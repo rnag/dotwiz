@@ -3,6 +3,7 @@ include HISTORY.rst
 include LICENSE
 include README.rst
 
+recursive-include * *.pyi
 recursive-include tests *.py
 recursive-exclude tests/integration *
 recursive-exclude * __pycache__
