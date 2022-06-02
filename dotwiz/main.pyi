@@ -4,6 +4,8 @@ _T = TypeVar('_T')
 _KT = TypeVar('_KT')
 _VT = TypeVar('_VT')
 
+_GetAttr = Callable[[dict, str], _VT]
+_GetItem = Callable[[dict, _KT], _VT]
 _SetItem = Callable[[dict, _KT, _VT], None]
 _Update = Callable[[dict, Mapping[_KT, _VT], _VT], None]
 
@@ -36,6 +38,11 @@ class DotWiz(dict):
 
     def __setattr__(self, item: str, value: _VT) -> None: ...
     def __setitem__(self, k: _KT, v: _VT) -> None: ...
+
+    def __getattribute__(self,
+                         key: str,
+                         __attr: _GetAttr = dict.__getattribute__,
+                         __item: _GetItem = dict.__getitem__): ...
 
     def update(self,
                __m: Mapping[_KT, _VT],

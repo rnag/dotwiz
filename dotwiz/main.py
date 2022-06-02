@@ -1,5 +1,5 @@
 """Main module."""
-from .constants import PY_VERSION
+from .constants import _PY_VERSION, _DICT_METHODS
 
 
 def make_dot_wiz(input_dict=None, **kwargs):
@@ -14,7 +14,7 @@ def make_dot_wiz(input_dict=None, **kwargs):
     return __dot_wiz_from_dict__(kwargs)
 
 
-if PY_VERSION > (3, 7):  # Python 3.8+
+if _PY_VERSION > (3, 7):  # Python 3.8+
     def __dot_wiz_from_dict__(input_dict):
         """
         Helper method to generate and return a `DotWiz` (dot-access dict) from
@@ -72,11 +72,13 @@ class DotWiz(dict):
     from_kwargs = make_dot_wiz
 
     __delattr__ = __delitem__ = dict.__delitem__
-    __getattr__ = __getitem__ = dict.__getitem__
+    __getitem__ = dict.__getitem__
     __setattr__ = __setitem__ = __setitem_impl__
 
-    # def __getattribute__(self, item):
-    #     pass
+    def __getattribute__(self, key,
+                         __attr=dict.__getattribute__,
+                         __item=dict.__getitem__):
+        return __attr(self, key) if key in _DICT_METHODS else __item(self, key)
 
     def update(self, __m, __update=dict.update, **kwargs):
         if __m:
