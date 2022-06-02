@@ -67,11 +67,16 @@ def __resolve_value__(value):
 
 
 class DotWiz(dict):
-    __getattr__ = dict.__getitem__
-    __delattr__ = dict.__delitem__
-    __setattr__ = __setitem_impl__
 
     from_dict = __dot_wiz_from_dict__
+    from_kwargs = make_dot_wiz
+
+    __delattr__ = __delitem__ = dict.__delitem__
+    __getattr__ = __getitem__ = dict.__getitem__
+    __setattr__ = __setitem__ = __setitem_impl__
+
+    # def __getattribute__(self, item):
+    #     pass
 
     def update(self, __m, __update=dict.update, **kwargs):
         if __m:
@@ -80,7 +85,6 @@ class DotWiz(dict):
         if kwargs:
             kwargs = __dot_wiz_from_dict__(kwargs)
 
-        # noinspection PyArgumentList
         __update(self, __m, **kwargs)
 
     def __repr__(self):
