@@ -8,18 +8,4 @@ import sys
 _PY_VERSION = sys.version_info[:2]
 
 # Methods for `dict`
-_DICT_METHODS = frozenset({
-    'clear',
-    'copy',
-    'fromkeys',
-    'get',
-    'items',
-    'keys',
-    'pop',
-    'popitem',
-    'setdefault',
-    'update',
-    'values',
-    '__annotations__',
-    '__dict__',
-})
+_DICT_METHODS = frozenset(dir(dict) + ['__module__', '__slots__'])
