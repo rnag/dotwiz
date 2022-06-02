@@ -1,6 +1,6 @@
 """
-Dot Wiz
-~~~~~~
+``dotwiz``
+~~~~~~~~~~
 
 A dict subclass that supports dot access notation
 

@@ -1,5 +1,5 @@
 """
-Dot Wiz - A dict subclass that supports dot access notation
+`dotwiz` - A dict subclass that supports dot access notation
 """
 
 __title__ = 'dotwiz'

@@ -2,6 +2,6 @@
 Usage
 =====
 
-To use Dot Wiz in a project::
+To use ``dotwiz`` in a project::
 
     import dotwiz
