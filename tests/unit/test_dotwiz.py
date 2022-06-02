@@ -5,6 +5,17 @@ import pytest
 from dotwiz import DotWiz, make_dot_wiz
 
 
+def test_dot_wiz_with_basic_usage():
+    """Confirm intended functionality of `DotWiz`"""
+    dw = DotWiz.from_dict({'key_1': [{'k': 'v'}],
+                           'keyTwo': '5',
+                           'key-3': 3.21})
+
+    assert dw.key_1[0].k == 'v'
+    assert dw.keyTwo == '5'
+    assert dw['key-3'] == 3.21
+
+
 def test_make_dot_wiz():
     """Confirm intended functionality of `make_dot_wiz`"""
     dd = make_dot_wiz({1: 'test', 'two': [{'hello': 'world'}]},
