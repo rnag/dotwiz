@@ -3,7 +3,7 @@
 import pytest
 
 
-from dotwiz import dotwiz
+from dotwiz import DotWiz, make_dot_wiz
 
 
 @pytest.fixture
@@ -16,7 +16,13 @@ def response():
     # return requests.get('https://github.com/audreyr/cookiecutter-pypackage')
 
 
-def test_content(response):
-    """Sample pytest test function with the pytest fixture as an argument."""
-    # from bs4 import BeautifulSoup
-    # assert 'GitHub' in BeautifulSoup(response.content).title.string
+def test_make_dot_wiz():
+    """Confirm correct functionality of `make_dot_wiz`"""
+    dd = make_dot_wiz(a=1, b='two')
+
+    assert repr(dd) == "DotWiz(a=1, b='two')"
+    assert dd.a == 1
+    assert dd.b == 'two'
+
+    dd.b = [1, 2, 3]
+    assert dd.b == [1, 2, 3]

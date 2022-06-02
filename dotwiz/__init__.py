@@ -16,8 +16,8 @@ For full documentation and more advanced usage, please see
 """
 
 __all__ = [
-    'DotDict',
-    'make_dot_dict'
+    'DotWiz',
+    'make_dot_wiz'
 ]
 
-from .main import DotDict, make_dot_dict
+from .main import DotWiz, make_dot_wiz
