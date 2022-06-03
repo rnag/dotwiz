@@ -3,6 +3,7 @@ include HISTORY.rst
 include LICENSE
 include README.rst
 
+include dotwiz/py.typed
 recursive-include * *.pyi
 recursive-include tests *.py
 recursive-exclude tests/integration *
