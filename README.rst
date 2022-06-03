@@ -23,12 +23,35 @@ Dot Wiz
 
 
 
-A dict subclass that supports dot access notation
-
+A ``dict`` subclass that is easy to create, and supports *fast* dot access notation.
 
 * Free software: MIT license
 * Documentation: https://dotwiz.readthedocs.io.
 
+
+Usage
+-----
+
+Here is an example using :meth:`DotWiz.from_dict` to create a :class:`DotWiz`
+object from a ``dict`` object:
+
+.. code:: python3
+
+    from dotwiz import DotWiz
+
+    dw = DotWiz.from_dict({'this': {'works': {'for': [{'nested': 'values'}]}}})
+    assert dw.this.works['for'][0].nested == 'values'
+
+Using :func:`make_dot_wiz`, which is aliased to :meth:`DotWiz.from_kwargs`:
+
+.. code:: python3
+
+    from dotwiz import make_dot_wiz
+
+    dw = make_dot_wiz({'hello, world!': 123}, AnyKey='value', isActive=True)
+    assert dw['hello, world!'] == 123
+    assert dw.AnyKey == 'value'
+    assert dw.isActive
 
 Features
 --------
