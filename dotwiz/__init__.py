@@ -6,7 +6,12 @@ A dict subclass that supports dot access notation
 
 Sample Usage:
 
-    >>> import dotwiz
+    >>> from dotwiz import DotWiz
+    >>> dw = DotWiz.from_dict({'this': {'works': {'for': [{'nested': 'values'}]}}})
+    >>> dw
+    DotWiz(this=DotWiz(works=DotWiz(for=[DotWiz(nested='values')])))
+    >>> dw.this.works['for'][0].nested
+    'values'
 
 For full documentation and more advanced usage, please see
 <https://dotwiz.readthedocs.io>.

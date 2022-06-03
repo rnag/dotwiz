@@ -16,6 +16,13 @@ def my_data():
     return {'a': 3, 'b': 1, 'c': {'aa': 33, 'bb': [{'x': 77}]}}
 
 
+def test_dict_getitem(benchmark, my_data):
+    o = my_data
+
+    result = benchmark(lambda: o['c']['bb'][0]['x'])
+    assert result == 77
+
+
 def test_dataclass_instance(benchmark, my_data):
     # noinspection PyPep8Naming
     X = dataclasses.make_dataclass('X', my_data)

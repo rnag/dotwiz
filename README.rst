@@ -21,7 +21,7 @@ Dot Wiz
      :alt: Updates
 
 
-A ``dict`` subclass that is easy to create, and supports *fast* dot access notation.
+A ``dict`` subclass that is *easy* to create, and supports *fast* dot access notation.
 
 * Documentation: https://dotwiz.readthedocs.io.
 
@@ -39,7 +39,7 @@ The ``dotwiz`` library officially supports **Python 3.6** or higher.
 Usage
 -----
 
-Here is an example using :meth:`DotWiz.from_dict` to create a :class:`DotWiz`
+Here is an example using ``DotWiz.from_dict`` to create a ``DotWiz``
 object from a ``dict`` object:
 
 .. code:: python3
@@ -53,10 +53,10 @@ object from a ``dict`` object:
 
     assert dw.this.works['for'][0].nested == 'values'  # True
 
-Using :func:`make_dot_wiz` allows you to pass in keyword arguments when
-creating a :class:`DotWiz` object:
+Using ``make_dot_wiz`` allows you to pass in keyword arguments when
+creating a ``DotWiz`` object:
 
-    Note: This helper function is also aliased to :meth:`DotWiz.from_kwargs`.
+    Note: This helper function is also aliased to ``DotWiz.from_kwargs``.
 
 .. code:: python3
 
@@ -72,6 +72,18 @@ Features
 --------
 
 * TODO
+
+Benchmarks
+----------
+
+    The `benchmark`_ tests can be found in the project repo on GitHub.
+
+Using a *dot-access* approach such as ``DotWiz`` can be up
+to **100x** faster than with `make_dataclass`_ from the ``dataclasses`` module.
+
+It's also about *5x* faster to create a ``DotWiz`` from a ``dict`` object
+as compared to other libraries such as ``prodict``, and up to *2x* faster
+in general to access keys by *dot* access.
 
 Contributing
 ------------
@@ -89,6 +101,8 @@ This package was created with Cookiecutter_ and the `rnag/cookiecutter-pypackage
 .. _Read The Docs: https://dotwiz.readthedocs.io
 .. _Installation: https://dotwiz.readthedocs.io/en/latest/installation.html
 .. _on PyPI: https://pypi.org/project/dotwiz/
+.. _make_dataclass: https://docs.python.org/3/library/dataclasses.html#dataclasses.make_dataclass
+.. _benchmark: https://github.com/rnag/dotwiz/tree/main/benchmarks
 .. _`Contributing`: https://dotwiz.readthedocs.io/en/latest/contributing.html
 .. _`open an issue`: https://github.com/rnag/dotwiz/issues
 .. _Cookiecutter: https://github.com/cookiecutter/cookiecutter

@@ -12,6 +12,7 @@
 
    installation
    usage
+   benchmarks
    contributing
    history
    modules
