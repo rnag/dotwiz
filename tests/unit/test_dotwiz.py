@@ -145,3 +145,14 @@ def test_dotwiz_update():
     item = dd.b.three.four[0]
     assert isinstance(item, DotWiz)
     assert item.five == '5'
+
+
+def test_dotwiz_update_with_no_args():
+    """Add for full branch coverage."""
+    dd = DotWiz.from_kwargs(a=1, b={'one': [1]})
+
+    dd.update()
+    assert dd.a == 1
+
+    dd.update(a=2)
+    assert dd.a == 2

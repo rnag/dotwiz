@@ -30,7 +30,7 @@ if _PY_VERSION > (3, 7):  # Python 3.8+
                 else v
             ) for k, v in input_dict.items()
         )
-else:
+else:  # pragma: no cover
     def __dot_wiz_from_dict__(input_dict):
         """
         Helper method to generate and return a `DotWiz` (dot-access dict) from
@@ -94,14 +94,14 @@ class DotWiz(dict):
                          __item=dict.__getitem__):
         return __attr(self, key) if key in _DICT_METHODS else __item(self, key)
 
-    def update(self, __m, __update=dict.update, **kwargs):
-        if __m:
-            __m = __dot_wiz_from_dict__(__m)
-
+    def update(self, __m=None, __update=dict.update, **kwargs):
         if kwargs:
             kwargs = __dot_wiz_from_dict__(kwargs)
 
-        __update(self, __m, **kwargs)
+        if __m:
+            kwargs.update(__dot_wiz_from_dict__(__m))
+
+        __update(self, kwargs)
 
     def __repr__(self):
         fields = [f'{k}={v!r}' for k, v in self.items()]

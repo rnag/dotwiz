@@ -1,4 +1,4 @@
-from typing import TypeVar, Mapping, Callable
+from typing import TypeVar, Mapping, Callable, Protocol
 
 _T = TypeVar('_T')
 _KT = TypeVar('_KT')
@@ -7,7 +7,12 @@ _VT = TypeVar('_VT')
 _GetAttr = Callable[[dict, str], _VT]
 _GetItem = Callable[[dict, _KT], _VT]
 _SetItem = Callable[[dict, _KT, _VT], None]
-_Update = Callable[[dict, Mapping[_KT, _VT], _VT], None]
+
+# Ref: https://stackoverflow.com/a/68392079/10237506
+class _Update(Protocol):
+    def __call__(self, instance: dict,
+                 __m: Mapping[_KT, _VT] | None = None,
+                 **kwargs: _VT) -> None: ...
 
 
 def make_dot_wiz(input_dict: Mapping[_KT, _VT] | None = None,
@@ -44,7 +49,7 @@ class DotWiz(dict):
                          __item: _GetItem = dict.__getitem__): ...
 
     def update(self,
-               __m: Mapping[_KT, _VT],
+               __m: Mapping[_KT, _VT] | None = None,
                __update: _Update = dict.update,
                **kwargs: _T) -> None: ...
 
