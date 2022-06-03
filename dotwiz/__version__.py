@@ -3,7 +3,8 @@
 """
 
 __title__ = 'dotwiz'
-__description__ = 'A dict subclass that supports dot access notation'
+__description__ = 'DotWiz is a dict subclass that enables accessing ' \
+                  '(nested) keys in dot notation.'
 __url__ = 'https://github.com/rnag/dotwiz'
 __version__ = '0.1.0'
 __author__ = 'Ritvik Nag'
