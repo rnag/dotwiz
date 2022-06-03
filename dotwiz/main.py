@@ -15,21 +15,29 @@ def make_dot_wiz(input_dict=None, **kwargs):
 
 
 if __PY_VERSION__ > (3, 7):  # Python 3.8+
-    def __dot_wiz_from_dict__(input_dict):
-        """
-        Helper method to generate and return a `DotWiz` (dot-access dict) from
-        a Python `dict` object.
 
-        """
-        return DotWiz(
-            (
-                k,
-                # 3.8 introduces the walrus `:=` operator, which is useful here
-                __dot_wiz_from_dict__(v) if (t := type(v)) is dict
-                else [__resolve_value__(e) for e in v] if t is list
-                else v
-            ) for k, v in input_dict.items()
-        )
+    # Compute the text of the entire function.
+    txt = f'''def __dot_wiz_from_dict__(input_dict):
+    """
+    Helper method to generate and return a `DotWiz` (dot-access dict) from
+    a Python `dict` object.
+
+    """
+    return DotWiz(
+        (
+            k,
+            # 3.8 introduces the walrus `:=` operator, which is useful here
+            __dot_wiz_from_dict__(v) if (t := type(v)) is dict
+            else [__resolve_value__(e) for e in v] if t is list
+            else v
+        ) for k, v in input_dict.items()
+    )\
+    '''
+
+    ns = {}
+    exec(txt, globals(), ns)
+    __dot_wiz_from_dict__ = ns['__dot_wiz_from_dict__']
+
 else:  # pragma: no cover
     def __dot_wiz_from_dict__(input_dict):
         """
