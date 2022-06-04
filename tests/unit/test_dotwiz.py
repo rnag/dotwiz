@@ -159,3 +159,17 @@ def test_dotwiz_update_with_no_args():
 
     dd.update(a=2)
     assert dd.a == 2
+
+
+def test_dotwiz_to_dict():
+    """Confirm intended functionality of `DotWiz.to_dict`"""
+    dw = DotWiz(hello=[{"key": "value", "another-key": {"a": "b"}}])
+
+    assert dw.to_dict() == {
+        'hello': [
+            {
+                'key': 'value',
+                'another-key': {'a': 'b'}
+            }
+        ]
+    }

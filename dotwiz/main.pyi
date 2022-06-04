@@ -26,6 +26,8 @@ def __setitem_impl__(self: DotWiz, key: _KT, value: _VT, __set: _SetItem = dict.
 
 def __resolve_value__(value: _T) -> _T | DotWiz | list[DotWiz]: ...
 
+def __convert_to_dict__(o: dict | DotWiz | list | _T) -> dict[_KT, _VT] : ...
+
 
 class DotWiz(dict):
 
@@ -46,6 +48,12 @@ class DotWiz(dict):
 
     def __setattr__(self, item: str, value: _VT) -> None: ...
     def __setitem__(self, k: _KT, v: _VT) -> None: ...
+
+    def to_dict(self) -> dict[_KT, _VT]:
+        """
+        Recursively convert the :class:`DotWiz` instance back to a ``dict``.
+        """
+        ...
 
     # noinspection PyDefaultArgument
     def update(self,

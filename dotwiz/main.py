@@ -74,6 +74,20 @@ def __resolve_value__(value):
     return value
 
 
+def __convert_to_dict__(o):
+    """
+    Recursively convert an object (typically a `dict` subclass) to a
+    Python `dict` type.
+    """
+    if isinstance(o, dict):
+        return {k: __convert_to_dict__(v) for k, v in o.items()}
+
+    if isinstance(o, list):
+        return [__convert_to_dict__(e) for e in o]
+
+    return o
+
+
 class DotWiz(dict):
     """
     :class:`DotWiz` - a ``dict`` subclass that also supports dot access
@@ -110,3 +124,7 @@ class DotWiz(dict):
         # we could use `self.__class__.__name__`, but here we already know
         # the name of the class.
         return f'DotWiz({", ".join(fields)})'
+
+    to_dict = __convert_to_dict__
+    to_dict.__doc__ = 'Recursively convert the :class:`DotWiz` instance ' \
+                      'back to a ``dict``.'
