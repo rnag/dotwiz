@@ -21,7 +21,7 @@ def test_make_dot_wiz():
     dd = make_dot_wiz({1: 'test', 'two': [{'hello': 'world'}]},
                       a=1, b='two', c={'d': [123]})
 
-    assert repr(dd) == "DotWiz(a=1, b='two', c=DotWiz(d=[123]), 1='test', two=[DotWiz(hello='world')])"
+    assert repr(dd) == "DotWiz(1='test', two=[DotWiz(hello='world')], a=1, b='two', c=DotWiz(d=[123]))"
     assert dd.a == 1
     assert dd.b == 'two'
     assert dd[1] == 'test'
@@ -60,7 +60,10 @@ def test_dotwiz_del_attr():
            'two': [{'first': 'one', 'second': 'two'}]},
         three={'four': [{'five': '5'}]}
     )
+
     assert dd.a == 1
+    assert 'a' in dd
+
     del dd.a
 
     # note: it's currently expected that `hasattr` will not work, i.e.

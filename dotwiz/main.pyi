@@ -1,4 +1,4 @@
-from typing import TypeVar, Mapping, Callable, Protocol
+from typing import TypeVar, Callable, Protocol, Mapping, MutableMapping
 
 _T = TypeVar('_T')
 _KT = TypeVar('_KT')
@@ -15,10 +15,11 @@ class _Update(Protocol):
                  **kwargs: _T) -> None: ...
 
 
-def make_dot_wiz(input_dict: Mapping[_KT, _VT] | None = None,
+def make_dot_wiz(input_dict: MutableMapping[_KT, _VT] | None = None,
                  **kwargs: _T) -> DotWiz: ...
 
-def __dot_wiz_from_dict__(input_dict: Mapping[_KT, _VT]) -> DotWiz: ...
+def __dot_wiz_from_dict__(input_dict: MutableMapping[_KT, _VT],
+                          *, __set: _SetItem = dict.__setitem__) -> DotWiz: ...
 
 def __setitem_impl__(self: DotWiz, key: _KT, value: _VT, __set: _SetItem = dict.__setitem__): ...
 
@@ -27,8 +28,13 @@ def __resolve_value__(value: _T) -> _T | DotWiz | list[DotWiz]: ...
 
 class DotWiz(dict):
 
+    def __init__(self,
+                 d: dict[_KT, _VT] | None = None,
+                 **kwargs: _T) -> None: ...
+
     @classmethod
-    def from_dict(cls, input_dict: Mapping[_KT, _VT]) -> DotWiz: ...
+    def from_dict(cls, input_dict: MutableMapping[_KT, _VT],
+                  **kwargs: _T) -> DotWiz: ...
 
     @classmethod
     def from_kwargs(cls, input_dict: Mapping[_KT, _VT] | None = None,
@@ -50,7 +56,7 @@ class DotWiz(dict):
 
     def update(self,
                __m: Mapping[_KT, _VT] | None = None,
-               __update: _Update = dict.update,
+               *, __set: _SetItem = dict.__setitem__,
                **kwargs: _T) -> None: ...
 
     def __repr__(self) -> str: ...
