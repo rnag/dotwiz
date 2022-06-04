@@ -1,6 +1,7 @@
 import dataclasses
 
 import box
+import dict2dot
 import dotmap
 import dotsi
 import dotted_dict
@@ -67,6 +68,18 @@ def test_dotted_dict(benchmark, my_data):
 def test_dotsi(benchmark, my_data):
     o = dotsi.Dict(my_data)
     # print(o)
+
+    result = benchmark(lambda: o.c.bb[0].x)
+    assert result == 77
+
+
+def test_dict2dot(benchmark, my_data):
+    o = dict2dot.Dict2Dot(my_data)
+    # print(o)
+
+    # fix: because `dicts` within nested `lists` aren't converted.
+    #   https://github.com/nandoabreu/python-dict2dot/blob/main/dict2dot/__init__.py#L5
+    o.c.bb[0] = dict2dot.Dict2Dot(o.c.bb[0])
 
     result = benchmark(lambda: o.c.bb[0].x)
     assert result == 77
