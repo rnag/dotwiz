@@ -8,7 +8,7 @@ in dot notation.
 Sample Usage:
 
     >>> from dotwiz import DotWiz
-    >>> dw = DotWiz.from_dict({'this': {'works': {'for': [{'nested': 'values'}]}}})
+    >>> dw = DotWiz({'this': {'works': {'for': [{'nested': 'values'}]}}})
     >>> dw
     DotWiz(this=DotWiz(works=DotWiz(for=[DotWiz(nested='values')])))
     >>> dw.this.works['for'][0].nested

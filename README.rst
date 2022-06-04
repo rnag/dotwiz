@@ -39,24 +39,25 @@ The ``dotwiz`` library officially supports **Python 3.6** or higher.
 Usage
 -----
 
-Here is an example using ``DotWiz.from_dict`` to create a ``DotWiz``
-object from a ``dict`` object:
+Here is an example of how to create and use a ``DotWiz`` object:
 
 .. code:: python3
 
     from dotwiz import DotWiz
 
-    dw = DotWiz.from_dict({'this': {'works': {'for': [{'nested': 'values'}]}}})
+    dw = DotWiz({'this': {'works': {'for': [{'nested': {'values': True}}]}}},
+                the_answer_to_life=42)
 
     print(dw)
-    #>  DotWiz(this=DotWiz(works=DotWiz(for=[DotWiz(nested='values')])))
+    # >  DotWiz(this=DotWiz(works=DotWiz(for=[DotWiz(nested=DotWiz(values=True))])),
+    #           the_answer_to_life=42)
 
-    assert dw.this.works['for'][0].nested == 'values'  # True
+    assert dw.this.works['for'][0].nested.values  # True
+    assert dw.the_answer_to_life == 42
 
-Using ``make_dot_wiz`` allows you to pass in keyword arguments when
+
+Using ``make_dot_wiz`` allows you to pass in an iterable object when
 creating a ``DotWiz`` object:
-
-    Note: This helper function is also aliased to ``DotWiz.from_kwargs``.
 
 .. code:: python3
 

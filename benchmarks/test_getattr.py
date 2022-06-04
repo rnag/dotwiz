@@ -42,7 +42,7 @@ def test_box(benchmark, my_data):
 
 
 def test_dotwiz(benchmark, my_data):
-    o = dotwiz.DotWiz.from_dict(my_data)
+    o = dotwiz.DotWiz(my_data)
     # print(o)
 
     result = benchmark(lambda: o.c.bb[0].x)
