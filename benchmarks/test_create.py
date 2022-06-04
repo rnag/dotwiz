@@ -39,18 +39,18 @@ def test_box(benchmark, my_data):
     assert result.c.bb[0].x == 77
 
 
-def test_dotwiz_from_dict(benchmark, my_data):
+def test_dotwiz(benchmark, my_data):
     result = benchmark(dotwiz.DotWiz, my_data)
     # print(result)
 
     assert result.c.bb[0].x == 77
 
 
-# def test_make_dot_wiz(benchmark, my_data):
-#     result = benchmark(dotwiz.make_dot_wiz, my_data)
-#     # print(result)
-#
-#     assert result.c.bb[0].x == 77
+def test_make_dot_wiz(benchmark, my_data):
+    result = benchmark(dotwiz.make_dot_wiz, my_data)
+    # print(result)
+
+    assert result.c.bb[0].x == 77
 
 
 def test_dotmap(benchmark, my_data):

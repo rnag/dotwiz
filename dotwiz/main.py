@@ -1,19 +1,15 @@
 """Main module."""
 
 
-def make_dot_wiz(input_dict=None, **kwargs):
+def make_dot_wiz(*args, **kwargs):
     """
     Helper method to generate and return a `DotWiz` (dot-access dict) from
-    an optional Python `dict` object and *keyword arguments*.
+    an optional iterable and *keyword arguments*.
 
     """
-    if kwargs:
-        if input_dict is not None:
-            input_dict.update(kwargs)
-        else:
-            input_dict = kwargs
+    kwargs.update(*args)
 
-    return DotWiz(input_dict)
+    return DotWiz(kwargs)
 
 
 # noinspection PyDefaultArgument
