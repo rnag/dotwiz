@@ -5,6 +5,7 @@ import dict2dot
 import dotmap
 import dotsi
 import dotted_dict
+import dotty_dict
 import metadict
 import prodict
 import pytest
@@ -65,6 +66,14 @@ def test_dotted_dict(benchmark, my_data):
     # print(result)
 
     assert result.c.bb[0].x == 77
+
+
+def test_dotty_dict(benchmark, my_data):
+    result = benchmark(dotty_dict.Dotty, my_data)
+    # print(result)
+
+    # the syntax here is actually slightly different, as per the docs
+    assert result['c.bb.0.x'] == 77
 
 
 def test_dotsi(benchmark, my_data):
