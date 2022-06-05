@@ -13,7 +13,7 @@ packages = find_packages(include=[package_name, f'{package_name}.*'])
 requires = []
 
 test_requirements = [
-    'pytest~=7.0.1',
+    'pytest>=7.0.1,<8',
     'pytest-benchmark[histogram]~=3.4.1',
     'pytest-cov~=3.0.0'
 ]
@@ -41,9 +41,9 @@ setup(
         'Source': 'https://github.com/rnag/dotwiz',
     },
     license=about['__license__'],
-    # TODO add more relevant keywords as needed
-    keywords=['dotdict', 'dot', 'dict',
-              'attribute', 'attr', 'access',
+    keywords=['dot', 'dict', 'dotted', 'dotdict',
+              'map', 'access', 'dynamic',
+              'attribute', 'attr',
               'dotwiz'],
     classifiers=[
         # Ref: https://pypi.org/classifiers/
@@ -59,7 +59,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python'
-],
+    ],
     test_suite='tests',
     tests_require=test_requirements,
     zip_safe=False
