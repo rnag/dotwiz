@@ -8,6 +8,9 @@ Dot Wiz
 .. image:: https://img.shields.io/pypi/pyversions/dotwiz.svg
         :target: https://pypi.org/project/dotwiz
 
+.. image:: https://codecov.io/gh/rnag/dotwiz/branch/main/graph/badge.svg?token=J3YW230U8Z
+        :target: https://codecov.io/gh/rnag/dotwiz
+
 .. image:: https://github.com/rnag/dotwiz/actions/workflows/dev.yml/badge.svg
         :target: https://github.com/rnag/dotwiz/actions/workflows/dev.yml
 
