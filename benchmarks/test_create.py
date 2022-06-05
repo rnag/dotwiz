@@ -14,22 +14,24 @@ import dotwiz
 
 @pytest.fixture
 def my_data():
-    return {'a': 3, 'b': 1, 'c': {'aa': 33, 'bb': [{'x': 77}]}}
+    return {'a': 3, 'b': 1, 'c': {'aa': 33, 'bb': [{'x': 77}]},
+            'myTestKey1': 'T', 'AnotherKey': 'T', 'Some  r@ndom#$(*#@ Key##$# here   !!!': 'T'}
 
 
-def test_make_dataclass(benchmark, my_data):
-    # noinspection PyPep8Naming
-    X = benchmark(dataclasses.make_dataclass, 'X', my_data)
-
-    assert dataclasses.is_dataclass(X)
-
-
-def test_dataclass_instance(benchmark, my_data):
-    # noinspection PyPep8Naming
-    X = dataclasses.make_dataclass('X', my_data)
-
-    instance = benchmark(X, **my_data)
-    assert instance.a == 3
+# TODO
+# def test_make_dataclass(benchmark, my_data):
+#     # noinspection PyPep8Naming
+#     X = benchmark(dataclasses.make_dataclass, 'X', my_data)
+#
+#     assert dataclasses.is_dataclass(X)
+#
+#
+# def test_dataclass_instance(benchmark, my_data):
+#     # noinspection PyPep8Naming
+#     X = dataclasses.make_dataclass('X', my_data)
+#
+#     instance = benchmark(X, **my_data)
+#     assert instance.a == 3
 
 
 def test_box(benchmark, my_data):
@@ -48,6 +50,20 @@ def test_dotwiz(benchmark, my_data):
 
 def test_make_dot_wiz(benchmark, my_data):
     result = benchmark(dotwiz.make_dot_wiz, my_data)
+    # print(result)
+
+    assert result.c.bb[0].x == 77
+
+
+def test_dotwiz_plus(benchmark, my_data):
+    result = benchmark(dotwiz.DotWizPlus, my_data)
+    # print(result)
+
+    assert result.c.bb[0].x == 77
+
+
+def test_make_dot_wiz_plus(benchmark, my_data):
+    result = benchmark(dotwiz.make_dot_wiz_plus, my_data)
     # print(result)
 
     assert result.c.bb[0].x == 77

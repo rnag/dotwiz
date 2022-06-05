@@ -1,5 +1,7 @@
 """Main module."""
 
+from .common import __convert_to_dict__, __resolve_value__
+
 
 def make_dot_wiz(*args, **kwargs):
     """
@@ -48,7 +50,7 @@ def __upsert_into_dot_wiz__(self, input_dict={},
         if t is dict:
             value = DotWiz(value)
         elif t is list:
-            value = [__resolve_value__(e) for e in value]
+            value = [__resolve_value__(e, DotWiz) for e in value]
 
         # note: this logic is the same as `DotWiz.__setitem__()`
         __set(self, key, value)
@@ -57,37 +59,10 @@ def __upsert_into_dot_wiz__(self, input_dict={},
 
 def __setitem_impl__(self, key, value, __set=dict.__setitem__):
     """Implementation of `DotWiz.__setitem__` to preserve dot access"""
-    value = __resolve_value__(value)
+    value = __resolve_value__(value, DotWiz)
 
     __set(self, key, value)
     self.__dict__[key] = value
-
-
-def __resolve_value__(value):
-    """Resolve `value`, which can be a complex type like `dict` or `list`"""
-    t = type(value)
-
-    if t is dict:
-        value = DotWiz(value)
-
-    elif t is list:
-        value = [__resolve_value__(e) for e in value]
-
-    return value
-
-
-def __convert_to_dict__(o):
-    """
-    Recursively convert an object (typically a `dict` subclass) to a
-    Python `dict` type.
-    """
-    if isinstance(o, dict):
-        return {k: __convert_to_dict__(v) for k, v in o.items()}
-
-    if isinstance(o, list):
-        return [__convert_to_dict__(e) for e in o]
-
-    return o
 
 
 class DotWiz(dict):

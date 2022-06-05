@@ -26,7 +26,10 @@ For full documentation and more advanced usage, please see
 
 __all__ = [
     'DotWiz',
-    'make_dot_wiz'
+    'DotWizPlus',
+    'make_dot_wiz',
+    'make_dot_wiz_plus'
 ]
 
 from .main import DotWiz, make_dot_wiz
+from .plus import DotWizPlus, make_dot_wiz_plus
