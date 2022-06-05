@@ -82,7 +82,7 @@ Features
 Benchmarks
 ----------
 
-    The `benchmark`_ tests can be found in the project repo on GitHub.
+    Check out the `Benchmarks`_ section in the docs for more info.
 
 Using a *dot-access* approach such as ``DotWiz`` can be up
 to **100x** faster than with `make_dataclass`_ from the ``dataclasses`` module.
@@ -90,7 +90,7 @@ to **100x** faster than with `make_dataclass`_ from the ``dataclasses`` module.
 It's also about *5x* faster to create a ``DotWiz`` from a ``dict`` object
 as compared to other libraries such as ``prodict`` -- or close to **15x** faster
 than creating a `Box`_ -- and up to *10x* faster in general to access keys
-by *dot* access -- or almost **30x** faster than accessing keys from a `DotMap`_!
+by *dot* notation -- or almost **30x** faster than accessing keys from a `DotMap`_.
 
 Contributing
 ------------
@@ -110,7 +110,7 @@ This package was created with Cookiecutter_ and the `rnag/cookiecutter-pypackage
 .. _Installation: https://dotwiz.readthedocs.io/en/latest/installation.html
 .. _on PyPI: https://pypi.org/project/dotwiz/
 .. _make_dataclass: https://docs.python.org/3/library/dataclasses.html#dataclasses.make_dataclass
-.. _benchmark: https://github.com/rnag/dotwiz/tree/main/benchmarks
+.. _Benchmarks: https://dotwiz.readthedocs.io/en/latest/benchmarks.html
 .. _Box: https://github.com/cdgriffith/Box/wiki/Quick-Start
 .. _DotMap: https://pypi.org/project/dotmap
 .. _`Contributing`: https://dotwiz.readthedocs.io/en/latest/contributing.html

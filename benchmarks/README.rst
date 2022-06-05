@@ -70,12 +70,12 @@ instance (from a ``dict`` object) as compared to other competitor libraries
 such as ``dotsi`` and ``prodict`` - and up to **15x** faster than creating
 a `Box`_.
 
-Accessing keys by "dot" attribute
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Accessing keys by "dot" notation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The results show it is up to **10x** faster to *access* a key by dot
-attribute than ``prodict``, and about **30x** faster than accessing
-keys from a `DotMap`_ for example.
+(or attribute) notation than with libraries such as ``prodict``, and
+about **30x** faster than accessing keys from a `DotMap`_ for example.
 
 .. _my post on SO: https://stackoverflow.com/a/72232461/10237506
 .. _benchmarks/: https://github.com/rnag/dotwiz/tree/main/benchmarks
