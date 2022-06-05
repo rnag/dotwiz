@@ -1,64 +1,66 @@
 """Main module."""
-from .constants import __PY_VERSION__, __DICT_METHODS__
 
 
-def make_dot_wiz(input_dict=None, **kwargs):
+def make_dot_wiz(*args, **kwargs):
     """
-    Helper method to generate and return a `DotWiz` (dot-access dict) from
-    an optional Python `dict` object and *keyword arguments*.
+    Helper function to create and return a :class:`DotWiz` (dot-access dict)
+    from an optional *iterable* object and *keyword* arguments.
 
-    """
-    if input_dict:
-        kwargs.update(input_dict)
+    Example::
 
-    return __dot_wiz_from_dict__(kwargs)
-
-
-if __PY_VERSION__ > (3, 7):  # Python 3.8+
-
-    # Compute the text of the entire function.
-    txt = f'''def __dot_wiz_from_dict__(input_dict):
-    """
-    Helper method to generate and return a `DotWiz` (dot-access dict) from
-    a Python `dict` object.
+        >>> from dotwiz import make_dot_wiz
+        >>> make_dot_wiz([('k1', 11), ('k2', [{'a': 'b'}]), ('k3', 'v3')], y=True)
+        DotWiz(y=True, k1=11, k2=[DotWiz(a='b')], k3='v3')
 
     """
-    return DotWiz(
-        (
-            k,
-            # 3.8 introduces the walrus `:=` operator, which is useful here
-            __dot_wiz_from_dict__(v) if (t := type(v)) is dict
-            else [__resolve_value__(e) for e in v] if t is list
-            else v
-        ) for k, v in input_dict.items()
-    )\
-    '''
+    kwargs.update(*args)
 
-    ns = {}
-    exec(txt, globals(), ns)
-    __dot_wiz_from_dict__ = ns['__dot_wiz_from_dict__']
+    return DotWiz(kwargs)
 
-else:  # pragma: no cover
-    def __dot_wiz_from_dict__(input_dict):
-        """
-        Helper method to generate and return a `DotWiz` (dot-access dict) from
-        a Python `dict` object.
 
-        """
-        return DotWiz(
-            (
-                k,
-                __dot_wiz_from_dict__(v) if type(v) is dict
-                else [__resolve_value__(e) for e in v] if type(v) is list
-                else v
-            ) for k, v in input_dict.items()
-        )
+# noinspection PyDefaultArgument
+def __upsert_into_dot_wiz__(self, input_dict={},
+                            *, __set=dict.__setitem__,
+                            **kwargs):
+    """
+    Helper method to generate / update a :class:`DotWiz` (dot-access dict)
+    from a Python ``dict`` object, and optional *keyword arguments*.
+
+    """
+    __dict = self.__dict__
+
+    if kwargs:
+        # avoids the potential pitfall of a "mutable default argument" -
+        # only update or modify `input_dict` if the param is passed in.
+        if input_dict:
+            input_dict.update(kwargs)
+        else:
+            input_dict = kwargs
+
+    for key in input_dict:
+        # note: this logic is the same as `__resolve_value__()`
+        #
+        # *however*, I decided to inline it because it's actually faster
+        # to eliminate a function call here.
+        value = input_dict[key]
+        t = type(value)
+
+        if t is dict:
+            value = DotWiz(value)
+        elif t is list:
+            value = [__resolve_value__(e) for e in value]
+
+        # note: this logic is the same as `DotWiz.__setitem__()`
+        __set(self, key, value)
+        __dict[key] = value
 
 
 def __setitem_impl__(self, key, value, __set=dict.__setitem__):
-    """Implementation of `dict.__setitem__` to preserve dot access"""
+    """Implementation of `DotWiz.__setitem__` to preserve dot access"""
     value = __resolve_value__(value)
+
     __set(self, key, value)
+    self.__dict__[key] = value
 
 
 def __resolve_value__(value):
@@ -66,7 +68,7 @@ def __resolve_value__(value):
     t = type(value)
 
     if t is dict:
-        value = __dot_wiz_from_dict__(value)
+        value = DotWiz(value)
 
     elif t is list:
         value = [__resolve_value__(e) for e in value]
@@ -74,45 +76,50 @@ def __resolve_value__(value):
     return value
 
 
+def __convert_to_dict__(o):
+    """
+    Recursively convert an object (typically a `dict` subclass) to a
+    Python `dict` type.
+    """
+    if isinstance(o, dict):
+        return {k: __convert_to_dict__(v) for k, v in o.items()}
+
+    if isinstance(o, list):
+        return [__convert_to_dict__(e) for e in o]
+
+    return o
+
+
 class DotWiz(dict):
     """
-    :class:`DotWiz` - a ``dict`` subclass that also supports dot access
-    notation.
+    :class:`DotWiz` - a blazing *fast* ``dict`` subclass that also supports
+    *dot access* notation.
 
     Usage::
 
     >>> from dotwiz import DotWiz
-    >>> dw = DotWiz.from_dict({'key_1': [{'k': 'v'}], 'keyTwo': '5', 'key-3': 3.21})
+    >>> dw = DotWiz({'key_1': [{'k': 'v'}], 'keyTwo': '5', 'key-3': 3.21})
     >>> assert dw.key_1[0].k == 'v'
     >>> assert dw.keyTwo == '5'
     >>> assert dw['key-3'] == 3.21
 
     """
-    __slots__ = ()
+    __slots__ = ('__dict__', )
 
-    from_dict = __dot_wiz_from_dict__
-    from_kwargs = make_dot_wiz
+    __init__ = update = __upsert_into_dot_wiz__
 
     __delattr__ = __delitem__ = dict.__delitem__
-    __getitem__ = dict.__getitem__
     __setattr__ = __setitem__ = __setitem_impl__
 
-    def __getattribute__(self, key,
-                         __attr=dict.__getattribute__,
-                         __item=dict.__getitem__):
-        return __attr(self, key) if key in __DICT_METHODS__ else __item(self, key)
-
-    def update(self, __m=None, __update=dict.update, **kwargs):
-        if kwargs:
-            kwargs = __dot_wiz_from_dict__(kwargs)
-
-        if __m:
-            kwargs.update(__dot_wiz_from_dict__(__m))
-
-        __update(self, kwargs)
+    def __getitem__(self, key):
+        return self.__dict__[key]
 
     def __repr__(self):
         fields = [f'{k}={v!r}' for k, v in self.items()]
         # we could use `self.__class__.__name__`, but here we already know
         # the name of the class.
         return f'DotWiz({", ".join(fields)})'
+
+    to_dict = __convert_to_dict__
+    to_dict.__doc__ = 'Recursively convert the :class:`DotWiz` instance ' \
+                      'back to a ``dict``.'

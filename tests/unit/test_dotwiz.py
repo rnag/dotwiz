@@ -7,9 +7,9 @@ from dotwiz import DotWiz, make_dot_wiz
 
 def test_dot_wiz_with_basic_usage():
     """Confirm intended functionality of `DotWiz`"""
-    dw = DotWiz.from_dict({'key_1': [{'k': 'v'}],
-                           'keyTwo': '5',
-                           'key-3': 3.21})
+    dw = DotWiz({'key_1': [{'k': 'v'}],
+                 'keyTwo': '5',
+                 'key-3': 3.21})
 
     assert dw.key_1[0].k == 'v'
     assert dw.keyTwo == '5'
@@ -18,7 +18,7 @@ def test_dot_wiz_with_basic_usage():
 
 def test_make_dot_wiz():
     """Confirm intended functionality of `make_dot_wiz`"""
-    dd = make_dot_wiz({1: 'test', 'two': [{'hello': 'world'}]},
+    dd = make_dot_wiz([(1, 'test'), ('two', [{'hello': 'world'}])],
                       a=1, b='two', c={'d': [123]})
 
     assert repr(dd) == "DotWiz(a=1, b='two', c=DotWiz(d=[123]), 1='test', two=[DotWiz(hello='world')])"
@@ -32,9 +32,9 @@ def test_make_dot_wiz():
     assert dd.b == [1, 2, 3]
 
 
-def test_dotwiz_from_dict():
-    """Confirm intended functionality of `DotWiz.from_dict`"""
-    dd = DotWiz.from_dict({
+def test_dotwiz_init():
+    """Confirm intended functionality of `DotWiz.__init__`"""
+    dd = DotWiz({
         1: 'test',
         'two': [{'hello': 'world'}],
         'a': 1,
@@ -54,13 +54,16 @@ def test_dotwiz_from_dict():
 
 
 def test_dotwiz_del_attr():
-    dd = DotWiz.from_kwargs(
+    dd = DotWiz(
         a=1,
         b={'one': [1],
            'two': [{'first': 'one', 'second': 'two'}]},
         three={'four': [{'five': '5'}]}
     )
+
     assert dd.a == 1
+    assert 'a' in dd
+
     del dd.a
 
     # note: it's currently expected that `hasattr` will not work, i.e.
@@ -126,7 +129,7 @@ def test_dotwiz_set_item():
 
 def test_dotwiz_update():
     """Confirm intended functionality of `DotWiz.update`"""
-    dd = DotWiz.from_kwargs(a=1, b={'one': [1]})
+    dd = DotWiz(a=1, b={'one': [1]})
     assert isinstance(dd.b, DotWiz)
 
     dd.b.update({'two': [{'first': 'one', 'second': 'two'}]},
@@ -149,10 +152,24 @@ def test_dotwiz_update():
 
 def test_dotwiz_update_with_no_args():
     """Add for full branch coverage."""
-    dd = DotWiz.from_kwargs(a=1, b={'one': [1]})
+    dd = DotWiz(a=1, b={'one': [1]})
 
     dd.update()
     assert dd.a == 1
 
     dd.update(a=2)
     assert dd.a == 2
+
+
+def test_dotwiz_to_dict():
+    """Confirm intended functionality of `DotWiz.to_dict`"""
+    dw = DotWiz(hello=[{"key": "value", "another-key": {"a": "b"}}])
+
+    assert dw.to_dict() == {
+        'hello': [
+            {
+                'key': 'value',
+                'another-key': {'a': 'b'}
+            }
+        ]
+    }
