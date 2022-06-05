@@ -62,10 +62,15 @@ test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage with unit tests quickly with the default Python
-	coverage run --source dotwiz -m pytest tests/unit
+	coverage run -m pytest tests/unit
 	coverage report -m
 	coverage html
 	$(BROWSER) htmlcov/index.html
+
+codecov: ## generate an XML code coverage report to publish to `codecov`
+	coverage run -m pytest tests/unit
+	coverage report -m
+	coverage xml
 
 docs: ## generate Sphinx HTML documentation, including API docs
 	rm -f docs/dotwiz.rst
