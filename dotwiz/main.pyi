@@ -1,4 +1,4 @@
-from typing import TypeVar, Callable, Protocol, Mapping, MutableMapping
+from typing import TypeVar, Callable, Protocol, Mapping, MutableMapping, Iterable
 
 _T = TypeVar('_T')
 _KT = TypeVar('_KT')
@@ -13,7 +13,7 @@ class _Update(Protocol):
                  **kwargs: _T) -> None: ...
 
 
-def make_dot_wiz(input_dict: MutableMapping[_KT, _VT] | None = None,
+def make_dot_wiz(*args: Iterable[_KT, _VT],
                  **kwargs: _T) -> DotWiz: ...
 
 # noinspection PyDefaultArgument

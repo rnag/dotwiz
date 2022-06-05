@@ -3,8 +3,14 @@
 
 def make_dot_wiz(*args, **kwargs):
     """
-    Helper method to generate and return a `DotWiz` (dot-access dict) from
-    an optional iterable and *keyword arguments*.
+    Helper function to create and return a :class:`DotWiz` (dot-access dict)
+    from an optional *iterable* object and *keyword* arguments.
+
+    Example::
+
+        >>> from dotwiz import make_dot_wiz
+        >>> make_dot_wiz([('k1', 11), ('k2', [{'a': 'b'}]), ('k3', 'v3')], y=True)
+        DotWiz(y=True, k1=11, k2=[DotWiz(a='b')], k3='v3')
 
     """
     kwargs.update(*args)
@@ -17,8 +23,8 @@ def __upsert_into_dot_wiz__(self, input_dict={},
                             *, __set=dict.__setitem__,
                             **kwargs):
     """
-    Helper method to generate and return a `DotWiz` (dot-access dict) from
-    a Python `dict` object.
+    Helper method to generate / update a :class:`DotWiz` (dot-access dict)
+    from a Python ``dict`` object, and optional *keyword arguments*.
 
     """
     __dict = self.__dict__
@@ -86,8 +92,8 @@ def __convert_to_dict__(o):
 
 class DotWiz(dict):
     """
-    :class:`DotWiz` - a ``dict`` subclass that also supports dot access
-    notation.
+    :class:`DotWiz` - a blazing *fast* ``dict`` subclass that also supports
+    *dot access* notation.
 
     Usage::
 
@@ -104,13 +110,6 @@ class DotWiz(dict):
 
     __delattr__ = __delitem__ = dict.__delitem__
     __setattr__ = __setitem__ = __setitem_impl__
-
-    # TODO do we need this to ensure we raise an `AttributeError`?
-    # def __getattr__(self, attr):
-    #     try:
-    #         return self.__dict__[attr]
-    #     except KeyError:
-    #         raise AttributeError(attr)
 
     def __getitem__(self, key):
         return self.__dict__[key]

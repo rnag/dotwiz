@@ -18,10 +18,10 @@ def test_dot_wiz_with_basic_usage():
 
 def test_make_dot_wiz():
     """Confirm intended functionality of `make_dot_wiz`"""
-    dd = make_dot_wiz({1: 'test', 'two': [{'hello': 'world'}]},
+    dd = make_dot_wiz([(1, 'test'), ('two', [{'hello': 'world'}])],
                       a=1, b='two', c={'d': [123]})
 
-    assert repr(dd) == "DotWiz(1='test', two=[DotWiz(hello='world')], a=1, b='two', c=DotWiz(d=[123]))"
+    assert repr(dd) == "DotWiz(a=1, b='two', c=DotWiz(d=[123]), 1='test', two=[DotWiz(hello='world')])"
     assert dd.a == 1
     assert dd.b == 'two'
     assert dd[1] == 'test'
