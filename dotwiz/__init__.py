@@ -21,7 +21,7 @@ For full documentation and more advanced usage, please see
 <https://dotwiz.readthedocs.io>.
 
 :copyright: (c) 2022 by Ritvik Nag.
-:license:MIT, see LICENSE for more details.
+:license: MIT, see LICENSE for more details.
 """
 
 __all__ = [
