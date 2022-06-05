@@ -13,6 +13,7 @@ pytest>=7.0.1,<8
 pytest-benchmark[histogram]==3.4.1
 pytest-cov==3.0.0
 # Benchmarks
+dataclass-wizard==0.22.1  # for loading dict to nested dataclass
 dict2dot==0.1
 dotmap==1.3.30
 dotsi==0.0.3

@@ -9,8 +9,10 @@ import dotty_dict
 import metadict
 import prodict
 import pytest
+from dataclass_wizard import fromdict
 
 import dotwiz
+from benchmarks.models import MyClass
 
 
 @pytest.fixture
@@ -25,13 +27,25 @@ def test_dict_getitem(benchmark, my_data):
     assert result == 77
 
 
-def test_dataclass_instance(benchmark, my_data):
+def test_dataclass_instance_kwargs(benchmark, my_data):
+    """Passing keyword arguments to a dataclass generated with `make_dataclass`"""
+
     # noinspection PyPep8Naming
     X = dataclasses.make_dataclass('X', my_data)
     instance = X(** my_data)
 
-    result = benchmark(lambda: instance.a)
-    assert result == 3
+    # note: it looks like value for field `c` gets loaded as a `dict`,
+    # perhaps since we pass in keyword arguments directly.
+    result = benchmark(lambda: instance.c['bb'][0]['x'])
+    assert result == 77
+
+
+def test_dataclass_instance_fromdict(benchmark, my_data):
+    """Test for accessing attributes from a nested dataclass schema"""
+    instance = fromdict(MyClass, my_data)
+
+    result = benchmark(lambda: instance.c.bb[0].x)
+    assert result == 77
 
 
 def test_box(benchmark, my_data):
