@@ -18,7 +18,7 @@ class _DictGet(Protocol):
 
 
 def to_snake_case(string: str,
-                  *, __get: _DictGet = None,
+                  *, __letter: _DictGet = None,
                   __default: str | None = None) -> str: ...
 
 def make_dot_wiz_plus(*args: Iterable[_KT, _VT],

@@ -16,11 +16,26 @@ __SPECIAL_CASE_RE = re.compile(
 # A running cache of special cases that we've transformed based on above.
 __SPECIAL_KEYS = {}
 
-__DIGIT_MAP = {'0': 'o', '1': 'i', '2': 'z', '3': 'e', '4': 'o', '5': 's',
-               '6': 's', '7': 'z', '8': 'b', '9': 'n'}
+# Map a number to letter based on its similarity or resemblance
+#
+# Ref: https://angelplates.net/news/6/how-numbers-replace-letters-on-number-plates/
+__DIGIT_TO_LETTER = {
+    '0': 'o',
+    '1': 'i',
+    '2': 'z',
+    '3': 'e',
+    '4': 'a',
+    '5': 's',
+    '6': 'g',
+    '7': 't',
+    '8': 'b',
+    '9': 'n',
+}
 
 
-def to_snake_case(string, *, __get=__DIGIT_MAP.get, __default='x'):
+def to_snake_case(string,
+                  *, __letter=__DIGIT_TO_LETTER.get,
+                  __default='x'):
     """
     Make an underscored, lowercase form from the expression in the string.
     Example::
@@ -29,10 +44,10 @@ def to_snake_case(string, *, __get=__DIGIT_MAP.get, __default='x'):
     """
     words = __SPECIAL_CASE_RE.findall(string)
 
-    # note: this definitely does slow down performance, but here we need to
-    # check for words with a leading digit such as `123test` - since these
-    # are not valid identifiers in python, unfortunately.
-    words = [w if not w[0].isdigit() else f'{__get(w[0], __default)}{w[1:]}'
+    # note: this definitely does hurt performance, but in any case we need
+    # to check for words with a leading digit such as `123test` - since
+    # these are not valid identifiers in python, unfortunately.
+    words = [w if not w[0].isdigit() else f'{__letter(w[0], __default)}{w[1:]}'
              for w in words]
 
     return '_'.join(words).lower()
