@@ -21,20 +21,18 @@ Dot Wiz
      :alt: Updates
 
 
-A ``dict`` subclass that is *easy* to create, and supports *fast* dot access notation.
+A `blazing fast`_ ``dict`` subclass that enables *dot access* notation via Python
+attribute style. Nested ``dict`` and ``list`` values are automatically
+transformed as well.
 
 * Documentation: https://dotwiz.readthedocs.io.
 
-Installation
-------------
+Install
+-------
 
-The Dot Wiz library is available `on PyPI`_, and can be installed with ``pip``:
-
-.. code-block:: shell
+.. code-block:: console
 
     $ pip install dotwiz
-
-The ``dotwiz`` library officially supports **Python 3.6** or higher.
 
 Usage
 -----
@@ -63,11 +61,15 @@ creating a ``DotWiz`` object:
 
     from dotwiz import make_dot_wiz
 
-    dw = make_dot_wiz({'hello, world!': 123}, AnyKey='value', isActive=True)
+    dw = make_dot_wiz([('hello, world!', 123), ('easy: as~ pie?', True)],
+                      AnyKey='value')
+
+    print(dw)
+    #> DotWiz(AnyKey='value', hello, world!=123, easy: as~ pie?=True)
 
     assert dw['hello, world!'] == 123
+    assert dw['easy: as~ pie?']
     assert dw.AnyKey == 'value'
-    assert dw.isActive
 
 Features
 --------
@@ -83,8 +85,9 @@ Using a *dot-access* approach such as ``DotWiz`` can be up
 to **100x** faster than with `make_dataclass`_ from the ``dataclasses`` module.
 
 It's also about *5x* faster to create a ``DotWiz`` from a ``dict`` object
-as compared to other libraries such as ``prodict``, and up to *2x* faster
-in general to access keys by *dot* access.
+as compared to other libraries such as ``prodict`` -- or close to **15x** faster
+than creating a `Box`_ -- and up to *10x* faster in general to access keys
+by *dot* access -- or almost **30x** faster than accessing keys from a `DotMap`_!
 
 Contributing
 ------------
@@ -99,11 +102,14 @@ Credits
 
 This package was created with Cookiecutter_ and the `rnag/cookiecutter-pypackage`_ project template.
 
+.. _blazing fast: https://dotwiz.readthedocs.io/en/latest/benchmarks.html#results
 .. _Read The Docs: https://dotwiz.readthedocs.io
 .. _Installation: https://dotwiz.readthedocs.io/en/latest/installation.html
 .. _on PyPI: https://pypi.org/project/dotwiz/
 .. _make_dataclass: https://docs.python.org/3/library/dataclasses.html#dataclasses.make_dataclass
 .. _benchmark: https://github.com/rnag/dotwiz/tree/main/benchmarks
+.. _Box: https://github.com/cdgriffith/Box/wiki/Quick-Start
+.. _DotMap: https://pypi.org/project/dotmap
 .. _`Contributing`: https://dotwiz.readthedocs.io/en/latest/contributing.html
 .. _`open an issue`: https://github.com/rnag/dotwiz/issues
 .. _Cookiecutter: https://github.com/cookiecutter/cookiecutter

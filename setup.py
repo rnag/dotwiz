@@ -15,8 +15,7 @@ requires = []
 test_requirements = [
     'pytest~=7.0.1',
     'pytest-benchmark[histogram]~=3.4.1',
-    'pytest-cov~=3.0.0',
-    'pytest-runner~=5.3.1'
+    'pytest-cov~=3.0.0'
 ]
 
 about = {}
