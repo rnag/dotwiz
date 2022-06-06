@@ -6,6 +6,7 @@ import dotmap
 import dotsi
 import dotted_dict
 import dotty_dict
+import glom
 import metadict
 import prodict
 import pytest
@@ -106,6 +107,14 @@ def test_dict2dot(benchmark, my_data):
     o.c.bb[0] = dict2dot.Dict2Dot(o.c.bb[0])
 
     result = benchmark(lambda: o.c.bb[0].x)
+    assert result == 77
+
+
+def test_glom(benchmark, my_data):
+    o = my_data
+    # print(o)
+
+    result = benchmark(lambda: glom.glom(o, 'c.bb.0.x'))
     assert result == 77
 
 
