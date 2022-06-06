@@ -1,14 +1,17 @@
 import dataclasses
 
+import addict
 import box
 import dict2dot
 import dotmap
 import dotsi
 import dotted_dict
 import dotty_dict
+import glom
 import metadict
 import prodict
 import pytest
+import scalpl
 from dataclass_wizard import fromdict
 
 import dotwiz
@@ -80,6 +83,14 @@ def test_dotted_dict(benchmark, my_data):
     assert result == 77
 
 
+def test_dotted_dict_preserve_keys(benchmark, my_data):
+    o = dotted_dict.PreserveKeysDottedDict(my_data)
+    # print(o)
+
+    result = benchmark(lambda: o.c.bb[0].x)
+    assert result == 77
+
+
 def test_dotty_dict(benchmark, my_data):
     o = dotty_dict.Dotty(my_data)
     # print(o)
@@ -109,6 +120,26 @@ def test_dict2dot(benchmark, my_data):
     assert result == 77
 
 
+def test_addict(benchmark, my_data):
+    o = addict.Dict(my_data)
+    # print(o)
+
+    result = benchmark(lambda: o.c.bb[0].x)
+    assert result == 77
+
+
+def test_glom(benchmark, my_data):
+    o = my_data
+    # print(o)
+
+    # bring out the function to be fair with other tests, since attribute
+    # access might hurt slightly otherwise.
+    glom_fn = glom.glom
+
+    result = benchmark(lambda: glom_fn(o, 'c.bb.0.x'))
+    assert result == 77
+
+
 def test_metadict(benchmark, my_data):
     o = metadict.MetaDict(my_data)
     # print(o)
@@ -126,4 +157,12 @@ def test_prodict(benchmark, my_data):
     o.c.bb[0] = prodict.Prodict.from_dict(o.c.bb[0])
 
     result = benchmark(lambda: o.c.bb[0].x)
+    assert result == 77
+
+
+def test_scalpl(benchmark, my_data):
+    o = scalpl.Cut(my_data)
+    # print(o)
+
+    result = benchmark(lambda: o['c.bb[0].x'])
     assert result == 77
