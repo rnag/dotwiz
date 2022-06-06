@@ -10,7 +10,9 @@ package_name = 'dotwiz'
 
 packages = find_packages(include=[package_name, f'{package_name}.*'])
 
-requires = []
+requires = [
+    'pyheck==0.1.5',
+]
 
 test_requirements = [
     'pytest>=7.0.1,<8',

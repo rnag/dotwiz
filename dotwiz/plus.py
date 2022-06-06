@@ -1,17 +1,10 @@
 """Main module."""
 import keyword
-import re
+
+from pyheck import snake
 
 from .common import __convert_to_dict__, __resolve_value__
 
-
-# Credits: https://stackoverflow.com/a/46493824/10237506
-#
-# Known bug: it doesn't handle cases like `H@llo` or `WhaTSuP!` very well;
-# though the lower cased versions are OK.
-__SPECIAL_CASE_RE = re.compile(
-    r'\d[A-Z]+|[A-Z]?[a-z\d]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+|[A-Z]{2,}|[A-Z]'
-)
 
 # A running cache of special cases that we've transformed based on above.
 __SPECIAL_KEYS = {}
@@ -29,7 +22,7 @@ __DIGIT_TO_LETTER = {
     '6': 'g',
     '7': 't',
     '8': 'b',
-    '9': 'n',
+    '9': 'g',
 }
 
 
@@ -38,19 +31,20 @@ def to_snake_case(string,
                   __default='x'):
     """
     Make an underscored, lowercase form from the expression in the string.
-    Example::
+
+    Example:
+
         >>> to_snake_case("DeviceType")
         'device_type'
     """
-    words = __SPECIAL_CASE_RE.findall(string)
+    word = snake(string)
 
-    # note: this definitely does hurt performance, but in any case we need
+    # note: this hurts performance a little, but in any case we need
     # to check for words with a leading digit such as `123test` - since
     # these are not valid identifiers in python, unfortunately.
-    words = [w if not w[0].isdigit() else f'{__letter(w[0], __default)}{w[1:]}'
-             for w in words]
+    ch = word[0]
 
-    return '_'.join(words).lower()
+    return f'{__letter(ch, __default)}{word[1:]}' if ch.isdigit() else word
 
 
 def make_dot_wiz_plus(*args, **kwargs):
