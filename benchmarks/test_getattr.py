@@ -114,7 +114,11 @@ def test_glom(benchmark, my_data):
     o = my_data
     # print(o)
 
-    result = benchmark(lambda: glom.glom(o, 'c.bb.0.x'))
+    # bring out the function to be fair with other tests, since attribute
+    # access might hurt slightly otherwise.
+    glom_fn = glom.glom
+
+    result = benchmark(lambda: glom_fn(o, 'c.bb.0.x'))
     assert result == 77
 
 
