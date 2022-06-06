@@ -84,6 +84,13 @@ def test_dotted_dict(benchmark, my_data):
     assert result.c.bb[0].x == 77
 
 
+def test_dotted_dict_preserve_keys(benchmark, my_data):
+    result = benchmark(dotted_dict.PreserveKeysDottedDict, my_data)
+    # print(result)
+
+    assert result.c.bb[0].x == 77
+
+
 def test_dotty_dict(benchmark, my_data):
     result = benchmark(dotty_dict.Dotty, my_data)
     # print(result)
