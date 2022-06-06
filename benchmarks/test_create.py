@@ -1,5 +1,6 @@
 import dataclasses
 
+import addict
 import box
 import dict2dot
 import dotmap
@@ -9,6 +10,7 @@ import dotty_dict
 import metadict
 import prodict
 import pytest
+import scalpl
 from dataclass_wizard import fromdict
 
 import dotwiz
@@ -113,6 +115,13 @@ def test_dict2dot(benchmark, my_data):
     # assert result.c.bb[0].x == 77
 
 
+def test_addict(benchmark, my_data):
+    result = benchmark(addict.Dict, my_data)
+    # print(result)
+
+    assert result.c.bb[0].x == 77
+
+
 def test_metadict(benchmark, my_data):
     result = benchmark(metadict.MetaDict, my_data)
     # print(result)
@@ -125,6 +134,7 @@ def test_prodict(benchmark, my_data):
     # print(result)
 
     assert result.b == 1
+
     # note: commenting this out as this doesn't work for nested `lists`,
     # since the inner `dict` contents are not converted to a `Prodict`
     # type, apparently.
@@ -133,3 +143,13 @@ def test_prodict(benchmark, my_data):
     #   https://github.com/ramazanpolat/prodict/issues/17
     #
     # assert result.c.bb[0].x == 77
+
+    # instead, looks like dict access works:
+    assert result['c']['bb'][0]['x'] == 77
+
+
+def test_scalpl(benchmark, my_data):
+    result = benchmark(scalpl.Cut, my_data)
+    # print(result)
+
+    assert result['c.bb[0].x'] == 77
