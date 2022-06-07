@@ -40,6 +40,9 @@ Install
 Usage
 -----
 
+``DotWiz``
+~~~~~~~~~~
+
 Here is an example of how to create and use a ``DotWiz`` object:
 
 .. code:: python3
@@ -73,6 +76,37 @@ creating a ``DotWiz`` object:
     assert dw['hello, world!'] == 123
     assert dw['easy: as~ pie?']
     assert dw.AnyKey == 'value'
+
+``DotWizPlus``
+~~~~~~~~~~~~~~
+
+Using ``DotWizPlus`` allows you to case-transform keys to *snake_case*, as well
+as handle edge cases such as invalid identifier names for keys, such
+a leading number (which is prefixed with an `_`) or a reserved keyword in python,
+such as ``for`` or ``class`` (which is suffixed with an `_`).
+
+For example:
+
+.. code:: python3
+
+    from dotwiz import DotWizPlus
+
+    dw = DotWizPlus({'Key 1': [{'3D': {'with': 2}}], 'keyTwo': '5', 'r-2!@d.2?': 3.21})
+
+    print(dw)
+    #> DotWizPlus(key_1=[DotWizPlus(_3d=DotWizPlus(with_=2))],
+    #             key_two='5',
+    #             r_2_d_2=3.21)
+
+    assert dw.key_1[0]._3d.with_ == 2
+    assert dw.key_two == '5'
+    assert dw.r_2_d_2 == 3.21
+
+    print(dw.to_dict())
+    # {'Key 1': [{'3D': {'with': 2}}], 'keyTwo': '5', 'r-2!@d.2?': 3.21}
+
+    print(dw.to_attr_dict())
+    # {'key_1': [{'_3d': {'with_': 2}}], 'key_two': '5', 'r_2_d_2': 3.21}
 
 Features
 --------

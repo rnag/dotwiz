@@ -1,6 +1,10 @@
 """Main module."""
 
-from .common import __convert_to_dict__, __resolve_value__
+from .common import (
+    __add_repr__,
+    __convert_to_dict__,
+    __resolve_value__,
+)
 
 
 def make_dot_wiz(*args, **kwargs):
@@ -65,18 +69,18 @@ def __setitem_impl__(self, key, value, __set=dict.__setitem__):
     self.__dict__[key] = value
 
 
-class DotWiz(dict):
+class DotWiz(dict, metaclass=__add_repr__):
     """
     :class:`DotWiz` - a blazing *fast* ``dict`` subclass that also supports
     *dot access* notation.
 
     Usage::
 
-    >>> from dotwiz import DotWiz
-    >>> dw = DotWiz({'key_1': [{'k': 'v'}], 'keyTwo': '5', 'key-3': 3.21})
-    >>> assert dw.key_1[0].k == 'v'
-    >>> assert dw.keyTwo == '5'
-    >>> assert dw['key-3'] == 3.21
+        >>> from dotwiz import DotWiz
+        >>> dw = DotWiz({'key_1': [{'k': 'v'}], 'keyTwo': '5', 'key-3': 3.21})
+        >>> assert dw.key_1[0].k == 'v'
+        >>> assert dw.keyTwo == '5'
+        >>> assert dw['key-3'] == 3.21
 
     """
     __slots__ = ('__dict__', )
@@ -88,12 +92,6 @@ class DotWiz(dict):
 
     def __getitem__(self, key):
         return self.__dict__[key]
-
-    def __repr__(self):
-        fields = [f'{k}={v!r}' for k, v in self.items()]
-        # we could use `self.__class__.__name__`, but here we already know
-        # the name of the class.
-        return f'DotWiz({", ".join(fields)})'
 
     to_dict = __convert_to_dict__
     to_dict.__doc__ = 'Recursively convert the :class:`DotWiz` instance ' \

@@ -3,6 +3,28 @@ Common (shared) helpers and utilities.
 """
 
 
+def __add_repr__(name, bases, cls_dict, *, use_attr_dict=False):
+    """
+    Metaclass to generate and add a `__repr__` to a class.
+    """
+
+    # if `use_attr_dict` is true, use attributes defined in the instance's
+    # `__dict__` instead.
+    if use_attr_dict:
+        def __repr__(self: dict, __name=name):
+            fields = [f'{k}={v!r}' for k, v in self.__dict__.items()]
+            return f'{__name}({", ".join(fields)})'
+
+    else:
+        def __repr__(self: dict, __name=name):
+            fields = [f'{k}={v!r}' for k, v in self.items()]
+            return f'{__name}({", ".join(fields)})'
+
+    cls_dict['__repr__'] = __repr__
+
+    return type(name, bases, cls_dict)
+
+
 def __convert_to_attr_dict__(o):
     """
     Recursively convert an object (typically a `dict` subclass) to a
@@ -12,7 +34,7 @@ def __convert_to_attr_dict__(o):
         return {k: __convert_to_attr_dict__(v) for k, v in o.__dict__.items()}
 
     if isinstance(o, list):
-        return [__convert_to_dict__(e) for e in o]
+        return [__convert_to_attr_dict__(e) for e in o]
 
     return o
 

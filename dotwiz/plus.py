@@ -3,7 +3,13 @@ import keyword
 
 from pyheck import snake
 
-from .common import __convert_to_dict__, __resolve_value__, __convert_to_attr_dict__
+from .common import (
+    __add_repr__,
+    __convert_to_attr_dict__,
+    __convert_to_dict__,
+    __resolve_value__,
+)
+
 
 # A running cache of special cases that we've transformed based on above.
 __SPECIAL_KEYS = {}
@@ -115,38 +121,35 @@ def __setitem_impl__(self, key, value,
     __store_in_dot_wiz__(self, key, value, self.__dict__)
 
 
-class DotWizPlus(dict):
+class DotWizPlus(dict, metaclass=__add_repr__, use_attr_dict=True):
     """
-    :class:`DotWizPlus` - a blazing *fast* ``dict`` subclass that also supports
-    *dot access* notation.
+    :class:`DotWizPlus` - a blazing *fast* ``dict`` subclass that also
+    supports *dot access* notation.
 
     Usage::
 
-    >>> from dotwiz import DotWizPlus
-    >>> dw = DotWizPlus({'key_1': [{'k': 'v'}], 'keyTwo': '5', 'key-3': 3.21})
-    >>> assert dw.key_1[0].k == 'v'
-    >>> assert dw.key_two == '5'
-    >>> assert dw.key_3 == 3.21
+        >>> from dotwiz import DotWizPlus
+        >>> dw = DotWizPlus({'Key 1': [{'3D': {'with': 2}}], 'keyTwo': '5', 'r-2!@d.2?': 3.21})
+        >>> dw
+        DotWizPlus(key_1=[DotWizPlus(_3d=DotWizPlus(with_=2))], key_two='5', r_2_d_2=3.21)
+        >>> assert dw.key_1[0]._3d.with_ == 2
+        >>> assert dw.key_two == '5'
+        >>> assert dw.r_2_d_2 == 3.21
+        >>> dw.to_dict()
+        {'Key 1': [{'3D': {'with': 2}}], 'keyTwo': '5', 'r-2!@d.2?': 3.21}
+        >>> dw.to_attr_dict()
+        {'key_1': [{'_3d': {'with_': 2}}], 'key_two': '5', 'r_2_d_2': 3.21}
 
     """
     __slots__ = ('__dict__', )
 
     __init__ = update = __upsert_into_dot_wiz_plus__
 
+    # __getattr__: Use the default `object.__getattr__` implementation.
+    # __getitem__: Use the default `dict.__getitem__` implementation.
+
     __delattr__ = __delitem__ = dict.__delitem__
     __setattr__ = __setitem__ = __setitem_impl__
-
-    # Use the default `dict.__getitem__` implementation.
-    # def __getitem__(self, key):
-    #     ...
-
-    def __repr__(self):
-        # note: iterate over `self.__dict__` instead of `self`, in case
-        # of keywords like `for`, which we store differently - like `for_`.
-        fields = [f'{k}={v!r}' for k, v in self.__dict__.items()]
-        # we could use `self.__class__.__name__`, but here we already know
-        # the name of the class.
-        return f'DotWizPlus({", ".join(fields)})'
 
     to_attr_dict = __convert_to_attr_dict__
     to_attr_dict.__doc__ = 'Recursively convert the :class:`DotWizPlus` instance ' \
