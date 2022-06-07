@@ -57,10 +57,12 @@ def __store_in_dot_wiz__(self, key: str, value,
             # transform key to `snake case` and cache the result.
             key = snake(key)
 
-            # I've noticed for keys like 'a.b.c', the result isn't `a_b_c`
-            # as we'd want it to be. So for now, do the conversion ourselves.
-            if '.' in key:
-                key = key.replace('.', '_').replace('__', '_')
+            # I've noticed for keys like 'a.b.c' or a'b'c, the result isn't
+            # `a_b_c` as we'd want it to be. So for now, do the conversion
+            # ourselves.
+            for ch in ('.', '\''):
+                if ch in key:
+                    key = key.replace(ch, '_').replace('__', '_')
 
             # note: this hurts performance a little, but in any case we need
             # to check for words with a leading digit such as `123test` -
@@ -79,7 +81,7 @@ def __store_in_dot_wiz__(self, key: str, value,
 
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz_plus__(self, input_dict={},
-                                 *, __set=dict.__setitem__,
+                                 __set=dict.__setitem__,
                                  __is_keyword=keyword.iskeyword,
                                  **kwargs):
     """
@@ -114,7 +116,7 @@ def __upsert_into_dot_wiz_plus__(self, input_dict={},
 
 
 def __setitem_impl__(self, key, value,
-                     *, __set=dict.__setitem__,
+                     __set=dict.__setitem__,
                      __is_keyword=keyword.iskeyword):
     """Implementation of `DotWizPlus.__setitem__` to preserve dot access"""
     value = __resolve_value__(value, DotWizPlus)
