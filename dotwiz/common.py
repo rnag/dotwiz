@@ -3,7 +3,7 @@ Common (shared) helpers and utilities.
 """
 
 
-def __add_repr__(name, bases, cls_dict, *, use_attr_dict=False):
+def __add_repr__(name, bases, cls_dict, *, char='*', use_attr_dict=False):
     """
     Metaclass to generate and add a `__repr__` to a class.
     """
@@ -13,12 +13,12 @@ def __add_repr__(name, bases, cls_dict, *, use_attr_dict=False):
     if use_attr_dict:
         def __repr__(self: dict, __name=name):
             fields = [f'{k}={v!r}' for k, v in self.__dict__.items()]
-            return f'{__name}({", ".join(fields)})'
+            return f'{char}({", ".join(fields)})'
 
     else:
         def __repr__(self: dict, __name=name):
             fields = [f'{k}={v!r}' for k, v in self.items()]
-            return f'{__name}({", ".join(fields)})'
+            return f'{char}({", ".join(fields)})'
 
     cls_dict['__repr__'] = __repr__
 

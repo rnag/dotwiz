@@ -123,10 +123,10 @@ def __setitem_impl__(self, key, value,
     __store_in_dot_wiz__(self, key, value, self.__dict__)
 
 
-class DotWizPlus(dict, metaclass=__add_repr__, use_attr_dict=True):
+class DotWizPlus(dict, metaclass=__add_repr__, char='✪', use_attr_dict=True):
     """
     :class:`DotWizPlus` - a blazing *fast* ``dict`` subclass that also
-    supports *dot access* notation.
+    supports *dot access* notation.exit
 
     Usage::
 

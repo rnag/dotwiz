@@ -2,8 +2,6 @@
 Dot Wiz
 =======
 
-Full documentation is available at `Read The Docs`_. (`Installation`_)
-
 .. image:: https://img.shields.io/pypi/v/dotwiz.svg
         :target: https://pypi.org/project/dotwiz
 
@@ -25,9 +23,11 @@ A `blazing fast`_ ``dict`` subclass that enables *dot access* notation via Pytho
 attribute style. Nested ``dict`` and ``list`` values are automatically
 transformed as well.
 
------
+* Documentation: https://dotwiz.readthedocs.io.
 
-Assume you are given a simple ``dict`` object, with dynamic keys::
+-------------------
+
+Assume you have a simple ``dict`` object, with dynamic keys::
 
     >>> my_dict = {'this': {'dict': {'has': [{'nested': {'data': True}}]}}}
 
@@ -66,12 +66,15 @@ Here is an example of how to create and use a ``DotWiz`` object:
                 the_answer_to_life=42)
 
     print(dw)
-    # >  DotWiz(this=DotWiz(works=DotWiz(for=[DotWiz(nested=DotWiz(values=True))])),
-    #           the_answer_to_life=42)
+    # >  ✫(this=✫(works=✫(for=[✫(nested=✫(values=True))])),
+    #      the_answer_to_life=42)
 
     assert dw.this.works['for'][0].nested.values  # True
     assert dw.the_answer_to_life == 42
 
+    print(dw.to_dict())
+    # >  {'this': {'works': {'for': [{'nested': {'values': True}}]}},
+    #     'the_answer_to_life': 42}
 
 Using ``make_dot_wiz`` allows you to pass in an iterable object when
 creating a ``DotWiz`` object:
@@ -84,7 +87,7 @@ creating a ``DotWiz`` object:
                       AnyKey='value')
 
     print(dw)
-    #> DotWiz(AnyKey='value', hello, world!=123, easy: as~ pie?=True)
+    #> ✫(AnyKey='value', hello, world!=123, easy: as~ pie?=True)
 
     assert dw['hello, world!'] == 123
     assert dw['easy: as~ pie?']
@@ -94,31 +97,46 @@ creating a ``DotWiz`` object:
 ~~~~~~~~~~~~~~
 
 ``DotWizPlus`` enables you to turn special-cased keys into valid
-*snake_case* words in Python, as shown below.
-
-    It also handles edge cases such as invalid *identifier names* for
-    keys, such a leading number (which is prefixed with an `_`) or
-    a reserved keyword, such as ``for`` or ``class`` (which is suffixed
-    with an `_`).
+*snake_case* words in Python, as shown below. Also see the note
+on :ref:`invalid-characters` below.
 
 .. code:: python3
 
     from dotwiz.plus import DotWizPlus
 
-    my_dict = {'THIS': {'1': {'is': {'For': {'AllOf': {'My !@ Fans!': True}}}}}}
+    my_dict = {'THIS': {'1': {'is': [{'For': {'AllOf': {'My !@ Fans!': True}}}]}}}
     dw = DotWizPlus(my_dict)
 
     print(dw)
-    #> DotWizPlus(this=DotWizPlus(_1=DotWizPlus(is_=DotWizPlus(for_=DotWizPlus(all_of=DotWizPlus(my_fans=True))))))
+    #> ✪(this=✪(_1=✪(is_=[✪(for_=✪(all_of=✪(my_fans=True)))])))
 
     # True
-    assert dw.this._1.is_.for_.all_of.my_fans
+    assert dw.this._1.is_[0].for_.all_of.my_fans
+
+    # alternatively, you can access it like a dict with the original keys:
+    assert dw['THIS']['1']['is'][0]['For']['AllOf']['My !@ Fans!']
 
     print(dw.to_dict())
-    # {'THIS': {'1': {'is': {'For': {'AllOf': {'My !@ Fans!': True}}}}}}
+    # {'THIS': {'1': {'is': [{'For': {'AllOf': {'My !@ Fans!': True}}}]}}}
 
     print(dw.to_attr_dict())
-    # {'this': {'_1': {'is_': {'for_': {'all_of': {'my_fans': True}}}}}}
+    # {'this': {'_1': {'is_': [{'for_': {'all_of': {'my_fans': True}}}]}}}
+
+.. _invalid-characters:
+
+Issues with Invalid Characters
+******************************
+
+A key name in the scope
+of this library must be a valid *identifier* in python, and
+also not a reserved *keyword* such as ``for`` or ``class``.
+In the case where your key name does not conform, the library
+will mutate your key to a safe, lower-cased format.
+
+Spaces
+and invalid characters are replaced with ``_``. In the case
+of a key beginning with an *int*, a leading ``_`` is added.
+In the case of a *keyword*, a trailing ``_`` is added.
 
 Features
 --------

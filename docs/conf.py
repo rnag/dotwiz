@@ -19,7 +19,10 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
+
+# Insert DotWiz' path into the system.
+sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath("_themes"))
 
 from dotwiz import __version__
 
@@ -31,7 +34,12 @@ from dotwiz import __version__
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
+    'sphinx.ext.viewcode',
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -71,11 +79,28 @@ language = 'en'
 # This patterns also effect to html_static_path and html_extra_path
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+# If true, '()' will be appended to :func: etc. cross-reference text.
+add_function_parentheses = False
+
+# If true, the current module name will be prepended to all description
+# unit titles (such as .. function::).
+add_module_names = True
+
+# If true, sectionauthor and moduleauthor directives will be shown in the
+# output. They are ignored by default.
+# show_authors = False
+
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'flask_theme_support.FlaskyStyle'
+
+# A list of ignored prefixes for module index sorting.
+# modindex_common_prefix = []
+
+# If true, keep warnings as "system message" paragraphs in the built documents.
+# keep_warnings = False
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = False
+todo_include_todos = True
 
 
 # -- Options for HTML output -------------------------------------------
@@ -83,18 +108,74 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+
+html_theme = 'furo'
+
+# TODO: here are a list of additional themes I liked and wanted to try out, in
+#  my order of preference.
+#    I might need to clean up these comments sometime later.
+# html_theme = 'sphinxawesome_theme'
+# html_theme = 'press'
+# html_theme = 'alabaster'
+# html_theme = 'sphinx_rtd_theme'
+# html_theme = 'sphinx_material'
+# html_theme = 'sphinx_book_theme'
+# html_theme = 'piccolo_theme'
+# html_theme = 'pyramid'
+# html_theme = 'karma_sphinx_theme'
+
+# html_permalinks_icon = '<span>#</span>'
 
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    "show_powered_by": False,
+    "github_user": "rnag",
+    "github_repo": "dotwiz",
+    "github_banner": True,
+    "show_related": False,
+    "note_bg": "#FFF59C",
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# Custom sidebar templates, maps document names to template names.
+html_sidebars = {
+    "index": [
+        # "sidebarintro.html",
+        # "sourcelink.html",
+        "sidebar/scroll-start.html",
+        "brand.html",
+        "sidebar/search.html",
+        "sidebar/navigation.html",
+        "links.html",
+        "sidebar_modindex.html",
+        "sidebar/scroll-end.html",
+        "hacks.html"
+    ],
+    "**": [
+        # "sidebarintro.html",
+        # -- These are Sphinx builtin templates that are rendered by default --
+        # See https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-html_sidebars
+        # "localtoc.html",
+        # "relations.html",
+        # "sourcelink.html",
+        "sidebar/scroll-start.html",
+        "brand.html",
+        "sidebar/search.html",
+        "sidebar/navigation.html",
+        "links.html",
+        "sidebar_modindex.html",
+        "sidebar/scroll-end.html",
+        # -- End --
+        "hacks.html",
+    ],
+}
 
 
 # -- Options for HTMLHelp output ---------------------------------------
