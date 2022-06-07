@@ -2,6 +2,8 @@
 Dot Wiz
 =======
 
+Full documentation is available at `Read The Docs`_. (`Installation`_)
+
 .. image:: https://img.shields.io/pypi/v/dotwiz.svg
         :target: https://pypi.org/project/dotwiz
 
@@ -14,21 +16,32 @@ Dot Wiz
 .. image:: https://github.com/rnag/dotwiz/actions/workflows/dev.yml/badge.svg
         :target: https://github.com/rnag/dotwiz/actions/workflows/dev.yml
 
-.. image:: https://readthedocs.org/projects/dotwiz/badge/?version=latest
-        :target: https://dotwiz.readthedocs.io/en/latest/?version=latest
-        :alt: Documentation Status
-
-
 .. image:: https://pyup.io/repos/github/rnag/dotwiz/shield.svg
-     :target: https://pyup.io/repos/github/rnag/dotwiz/
-     :alt: Updates
+        :target: https://pyup.io/repos/github/rnag/dotwiz/
+        :alt: Updates
 
 
 A `blazing fast`_ ``dict`` subclass that enables *dot access* notation via Python
 attribute style. Nested ``dict`` and ``list`` values are automatically
 transformed as well.
 
-* Documentation: https://dotwiz.readthedocs.io.
+-----
+
+Assume you are given a simple ``dict`` object, with dynamic keys::
+
+    >>> my_dict = {'this': {'dict': {'has': [{'nested': {'data': True}}]}}}
+
+If the goal is to access a nested value, you could do it like this::
+
+    >>> my_dict['this']['dict']['has'][0]['nested']['data']
+    True
+
+Or, using ``DotWiz``::
+
+    >>> from dotwiz import DotWiz
+    >>> dw = DotWiz(my_dict)
+    >>> dw.this.dict.has[0].nested.data
+    True
 
 Install
 -------
@@ -80,33 +93,32 @@ creating a ``DotWiz`` object:
 ``DotWizPlus``
 ~~~~~~~~~~~~~~
 
-Using ``DotWizPlus`` allows you to case-transform keys to *snake_case*, as well
-as handle edge cases such as invalid identifier names for keys, such
-a leading number (which is prefixed with an `_`) or a reserved keyword in python,
-such as ``for`` or ``class`` (which is suffixed with an `_`).
+``DotWizPlus`` enables you to turn special-cased keys into valid
+*snake_case* words in Python, as shown below.
 
-For example:
+    It also handles edge cases such as invalid *identifier names* for
+    keys, such a leading number (which is prefixed with an `_`) or
+    a reserved keyword, such as ``for`` or ``class`` (which is suffixed
+    with an `_`).
 
 .. code:: python3
 
-    from dotwiz import DotWizPlus
+    from dotwiz.plus import DotWizPlus
 
-    dw = DotWizPlus({'Key 1': [{'3D': {'with': 2}}], 'keyTwo': '5', 'r-2!@d.2?': 3.21})
+    my_dict = {'THIS': {'1': {'is': {'For': {'AllOf': {'My !@ Fans!': True}}}}}}
+    dw = DotWizPlus(my_dict)
 
     print(dw)
-    #> DotWizPlus(key_1=[DotWizPlus(_3d=DotWizPlus(with_=2))],
-    #             key_two='5',
-    #             r_2_d_2=3.21)
+    #> DotWizPlus(this=DotWizPlus(_1=DotWizPlus(is_=DotWizPlus(for_=DotWizPlus(all_of=DotWizPlus(my_fans=True))))))
 
-    assert dw.key_1[0]._3d.with_ == 2
-    assert dw.key_two == '5'
-    assert dw.r_2_d_2 == 3.21
+    # True
+    assert dw.this._1.is_.for_.all_of.my_fans
 
     print(dw.to_dict())
-    # {'Key 1': [{'3D': {'with': 2}}], 'keyTwo': '5', 'r-2!@d.2?': 3.21}
+    # {'THIS': {'1': {'is': {'For': {'AllOf': {'My !@ Fans!': True}}}}}}
 
     print(dw.to_attr_dict())
-    # {'key_1': [{'_3d': {'with_': 2}}], 'key_two': '5', 'r_2_d_2': 3.21}
+    # {'this': {'_1': {'is_': {'for_': {'all_of': {'my_fans': True}}}}}}
 
 Features
 --------
