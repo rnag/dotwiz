@@ -3,6 +3,20 @@ Common (shared) helpers and utilities.
 """
 
 
+def __convert_to_attr_dict__(o):
+    """
+    Recursively convert an object (typically a `dict` subclass) to a
+    Python `dict` type.
+    """
+    if isinstance(o, dict):
+        return {k: __convert_to_attr_dict__(v) for k, v in o.__dict__.items()}
+
+    if isinstance(o, list):
+        return [__convert_to_dict__(e) for e in o]
+
+    return o
+
+
 def __convert_to_dict__(o):
     """
     Recursively convert an object (typically a `dict` subclass) to a

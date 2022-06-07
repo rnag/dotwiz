@@ -13,13 +13,11 @@ class _Update(Protocol):
                  __m: Mapping[_KT, _VT] | None = None,
                  **kwargs: _T) -> None: ...
 
-class _DictGet(Protocol):
-    def __call__(self, __key: str, default: str | None = None) -> str:...
+# class _DictGet(Protocol):
+#     def __call__(self, __key: str, default: str | None = None) -> str:...
 
 
-def to_snake_case(string: str,
-                  *, __letter: _DictGet = None,
-                  __default: str | None = None) -> str: ...
+def to_snake_case(string: str) -> str: ...
 
 def make_dot_wiz_plus(*args: Iterable[_KT, _VT],
                       **kwargs: _T) -> DotWizPlus: ...
@@ -53,6 +51,13 @@ class DotWizPlus(dict):
 
     def __setattr__(self, item: str, value: _VT) -> None: ...
     def __setitem__(self, k: _KT, v: _VT) -> None: ...
+
+    def to_attr_dict(self) -> dict[_KT, _VT]:
+        """
+        Recursively convert the :class:`DotWizPlus` instance back to a ``dict``,
+        while preserving the lower-cased keys used for attribute access.
+        """
+        ...
 
     def to_dict(self) -> dict[_KT, _VT]:
         """

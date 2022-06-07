@@ -3,48 +3,10 @@ import keyword
 
 from pyheck import snake
 
-from .common import __convert_to_dict__, __resolve_value__
-
+from .common import __convert_to_dict__, __resolve_value__, __convert_to_attr_dict__
 
 # A running cache of special cases that we've transformed based on above.
 __SPECIAL_KEYS = {}
-
-# Map a number to letter based on its similarity or resemblance
-#
-# Ref: https://angelplates.net/news/6/how-numbers-replace-letters-on-number-plates/
-__DIGIT_TO_LETTER = {
-    '0': 'o',
-    '1': 'i',
-    '2': 'z',
-    '3': 'e',
-    '4': 'a',
-    '5': 's',
-    '6': 'g',
-    '7': 't',
-    '8': 'b',
-    '9': 'g',
-}
-
-
-def to_snake_case(string,
-                  *, __letter=__DIGIT_TO_LETTER.get,
-                  __default='x'):
-    """
-    Make an underscored, lowercase form from the expression in the string.
-
-    Example:
-
-        >>> to_snake_case("DeviceType")
-        'device_type'
-    """
-    word = snake(string)
-
-    # note: this hurts performance a little, but in any case we need
-    # to check for words with a leading digit such as `123test` - since
-    # these are not valid identifiers in python, unfortunately.
-    ch = word[0]
-
-    return f'{__letter(ch, __default)}{word[1:]}' if ch.isdigit() else word
 
 
 def make_dot_wiz_plus(*args, **kwargs):
@@ -62,6 +24,51 @@ def make_dot_wiz_plus(*args, **kwargs):
     kwargs.update(*args)
 
     return DotWizPlus(kwargs)
+
+
+def __store_in_dot_wiz__(self, key: str, value,
+                         __dict,
+                         __set=dict.__setitem__,
+                         __is_keyword=keyword.iskeyword):
+
+    orig_key = key
+    lower_key = key.lower()
+
+    # if it's a keyword like `for` or `class`, and an underscore to key so
+    # that attribute access still works.
+    if __is_keyword(lower_key):
+        key = f'{lower_key}_'
+
+    # handle special cases: if the key is not lowercase, or it's not a
+    # valid identifier in python.
+    #
+    #   examples: `ThisIsATest` | `hey, world!` | `hi-there` | `3D`
+    elif not key == lower_key or not key.isidentifier():
+
+        if key in __SPECIAL_KEYS:
+            key = __SPECIAL_KEYS[key]
+        else:
+            # transform key to `snake case` and cache the result.
+            key = snake(key)
+
+            # I've noticed for keys like 'a.b.c', the result isn't `a_b_c`
+            # as we'd want it to be. So for now, do the conversion ourselves.
+            if '.' in key:
+                key = key.replace('.', '_').replace('__', '_')
+
+            # note: this hurts performance a little, but in any case we need
+            # to check for words with a leading digit such as `123test` -
+            # since these are not valid identifiers in python, unfortunately.
+            ch = key[0]
+
+            if ch.isdigit():  # the key has a leading digit
+                key = f'_{ch}{key[1:]}'
+
+            __SPECIAL_KEYS[key] = key
+
+    # note: this logic is the same as `DotWizPlus.__setitem__()`
+    __set(self, orig_key, value)
+    __dict[key] = value
 
 
 # noinspection PyDefaultArgument
@@ -97,44 +104,15 @@ def __upsert_into_dot_wiz_plus__(self, input_dict={},
         elif t is list:
             value = [__resolve_value__(e, DotWizPlus) for e in value]
 
-        lower_key = key.lower()
-
-        if __is_keyword(lower_key):
-            __set(self, key, value)
-            __dict[f'{lower_key}_'] = value
-        else:
-            # handle special cases such as `hey, world!` or `ThisIsATest`
-            if not key == lower_key or not key.isidentifier():
-                if key in __SPECIAL_KEYS:
-                    key = __SPECIAL_KEYS[key]
-                else:  # transform key to `snake case` and cache the result.
-                    __SPECIAL_KEYS[key] = key = to_snake_case(key)
-
-            # note: this logic is the same as `DotWizPlus.__setitem__()`
-            __set(self, key, value)
-            __dict[key] = value
+        __store_in_dot_wiz__(self, key, value, __dict)
 
 
 def __setitem_impl__(self, key, value,
                      *, __set=dict.__setitem__,
                      __is_keyword=keyword.iskeyword):
     """Implementation of `DotWizPlus.__setitem__` to preserve dot access"""
-    lower_key = key.lower()
     value = __resolve_value__(value, DotWizPlus)
-
-    if __is_keyword(lower_key):
-        __set(self, key, value)
-        self.__dict__[f'{lower_key}_'] = value
-    else:
-        # handle special cases such as `hey, world!` or `ThisIsATest`
-        if not key == lower_key or not key.isidentifier():
-            if key in __SPECIAL_KEYS:
-                key = __SPECIAL_KEYS[key]
-            else:  # transform key to `snake case` and cache the result.
-                __SPECIAL_KEYS[key] = key = to_snake_case(key)
-
-        __set(self, key, value)
-        self.__dict__[key] = value
+    __store_in_dot_wiz__(self, key, value, self.__dict__)
 
 
 class DotWizPlus(dict):
@@ -158,8 +136,9 @@ class DotWizPlus(dict):
     __delattr__ = __delitem__ = dict.__delitem__
     __setattr__ = __setitem__ = __setitem_impl__
 
-    def __getitem__(self, key):
-        return self.__dict__[key]
+    # Use the default `dict.__getitem__` implementation.
+    # def __getitem__(self, key):
+    #     ...
 
     def __repr__(self):
         # note: iterate over `self.__dict__` instead of `self`, in case
@@ -168,6 +147,11 @@ class DotWizPlus(dict):
         # we could use `self.__class__.__name__`, but here we already know
         # the name of the class.
         return f'DotWizPlus({", ".join(fields)})'
+
+    to_attr_dict = __convert_to_attr_dict__
+    to_attr_dict.__doc__ = 'Recursively convert the :class:`DotWizPlus` instance ' \
+                           'back to a ``dict``, while preserving the lower-cased ' \
+                           'keys used for attribute access.'
 
     to_dict = __convert_to_dict__
     to_dict.__doc__ = 'Recursively convert the :class:`DotWizPlus` instance ' \
