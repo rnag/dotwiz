@@ -37,6 +37,9 @@ def __store_in_object__(self, __self_dict, key, value,
                         __is_keyword=keyword.iskeyword):
 
     orig_key = key
+    # in case of other types, like `int`
+    key = str(key)
+
     lower_key = key.lower()
 
     # if it's a keyword like `for` or `class`, and an underscore to key so
@@ -54,25 +57,25 @@ def __store_in_object__(self, __self_dict, key, value,
             key = __SPECIAL_KEYS[key]
         else:
             # transform key to `snake case` and cache the result.
-            key = snake(key)
+            lower_snake = snake(key)
 
             # I've noticed for keys like `a.b.c` or `a'b'c`, the result isn't
             # `a_b_c` as we'd want it to be. So for now, do the conversion
             # ourselves.
             #   See also: https://github.com/kevinheavey/pyheck/issues/10
             for ch in ('.', '\''):
-                if ch in key:
-                    key = key.replace(ch, '_').replace('__', '_')
+                if ch in lower_snake:
+                    lower_snake = lower_snake.replace(ch, '_').replace('__', '_')
 
             # note: this hurts performance a little, but in any case we need
             # to check for words with a leading digit such as `123test` -
             # since these are not valid identifiers in python, unfortunately.
-            ch = key[0]
+            ch = lower_snake[0]
 
             if ch.isdigit():  # the key has a leading digit
-                key = f'_{ch}{key[1:]}'
+                lower_snake = f'_{ch}{lower_snake[1:]}'
 
-            __SPECIAL_KEYS[key] = key
+            __SPECIAL_KEYS[key] = key = lower_snake
 
     # note: this logic is the same as `DotWizPlus.__setitem__()`
     __set(self, orig_key, value)
