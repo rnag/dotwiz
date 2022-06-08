@@ -13,9 +13,6 @@ class _Update(Protocol):
                  __m: Mapping[_KT, _VT] | None = None,
                  **kwargs: _T) -> None: ...
 
-# class _DictGet(Protocol):
-#     def __call__(self, __key: str, default: str | None = None) -> str:...
-
 
 def to_snake_case(string: str) -> str: ...
 
