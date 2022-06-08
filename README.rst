@@ -96,8 +96,8 @@ creating a ``DotWiz`` object:
 ``DotWizPlus``
 ~~~~~~~~~~~~~~
 
-``DotWizPlus`` enables you to turn special-cased keys into valid
-*snake_case* words in Python, as shown below. Also see the note
+``DotWizPlus`` enables you to turn special-cased keys, such as names with spaces,
+into valid *snake_case* words in Python, as shown below. Also see the note
 on :ref:`invalid-characters` below.
 
 .. code:: python3
