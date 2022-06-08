@@ -1,4 +1,4 @@
-"""Main module."""
+"""Dot Wiz Plus module."""
 import keyword
 
 from pyheck import snake
@@ -35,7 +35,17 @@ def make_dot_wiz_plus(*args, **kwargs):
 def __store_in_object__(self, __self_dict, key, value,
                         __set=dict.__setitem__,
                         __is_keyword=keyword.iskeyword):
+    """
+    Helper method to store a key-value pair in an object :param:`self` (a
+    ``DotWizPlus`` instance). This implementation stores the key if it's
+    already *lower-cased* and a valid *identifier* name in python, else it
+    mutates it into a (lowercase) *snake case* key name that conforms.
 
+    The new key-value pair is stored in the object's :attr:`__dict__`, and
+    the original key-value is stored in the underlying ``dict`` store, via
+    :meth:`dict.__setitem__`.
+
+    """
     orig_key = key
     # in case of other types, like `int`
     key = str(key)
@@ -121,7 +131,9 @@ def __setitem_impl__(self, key, value):
     __store_in_object__(self, self.__dict__, key, value)
 
 
-class DotWizPlus(dict, metaclass=__add_repr__, char='✪', use_attr_dict=True):
+class DotWizPlus(dict, metaclass=__add_repr__,
+                 print_char='✪',
+                 use_attr_dict=True):
     # noinspection PyProtectedMember
     """
     :class:`DotWizPlus` - a blazing *fast* ``dict`` subclass that also

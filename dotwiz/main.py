@@ -69,7 +69,7 @@ def __setitem_impl__(self, key, value, __set=dict.__setitem__):
     self.__dict__[key] = value
 
 
-class DotWiz(dict, metaclass=__add_repr__, char='✫'):
+class DotWiz(dict, metaclass=__add_repr__, print_char='✫'):
     """
     :class:`DotWiz` - a blazing *fast* ``dict`` subclass that also supports
     *dot access* notation.
