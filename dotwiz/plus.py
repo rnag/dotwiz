@@ -32,10 +32,9 @@ def make_dot_wiz_plus(*args, **kwargs):
     return DotWizPlus(kwargs)
 
 
-def __store_in_dot_wiz__(self, key: str, value,
-                         __dict,
-                         __set=dict.__setitem__,
-                         __is_keyword=keyword.iskeyword):
+def __store_in_object__(self, __self_dict, key, value,
+                        __set=dict.__setitem__,
+                        __is_keyword=keyword.iskeyword):
 
     orig_key = key
     lower_key = key.lower()
@@ -57,9 +56,10 @@ def __store_in_dot_wiz__(self, key: str, value,
             # transform key to `snake case` and cache the result.
             key = snake(key)
 
-            # I've noticed for keys like 'a.b.c' or a'b'c, the result isn't
+            # I've noticed for keys like `a.b.c` or `a'b'c`, the result isn't
             # `a_b_c` as we'd want it to be. So for now, do the conversion
             # ourselves.
+            #   See also: https://github.com/kevinheavey/pyheck/issues/10
             for ch in ('.', '\''):
                 if ch in key:
                     key = key.replace(ch, '_').replace('__', '_')
@@ -76,14 +76,11 @@ def __store_in_dot_wiz__(self, key: str, value,
 
     # note: this logic is the same as `DotWizPlus.__setitem__()`
     __set(self, orig_key, value)
-    __dict[key] = value
+    __self_dict[key] = value
 
 
 # noinspection PyDefaultArgument
-def __upsert_into_dot_wiz_plus__(self, input_dict={},
-                                 __set=dict.__setitem__,
-                                 __is_keyword=keyword.iskeyword,
-                                 **kwargs):
+def __upsert_into_dot_wiz_plus__(self, input_dict={}, **kwargs):
     """
     Helper method to generate / update a :class:`DotWizPlus` (dot-access dict)
     from a Python ``dict`` object, and optional *keyword arguments*.
@@ -112,28 +109,27 @@ def __upsert_into_dot_wiz_plus__(self, input_dict={},
         elif t is list:
             value = [__resolve_value__(e, DotWizPlus) for e in value]
 
-        __store_in_dot_wiz__(self, key, value, __dict)
+        __store_in_object__(self, __dict, key, value)
 
 
-def __setitem_impl__(self, key, value,
-                     __set=dict.__setitem__,
-                     __is_keyword=keyword.iskeyword):
+def __setitem_impl__(self, key, value):
     """Implementation of `DotWizPlus.__setitem__` to preserve dot access"""
     value = __resolve_value__(value, DotWizPlus)
-    __store_in_dot_wiz__(self, key, value, self.__dict__)
+    __store_in_object__(self, self.__dict__, key, value)
 
 
 class DotWizPlus(dict, metaclass=__add_repr__, char='✪', use_attr_dict=True):
+    # noinspection PyProtectedMember
     """
     :class:`DotWizPlus` - a blazing *fast* ``dict`` subclass that also
-    supports *dot access* notation.exit
-
-    Usage::
+    supports *dot access* notation. This implementation enables you to
+    turn special-cased keys into valid *snake_case* words in Python,
+    as shown below.
 
         >>> from dotwiz import DotWizPlus
         >>> dw = DotWizPlus({'Key 1': [{'3D': {'with': 2}}], 'keyTwo': '5', 'r-2!@d.2?': 3.21})
         >>> dw
-        DotWizPlus(key_1=[DotWizPlus(_3d=DotWizPlus(with_=2))], key_two='5', r_2_d_2=3.21)
+        ✪(key_1=[✪(_3d=✪(with_=2))], key_two='5', r_2_d_2=3.21)
         >>> assert dw.key_1[0]._3d.with_ == 2
         >>> assert dw.key_two == '5'
         >>> assert dw.r_2_d_2 == 3.21
@@ -141,6 +137,21 @@ class DotWizPlus(dict, metaclass=__add_repr__, char='✪', use_attr_dict=True):
         {'Key 1': [{'3D': {'with': 2}}], 'keyTwo': '5', 'r-2!@d.2?': 3.21}
         >>> dw.to_attr_dict()
         {'key_1': [{'_3d': {'with_': 2}}], 'key_two': '5', 'r_2_d_2': 3.21}
+
+    Issues with Invalid Characters
+    ******************************
+
+    A key name in the scope of the :class:`DotWizPlus` implementation must be
+    a valid, lower-cased *identifier* in python, and also not a reserved
+    *keyword* such as ``for`` or ``class``. In the case where your key name
+    does not conform, the library will mutate your key to a safe,
+    lower-cased format.
+
+    Spaces and invalid characters are replaced with ``_``. In the case
+    of a key beginning with an *int*, a leading ``_`` is added.
+    In the case of a *keyword*, a trailing ``_`` is added. Keys that appear
+    in different cases, such as ``myKey`` or ``My-Key``, will all be converted
+    to a *snake case* variant, ``my_key`` in this example.
 
     """
     __slots__ = ('__dict__', )

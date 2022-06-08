@@ -29,6 +29,7 @@ help:
 init: ## install all dev dependencies for this project
 	pip install -e .
 	pip install -r requirements-dev.txt
+	pip install -r docs/requirements.txt
 
 clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
 

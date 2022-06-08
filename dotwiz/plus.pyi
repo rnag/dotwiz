@@ -22,18 +22,21 @@ def to_snake_case(string: str) -> str: ...
 def make_dot_wiz_plus(*args: Iterable[_KT, _VT],
                       **kwargs: _T) -> DotWizPlus: ...
 
+def __store_in_object__(self: DotWizPlus,
+                        __self_dict: MutableMapping[_KT, _VT],
+                        key: _KT,
+                        value: _VT,
+                        *, __set: _SetItem = dict.__setitem__,
+                        __is_keyword=keyword.iskeyword): ...
+
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz_plus__(self: DotWizPlus,
                                  input_dict: MutableMapping[_KT, _VT] = {},
-                                 *, __set: _SetItem =dict.__setitem__,
-                                 __is_keyword=keyword.iskeyword,
                                  **kwargs: _T) -> None: ...
 
 def __setitem_impl__(self: DotWizPlus,
                      key: _KT,
-                     value: _VT,
-                     *, __set: _SetItem = dict.__setitem__,
-                     __is_keyword=keyword.iskeyword): ...
+                     value: _VT): ...
 
 
 class DotWizPlus(dict):
@@ -68,7 +71,6 @@ class DotWizPlus(dict):
     # noinspection PyDefaultArgument
     def update(self,
                __m: MutableMapping[_KT, _VT] = {},
-               *, __set: _SetItem = dict.__setitem__,
                **kwargs: _T) -> None: ...
 
     def __repr__(self) -> str: ...

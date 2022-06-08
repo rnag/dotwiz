@@ -127,16 +127,17 @@ on :ref:`invalid-characters` below.
 Issues with Invalid Characters
 ******************************
 
-A key name in the scope
-of this library must be a valid *identifier* in python, and
-also not a reserved *keyword* such as ``for`` or ``class``.
-In the case where your key name does not conform, the library
-will mutate your key to a safe, lower-cased format.
+A key name in the scope of the :class:`DotWizPlus` implementation must be
+a valid, lower-cased *identifier* in python, and also not a reserved
+*keyword* such as ``for`` or ``class``. In the case where your key name
+does not conform, the library will mutate your key to a safe,
+lower-cased format.
 
-Spaces
-and invalid characters are replaced with ``_``. In the case
+Spaces and invalid characters are replaced with ``_``. In the case
 of a key beginning with an *int*, a leading ``_`` is added.
-In the case of a *keyword*, a trailing ``_`` is added.
+In the case of a *keyword*, a trailing ``_`` is added. Keys that appear
+in different cases, such as ``myKey`` or ``My-Key``, will all be converted
+to a *snake case* variant, ``my_key`` in this example.
 
 Features
 --------

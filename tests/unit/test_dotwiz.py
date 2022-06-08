@@ -21,7 +21,7 @@ def test_make_dot_wiz():
     dd = make_dot_wiz([(1, 'test'), ('two', [{'hello': 'world'}])],
                       a=1, b='two', c={'d': [123]})
 
-    assert repr(dd) == "DotWiz(a=1, b='two', c=DotWiz(d=[123]), 1='test', two=[DotWiz(hello='world')])"
+    assert repr(dd) == "✫(a=1, b='two', c=✫(d=[123]), 1='test', two=[✫(hello='world')])"
     assert dd.a == 1
     assert dd.b == 'two'
     assert dd[1] == 'test'
@@ -42,7 +42,7 @@ def test_dotwiz_init():
         'c': {'d': [123]}
     })
 
-    assert repr(dd) == "DotWiz(1='test', two=[DotWiz(hello='world')], a=1, b='two', c=DotWiz(d=[123]))"
+    assert repr(dd) == "✫(1='test', two=[✫(hello='world')], a=1, b='two', c=✫(d=[123]))"
     assert dd.a == 1
     assert dd.b == 'two'
     assert dd[1] == 'test'
