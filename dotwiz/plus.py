@@ -24,7 +24,7 @@ def make_dot_wiz_plus(*args, **kwargs):
 
         >>> from dotwiz import make_dot_wiz_plus
         >>> make_dot_wiz_plus([('k1', 11), ('k2', [{'a': 'b'}]), ('k3', 'v3')], y=True)
-        DotWizPlus(y=True, k1=11, k2=[DotWizPlus(a='b')], k3='v3')
+        ✪(y=True, k1=11, k2=[✪(a='b')], k3='v3')
 
     """
     kwargs.update(*args)
