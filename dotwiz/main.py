@@ -26,7 +26,7 @@ def make_dot_wiz(*args, **kwargs):
 
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz__(self, input_dict={},
-                            *, __set=dict.__setitem__,
+                            __set=dict.__setitem__,
                             **kwargs):
     """
     Helper method to generate / update a :class:`DotWiz` (dot-access dict)

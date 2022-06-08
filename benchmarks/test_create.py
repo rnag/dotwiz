@@ -125,8 +125,12 @@ def test_dotsi(benchmark, my_data):
 def test_dict2dot(benchmark, my_data):
     result = benchmark(dict2dot.Dict2Dot, my_data)
     assert result.b == 1
+
     # the docs mention that `dict`s nested within `lists` won't work
     # assert result.c.bb[0].x == 77
+
+    # instead, looks like dict access works:
+    assert result.c.bb[0]['x'] == 77
 
 
 def test_addict(benchmark, my_data):
@@ -159,7 +163,7 @@ def test_prodict(benchmark, my_data):
     # assert result.c.bb[0].x == 77
 
     # instead, looks like dict access works:
-    assert result['c']['bb'][0]['x'] == 77
+    assert result.c.bb[0]['x'] == 77
 
 
 def test_scalpl(benchmark, my_data):
