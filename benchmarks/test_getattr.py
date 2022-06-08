@@ -67,6 +67,14 @@ def test_dotwiz(benchmark, my_data):
     assert result == 77
 
 
+def test_dotwiz_plus(benchmark, my_data):
+    o = dotwiz.DotWizPlus(my_data)
+    # print(o)
+
+    result = benchmark(lambda: o.c.bb[0].x)
+    assert result == 77
+
+
 def test_dotmap(benchmark, my_data):
     o = dotmap.DotMap(my_data)
     # print(o)

@@ -11,7 +11,7 @@ Sample Usage::
     >>> dw = DotWiz({'this': {'works': {'for': [{'nested': {'values': True}}]}}},
     ...             the_answer_to_life=42)
     >>> dw
-    DotWiz(this=DotWiz(works=DotWiz(for=[DotWiz(nested=DotWiz(values=True))])), the_answer_to_life=42)
+    ✫(this=✫(works=✫(for=[✫(nested=✫(values=True))])), the_answer_to_life=42)
     >>> dw.this.works['for'][0].nested.values
     True
     >>> dw.the_answer_to_life
@@ -26,7 +26,10 @@ For full documentation and more advanced usage, please see
 
 __all__ = [
     'DotWiz',
-    'make_dot_wiz'
+    'DotWizPlus',
+    'make_dot_wiz',
+    'make_dot_wiz_plus'
 ]
 
 from .main import DotWiz, make_dot_wiz
+from .plus import DotWizPlus, make_dot_wiz_plus

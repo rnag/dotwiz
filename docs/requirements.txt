@@ -1,0 +1,3 @@
+# Pinning to avoid unexpected breakages.
+# Used by RTD to generate docs.
+furo==2022.6.4.1

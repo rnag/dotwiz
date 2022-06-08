@@ -14,14 +14,9 @@ Dot Wiz
 .. image:: https://github.com/rnag/dotwiz/actions/workflows/dev.yml/badge.svg
         :target: https://github.com/rnag/dotwiz/actions/workflows/dev.yml
 
-.. image:: https://readthedocs.org/projects/dotwiz/badge/?version=latest
-        :target: https://dotwiz.readthedocs.io/en/latest/?version=latest
-        :alt: Documentation Status
-
-
 .. image:: https://pyup.io/repos/github/rnag/dotwiz/shield.svg
-     :target: https://pyup.io/repos/github/rnag/dotwiz/
-     :alt: Updates
+        :target: https://pyup.io/repos/github/rnag/dotwiz/
+        :alt: Updates
 
 
 A `blazing fast`_ ``dict`` subclass that enables *dot access* notation via Python
@@ -29,6 +24,24 @@ attribute style. Nested ``dict`` and ``list`` values are automatically
 transformed as well.
 
 * Documentation: https://dotwiz.readthedocs.io.
+
+-------------------
+
+Assume you have a simple ``dict`` object, with dynamic keys::
+
+    >>> my_dict = {'this': {'dict': {'has': [{'nested': {'data': True}}]}}}
+
+If the goal is to access a nested value, you could do it like this::
+
+    >>> my_dict['this']['dict']['has'][0]['nested']['data']
+    True
+
+Or, using ``DotWiz``::
+
+    >>> from dotwiz import DotWiz
+    >>> dw = DotWiz(my_dict)
+    >>> dw.this.dict.has[0].nested.data
+    True
 
 Install
 -------
@@ -40,6 +53,9 @@ Install
 Usage
 -----
 
+``DotWiz``
+~~~~~~~~~~
+
 Here is an example of how to create and use a ``DotWiz`` object:
 
 .. code:: python3
@@ -50,12 +66,15 @@ Here is an example of how to create and use a ``DotWiz`` object:
                 the_answer_to_life=42)
 
     print(dw)
-    # >  DotWiz(this=DotWiz(works=DotWiz(for=[DotWiz(nested=DotWiz(values=True))])),
-    #           the_answer_to_life=42)
+    # >  ✫(this=✫(works=✫(for=[✫(nested=✫(values=True))])),
+    #      the_answer_to_life=42)
 
     assert dw.this.works['for'][0].nested.values  # True
     assert dw.the_answer_to_life == 42
 
+    print(dw.to_dict())
+    # >  {'this': {'works': {'for': [{'nested': {'values': True}}]}},
+    #     'the_answer_to_life': 42}
 
 Using ``make_dot_wiz`` allows you to pass in an iterable object when
 creating a ``DotWiz`` object:
@@ -68,11 +87,55 @@ creating a ``DotWiz`` object:
                       AnyKey='value')
 
     print(dw)
-    #> DotWiz(AnyKey='value', hello, world!=123, easy: as~ pie?=True)
+    #> ✫(AnyKey='value', hello, world!=123, easy: as~ pie?=True)
 
     assert dw['hello, world!'] == 123
     assert dw['easy: as~ pie?']
     assert dw.AnyKey == 'value'
+
+``DotWizPlus``
+~~~~~~~~~~~~~~
+
+``DotWizPlus`` enables you to turn special-cased keys, such as names with spaces,
+into valid *snake_case* words in Python, as shown below. Also see the note
+on `Issues with Invalid Characters`_ below.
+
+.. code:: python3
+
+    from dotwiz.plus import DotWizPlus
+
+    my_dict = {'THIS': {'1': {'is': [{'For': {'AllOf': {'My !@ Fans!': True}}}]}}}
+    dw = DotWizPlus(my_dict)
+
+    print(dw)
+    #> ✪(this=✪(_1=✪(is_=[✪(for_=✪(all_of=✪(my_fans=True)))])))
+
+    # True
+    assert dw.this._1.is_[0].for_.all_of.my_fans
+
+    # alternatively, you can access it like a dict with the original keys:
+    assert dw['THIS']['1']['is'][0]['For']['AllOf']['My !@ Fans!']
+
+    print(dw.to_dict())
+    # {'THIS': {'1': {'is': [{'For': {'AllOf': {'My !@ Fans!': True}}}]}}}
+
+    print(dw.to_attr_dict())
+    # {'this': {'_1': {'is_': [{'for_': {'all_of': {'my_fans': True}}}]}}}
+
+Issues with Invalid Characters
+******************************
+
+A key name in the scope of the ``DotWizPlus`` implementation must be
+a valid, lower-cased *identifier* in python, and also not a reserved
+*keyword* such as ``for`` or ``class``. In the case where your key name
+does not conform, the library will mutate your key to a safe,
+lower-cased format.
+
+Spaces and invalid characters are replaced with ``_``. In the case
+of a key beginning with an *int*, a leading ``_`` is added.
+In the case of a *keyword*, a trailing ``_`` is added. Keys that appear
+in different cases, such as ``myKey`` or ``My-Key``, will all be converted
+to a *snake case* variant, ``my_key`` in this example.
 
 Features
 --------
@@ -109,6 +172,7 @@ This package was created with Cookiecutter_ and the `rnag/cookiecutter-pypackage
 .. _Read The Docs: https://dotwiz.readthedocs.io
 .. _Installation: https://dotwiz.readthedocs.io/en/latest/installation.html
 .. _on PyPI: https://pypi.org/project/dotwiz/
+.. _Issues with Invalid Characters: https://dotwiz.readthedocs.io/en/latest/#issues-with-invalid-characters
 .. _make_dataclass: https://docs.python.org/3/library/dataclasses.html#dataclasses.make_dataclass
 .. _Benchmarks: https://dotwiz.readthedocs.io/en/latest/benchmarks.html
 .. _Box: https://github.com/cdgriffith/Box/wiki/Quick-Start
