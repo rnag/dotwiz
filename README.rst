@@ -98,7 +98,7 @@ creating a ``DotWiz`` object:
 
 ``DotWizPlus`` enables you to turn special-cased keys, such as names with spaces,
 into valid *snake_case* words in Python, as shown below. Also see the note
-on :ref:`invalid-characters` below.
+on `Issues with Invalid Characters`_ below.
 
 .. code:: python3
 
@@ -121,8 +121,6 @@ on :ref:`invalid-characters` below.
 
     print(dw.to_attr_dict())
     # {'this': {'_1': {'is_': [{'for_': {'all_of': {'my_fans': True}}}]}}}
-
-.. _invalid-characters:
 
 Issues with Invalid Characters
 ******************************
@@ -174,6 +172,7 @@ This package was created with Cookiecutter_ and the `rnag/cookiecutter-pypackage
 .. _Read The Docs: https://dotwiz.readthedocs.io
 .. _Installation: https://dotwiz.readthedocs.io/en/latest/installation.html
 .. _on PyPI: https://pypi.org/project/dotwiz/
+.. _Issues with Invalid Characters: https://dotwiz.readthedocs.io/en/latest/#issues-with-invalid-characters
 .. _make_dataclass: https://docs.python.org/3/library/dataclasses.html#dataclasses.make_dataclass
 .. _Benchmarks: https://dotwiz.readthedocs.io/en/latest/benchmarks.html
 .. _Box: https://github.com/cdgriffith/Box/wiki/Quick-Start
