@@ -11,12 +11,12 @@ def __add_repr__(name, bases, cls_dict, *, print_char='*', use_attr_dict=False):
     # if `use_attr_dict` is true, use attributes defined in the instance's
     # `__dict__` instead.
     if use_attr_dict:
-        def __repr__(self: dict, __name=name):
+        def __repr__(self: dict):
             fields = [f'{k}={v!r}' for k, v in self.__dict__.items()]
             return f'{print_char}({", ".join(fields)})'
 
     else:
-        def __repr__(self: dict, __name=name):
+        def __repr__(self: dict):
             fields = [f'{k}={v!r}' for k, v in self.items()]
             return f'{print_char}({", ".join(fields)})'
 
@@ -28,7 +28,8 @@ def __add_repr__(name, bases, cls_dict, *, print_char='*', use_attr_dict=False):
 def __convert_to_attr_dict__(o):
     """
     Recursively convert an object (typically a `dict` subclass) to a
-    Python `dict` type.
+    Python `dict` type, while preserving the lower-cased keys used
+    for attribute access.
     """
     if isinstance(o, dict):
         return {k: __convert_to_attr_dict__(v) for k, v in o.__dict__.items()}
