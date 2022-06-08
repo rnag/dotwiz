@@ -96,13 +96,13 @@ creating a ``DotWiz`` object:
 ``DotWizPlus``
 ~~~~~~~~~~~~~~
 
-``DotWizPlus`` enables you to turn special-cased keys, such as names with spaces,
+``DotWiz+`` enables you to turn special-cased keys, such as names with spaces,
 into valid *snake_case* words in Python, as shown below. Also see the note
 on `Issues with Invalid Characters`_ below.
 
 .. code:: python3
 
-    from dotwiz.plus import DotWizPlus
+    from dotwiz import DotWizPlus
 
     my_dict = {'THIS': {'1': {'is': [{'For': {'AllOf': {'My !@ Fans!': True}}}]}}}
     dw = DotWizPlus(my_dict)

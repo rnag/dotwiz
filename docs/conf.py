@@ -39,7 +39,16 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
+    "sphinx_copybutton",
+    # for later...
+    # "sphinx.ext.extlinks",
+    # "sphinx_design",
+    # "sphinx_inline_tabs",
 ]
+
+# Ref: https://sphinx-copybutton.readthedocs.io/en/latest/use.html#strip-and-configure-input-prompts-for-code-cells
+copybutton_prompt_text = r">>> |\.\.\. |\$ "
+copybutton_prompt_is_regexp = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -92,6 +101,7 @@ add_module_names = True
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'flask_theme_support.FlaskyStyle'
+# pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []
@@ -131,14 +141,14 @@ html_theme = 'furo'
 # documentation.
 #
 # TODO: commenting this out because current theme (furo) doesn't support it.
-# html_theme_options = {
+html_theme_options = {
 #     "show_powered_by": False,
 #     "github_user": "rnag",
 #     "github_repo": "dotwiz",
 #     "github_banner": True,
 #     "show_related": False,
 #     "note_bg": "#FFF59C",
-# }
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
