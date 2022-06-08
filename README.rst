@@ -125,7 +125,7 @@ on `Issues with Invalid Characters`_ below.
 Issues with Invalid Characters
 ******************************
 
-A key name in the scope of the :class:`DotWizPlus` implementation must be
+A key name in the scope of the ``DotWizPlus`` implementation must be
 a valid, lower-cased *identifier* in python, and also not a reserved
 *keyword* such as ``for`` or ``class``. In the case where your key name
 does not conform, the library will mutate your key to a safe,
