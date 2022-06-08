@@ -14,6 +14,9 @@ class _Update(Protocol):
                  **kwargs: _T) -> None: ...
 
 
+__SPECIAL_KEYS: dict[str, str] = ...
+
+
 def make_dot_wiz_plus(*args: Iterable[_KT, _VT],
                       **kwargs: _T) -> DotWizPlus: ...
 
@@ -22,7 +25,7 @@ def __store_in_object__(self: DotWizPlus,
                         key: _KT,
                         value: _VT,
                         *, __set: _SetItem = dict.__setitem__,
-                        __is_keyword=keyword.iskeyword): ...
+                        __is_keyword=keyword.iskeyword) -> None: ...
 
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz_plus__(self: DotWizPlus,
@@ -31,7 +34,7 @@ def __upsert_into_dot_wiz_plus__(self: DotWizPlus,
 
 def __setitem_impl__(self: DotWizPlus,
                      key: _KT,
-                     value: _VT): ...
+                     value: _VT) -> None: ...
 
 
 class DotWizPlus(dict):

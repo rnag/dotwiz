@@ -11,7 +11,8 @@ from .common import (
 )
 
 
-# A running cache of special cases that we've transformed based on above.
+# A running cache of special-cased or non-lowercase keys that we've
+# transformed before.
 __SPECIAL_KEYS = {}
 
 

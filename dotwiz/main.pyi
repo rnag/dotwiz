@@ -25,7 +25,7 @@ def __upsert_into_dot_wiz__(self: DotWiz,
 def __setitem_impl__(self: DotWiz,
                      key: _KT,
                      value: _VT,
-                     *, __set: _SetItem = dict.__setitem__): ...
+                     *, __set: _SetItem = dict.__setitem__) -> None: ...
 
 
 class DotWiz(dict):
