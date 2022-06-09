@@ -11,6 +11,11 @@ import pytest
 import dotwiz
 
 
+# Mark all benchmarks in this module, and assign them to the specified group.
+pytestmark = [pytest.mark.create_with_special_keys,
+              pytest.mark.benchmark(group='create_with_special_keys')]
+
+
 @pytest.fixture
 def my_data():
     return {'camelCase': 1,
