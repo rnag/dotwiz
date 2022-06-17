@@ -177,7 +177,7 @@ class DotWizPlus(dict, metaclass=__add_repr__,
     that was discussed above.
 
     .. _identifier: https://www.askpython.com/python/python-identifiers-rules-best-practices
-    .. _this example: https://dotwiz.readthedocs.io/en/latest/usage.html#complete-example-with-dotwizplus
+    .. _this example: https://dotwiz.readthedocs.io/en/latest/usage.html#complete-example
 
     """
     __slots__ = ('__dict__', )

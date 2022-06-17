@@ -43,6 +43,10 @@ Or, using ``DotWiz``::
     >>> dw.this.dict.has[0].nested.data
     True
 
+**Note**: This library can also make inaccessible keys safe -- check out `an example`_ with ``DotWizPlus``.
+
+.. _an example: https://dotwiz.readthedocs.io/en/latest/usage.html#dotwizplus
+
 Install
 -------
 
@@ -181,7 +185,7 @@ This package was created with Cookiecutter_ and the `rnag/cookiecutter-pypackage
 .. _on PyPI: https://pypi.org/project/dotwiz/
 .. _Issues with Invalid Characters: https://dotwiz.readthedocs.io/en/latest/#issues-with-invalid-characters
 .. _identifier: https://www.askpython.com/python/python-identifiers-rules-best-practices
-.. _this example: https://dotwiz.readthedocs.io/en/latest/usage.html#complete-example-with-dotwizplus
+.. _this example: https://dotwiz.readthedocs.io/en/latest/usage.html#complete-example
 .. _make_dataclass: https://docs.python.org/3/library/dataclasses.html#dataclasses.make_dataclass
 .. _Benchmarks: https://dotwiz.readthedocs.io/en/latest/benchmarks.html
 .. _Box: https://github.com/cdgriffith/Box/wiki/Quick-Start
