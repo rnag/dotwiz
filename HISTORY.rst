@@ -2,6 +2,23 @@
 History
 =======
 
+0.3.1 (2022-06-17)
+------------------
+
+**Bugfixes**
+
+* Update the implementations for :class:`DotWiz` and :class:`DotWizPlus` so that
+  we handle an edge case where we are presented with keys names that shadow
+  builtin ``dict`` methods, such as ``items`` or ``values``.
+
+**Features and Improvements**
+
+* Update :class:`DotWizPlus` to treat key names such as ``items``, ``get``, or
+  ``to_dict`` as a reserved *keyword* for all intents and purposes, and add a
+  trailing ``_`` when storing the key name; this fixes attribute access (ex. like ``items_``)
+  and also resolves IDE warnings, which correctly state for ex. that builtin method ``items``
+  doesn't have an attribute named *x*.
+
 0.3.0 (2022-06-08)
 ------------------
 
