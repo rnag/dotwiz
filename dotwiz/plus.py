@@ -155,20 +155,29 @@ class DotWizPlus(dict, metaclass=__add_repr__,
         >>> dw.to_attr_dict()
         {'key_1': [{'_3d': {'with_': 2}}], 'key_two': '5', 'r_2_d_2': 3.21}
 
-    Issues with Invalid Characters
-    ******************************
+    **Issues with Invalid Characters**
 
-    A key name in the scope of the :class:`DotWizPlus` implementation must be
-    a valid, lower-cased *identifier* in python, and also not a reserved
-    *keyword* such as ``for`` or ``class``. In the case where your key name
-    does not conform, the library will mutate your key to a safe,
-    lower-cased format.
+    A key name in the scope of the ``DotWizPlus`` implementation must be:
+
+    * a valid, *lower-* and *snake-* cased `identifier`_ in python.
+    * not a reserved *keyword*, such as ``for`` or ``class``.
+    * not override ``dict`` method declarations, such as ``items``, ``get``, or ``values``.
+
+    In the case where your key name does not conform, the library will mutate
+    your key to a safe, snake-cased format.
 
     Spaces and invalid characters are replaced with ``_``. In the case
     of a key beginning with an *int*, a leading ``_`` is added.
-    In the case of a *keyword*, a trailing ``_`` is added. Keys that appear
-    in different cases, such as ``myKey`` or ``My-Key``, will all be converted
-    to a *snake case* variant, ``my_key`` in this example.
+    In the case of a *keyword* or a ``dict`` method name, a trailing
+    ``_`` is added. Keys that appear in different cases, such
+    as ``myKey`` or ``My-Key``, will all be converted to
+    a *snake case* variant, ``my_key`` in this example.
+
+    Finally, check out `this example`_ which brings home all
+    that was discussed above.
+
+    .. _identifier: https://www.askpython.com/python/python-identifiers-rules-best-practices
+    .. _this example: https://dotwiz.readthedocs.io/en/latest/usage.html#complete-example-with-dotwizplus
 
     """
     __slots__ = ('__dict__', )
