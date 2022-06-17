@@ -43,6 +43,10 @@ Or, using ``DotWiz``::
     >>> dw.this.dict.has[0].nested.data
     True
 
+**Note**: This library can also make inaccessible keys safe -- check out `an example`_ with ``DotWizPlus``.
+
+.. _an example: https://dotwiz.readthedocs.io/en/latest/usage.html#dotwizplus
+
 Install
 -------
 
@@ -125,17 +129,24 @@ on `Issues with Invalid Characters`_ below.
 Issues with Invalid Characters
 ******************************
 
-A key name in the scope of the ``DotWizPlus`` implementation must be
-a valid, lower-cased *identifier* in python, and also not a reserved
-*keyword* such as ``for`` or ``class``. In the case where your key name
-does not conform, the library will mutate your key to a safe,
-lower-cased format.
+A key name in the scope of the ``DotWizPlus`` implementation must be:
+
+* a valid, *lower-* and *snake-* cased `identifier`_ in python.
+* not a reserved *keyword*, such as ``for`` or ``class``.
+* not override ``dict`` method declarations, such as ``items``, ``get``, or ``values``.
+
+In the case where your key name does not conform, the library will mutate
+your key to a safe, snake-cased format.
 
 Spaces and invalid characters are replaced with ``_``. In the case
 of a key beginning with an *int*, a leading ``_`` is added.
-In the case of a *keyword*, a trailing ``_`` is added. Keys that appear
-in different cases, such as ``myKey`` or ``My-Key``, will all be converted
-to a *snake case* variant, ``my_key`` in this example.
+In the case of a *keyword* or a ``dict`` method name, a trailing
+``_`` is added. Keys that appear in different cases, such
+as ``myKey`` or ``My-Key``, will all be converted to
+a *snake case* variant, ``my_key`` in this example.
+
+Finally, check out `this example`_ which brings home all
+that was discussed above.
 
 Features
 --------
@@ -173,6 +184,8 @@ This package was created with Cookiecutter_ and the `rnag/cookiecutter-pypackage
 .. _Installation: https://dotwiz.readthedocs.io/en/latest/installation.html
 .. _on PyPI: https://pypi.org/project/dotwiz/
 .. _Issues with Invalid Characters: https://dotwiz.readthedocs.io/en/latest/#issues-with-invalid-characters
+.. _identifier: https://www.askpython.com/python/python-identifiers-rules-best-practices
+.. _this example: https://dotwiz.readthedocs.io/en/latest/usage.html#complete-example
 .. _make_dataclass: https://docs.python.org/3/library/dataclasses.html#dataclasses.make_dataclass
 .. _Benchmarks: https://dotwiz.readthedocs.io/en/latest/benchmarks.html
 .. _Box: https://github.com/cdgriffith/Box/wiki/Quick-Start

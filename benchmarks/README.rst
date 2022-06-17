@@ -34,14 +34,20 @@ For example, to benchmark the tests for retrieving keys (via "dot" attribute acc
 
 .. code-block:: shell
 
-    $ pytest benchmarks/test_getattr.py --benchmark-compare
+    $ pytest benchmarks -m getattr --benchmark-compare
 
 Pass the ``--benchmark-histogram`` argument to generate a histogram for a suite
 of benchmark tests. For example:
 
 .. code-block:: shell
 
-    $ pytest benchmarks/test_create.py --benchmark-histogram
+    $ pytest benchmarks -m create --benchmark-histogram
+
+To simply run all available benchmark tests:
+
+.. code-block:: shell
+
+    $ pytest benchmarks
 
 Results
 -------

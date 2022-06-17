@@ -18,6 +18,11 @@ import dotwiz
 from benchmarks.models import MyClass
 
 
+# Mark all benchmarks in this module, and assign them to the specified group.
+pytestmark = [pytest.mark.getattr,
+              pytest.mark.benchmark(group='getattr')]
+
+
 @pytest.fixture
 def my_data():
     return {'a': 3, 'b': 1, 'c': {'aa': 33, 'bb': [{'x': 77}]}}

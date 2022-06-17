@@ -17,6 +17,11 @@ import dotwiz
 from benchmarks.models import MyClass
 
 
+# Mark all benchmarks in this module, and assign them to the specified group.
+pytestmark = [pytest.mark.create,
+              pytest.mark.benchmark(group='create')]
+
+
 @pytest.fixture
 def my_data():
     return {'a': 3, 'b': 1, 'c': {'aa': 33, 'bb': [{'x': 77}]}}
@@ -53,6 +58,13 @@ def test_dataclass_instance_fromdict(benchmark, my_data):
 
 def test_box(benchmark, my_data):
     result = benchmark(box.Box, my_data)
+    # print(result)
+
+    assert result.c.bb[0].x == 77
+
+
+def test_box_without_conversion(benchmark, my_data):
+    result = benchmark(box.Box, my_data, conversion_box=False)
     # print(result)
 
     assert result.c.bb[0].x == 77

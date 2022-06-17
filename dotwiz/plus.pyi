@@ -15,6 +15,7 @@ class _Update(Protocol):
 
 
 __SPECIAL_KEYS: dict[str, str] = ...
+__IS_KEYWORD: Callable[[object], bool] = ...
 
 
 def make_dot_wiz_plus(*args: Iterable[_KT, _VT],
@@ -24,8 +25,7 @@ def __store_in_object__(self: DotWizPlus,
                         __self_dict: MutableMapping[_KT, _VT],
                         key: _KT,
                         value: _VT,
-                        *, __set: _SetItem = dict.__setitem__,
-                        __is_keyword=keyword.iskeyword) -> None: ...
+                        *, __set: _SetItem = dict.__setitem__) -> None: ...
 
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz_plus__(self: DotWizPlus,

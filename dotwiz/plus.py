@@ -1,4 +1,5 @@
 """Dot Wiz Plus module."""
+import itertools
 import keyword
 
 from pyheck import snake
@@ -34,8 +35,7 @@ def make_dot_wiz_plus(*args, **kwargs):
 
 
 def __store_in_object__(self, __self_dict, key, value,
-                        __set=dict.__setitem__,
-                        __is_keyword=keyword.iskeyword):
+                        __set=dict.__setitem__):
     """
     Helper method to store a key-value pair in an object :param:`self` (a
     ``DotWizPlus`` instance). This implementation stores the key if it's
@@ -53,9 +53,10 @@ def __store_in_object__(self, __self_dict, key, value,
 
     lower_key = key.lower()
 
-    # if it's a keyword like `for` or `class`, add an underscore to key so
-    # that attribute access can then work.
-    if __is_keyword(lower_key):
+    # if it's a keyword like `for` or `class`, or overlaps with a `dict`
+    # method name such as `items`, add an underscore to key so that
+    # attribute access can then work.
+    if __IS_KEYWORD(lower_key):
         key = f'{lower_key}_'
 
     # handle special cases: if the key is not lowercase, or it's not a
@@ -154,20 +155,29 @@ class DotWizPlus(dict, metaclass=__add_repr__,
         >>> dw.to_attr_dict()
         {'key_1': [{'_3d': {'with_': 2}}], 'key_two': '5', 'r_2_d_2': 3.21}
 
-    Issues with Invalid Characters
-    ******************************
+    **Issues with Invalid Characters**
 
-    A key name in the scope of the :class:`DotWizPlus` implementation must be
-    a valid, lower-cased *identifier* in python, and also not a reserved
-    *keyword* such as ``for`` or ``class``. In the case where your key name
-    does not conform, the library will mutate your key to a safe,
-    lower-cased format.
+    A key name in the scope of the ``DotWizPlus`` implementation must be:
+
+    * a valid, *lower-* and *snake-* cased `identifier`_ in python.
+    * not a reserved *keyword*, such as ``for`` or ``class``.
+    * not override ``dict`` method declarations, such as ``items``, ``get``, or ``values``.
+
+    In the case where your key name does not conform, the library will mutate
+    your key to a safe, snake-cased format.
 
     Spaces and invalid characters are replaced with ``_``. In the case
     of a key beginning with an *int*, a leading ``_`` is added.
-    In the case of a *keyword*, a trailing ``_`` is added. Keys that appear
-    in different cases, such as ``myKey`` or ``My-Key``, will all be converted
-    to a *snake case* variant, ``my_key`` in this example.
+    In the case of a *keyword* or a ``dict`` method name, a trailing
+    ``_`` is added. Keys that appear in different cases, such
+    as ``myKey`` or ``My-Key``, will all be converted to
+    a *snake case* variant, ``my_key`` in this example.
+
+    Finally, check out `this example`_ which brings home all
+    that was discussed above.
+
+    .. _identifier: https://www.askpython.com/python/python-identifiers-rules-best-practices
+    .. _this example: https://dotwiz.readthedocs.io/en/latest/usage.html#complete-example
 
     """
     __slots__ = ('__dict__', )
@@ -188,3 +198,17 @@ class DotWizPlus(dict, metaclass=__add_repr__,
     to_dict = __convert_to_dict__
     to_dict.__doc__ = 'Recursively convert the :class:`DotWizPlus` instance ' \
                       'back to a ``dict``.'
+
+
+# A list of the public-facing methods in `DotWizPlus`
+__PUB_METHODS = (m for m in dir(DotWizPlus) if not m.startswith('_')
+                 and callable(getattr(DotWizPlus, m)))
+
+# A list of *lower-cased* reserved keywords. Note that we first lower-case an
+# input key name and do a lookup using `__IS_KEYWORD`, so the `contains` check
+# will only work for similar-cased keywords; any other keywords, such as `None`
+# or `False`, likely won't match anyway, so we don't include them.
+__LOWER_KWLIST = (kw for kw in keyword.kwlist if kw.islower())
+
+# Callable used to check if any key names are reserved keywords.
+__IS_KEYWORD = frozenset(itertools.chain(__LOWER_KWLIST, __PUB_METHODS)).__contains__

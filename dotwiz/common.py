@@ -16,8 +16,9 @@ def __add_repr__(name, bases, cls_dict, *, print_char='*', use_attr_dict=False):
             return f'{print_char}({", ".join(fields)})'
 
     else:
-        def __repr__(self: dict):
-            fields = [f'{k}={v!r}' for k, v in self.items()]
+        def __repr__(self: dict, items_fn=dict.items):
+            # noinspection PyArgumentList
+            fields = [f'{k}={v!r}' for k, v in items_fn(self)]
             return f'{print_char}({", ".join(fields)})'
 
     cls_dict['__repr__'] = __repr__
@@ -40,13 +41,15 @@ def __convert_to_attr_dict__(o):
     return o
 
 
-def __convert_to_dict__(o):
+def __convert_to_dict__(o, __items_fn=dict.items):
     """
     Recursively convert an object (typically a `dict` subclass) to a
     Python `dict` type.
     """
     if isinstance(o, dict):
-        return {k: __convert_to_dict__(v) for k, v in o.items()}
+        # use `dict.items(o)` instead of `o.items()`, to work around this issue:
+        #   https://github.com/rnag/dotwiz/issues/4
+        return {k: __convert_to_dict__(v) for k, v in __items_fn(o)}
 
     if isinstance(o, list):
         return [__convert_to_dict__(e) for e in o]
