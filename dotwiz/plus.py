@@ -1,4 +1,5 @@
 """Dot Wiz Plus module."""
+import itertools
 import keyword
 
 from pyheck import snake
@@ -191,14 +192,14 @@ class DotWizPlus(dict, metaclass=__add_repr__,
 
 
 # A list of the public-facing methods in `DotWizPlus`
-__PUB_METHODS = [m for m in dir(DotWizPlus) if not m.startswith('_')
-                 and callable(getattr(DotWizPlus, m))]
+__PUB_METHODS = (m for m in dir(DotWizPlus) if not m.startswith('_')
+                 and callable(getattr(DotWizPlus, m)))
 
 # A list of *lower-cased* reserved keywords. Note that we first lower-case an
 # input key name and do a lookup using `__IS_KEYWORD`, so the `contains` check
 # will only work for similar-cased keywords; any other keywords, such as `None`
 # or `False`, likely won't match anyway, so we don't include them.
-__LOWER_KWLIST = [kw for kw in keyword.kwlist if kw.islower()]
+__LOWER_KWLIST = (kw for kw in keyword.kwlist if kw.islower())
 
 # Callable used to check if any key names are reserved keywords.
-__IS_KEYWORD = frozenset(__LOWER_KWLIST + __PUB_METHODS).__contains__
+__IS_KEYWORD = frozenset(itertools.chain(__LOWER_KWLIST, __PUB_METHODS)).__contains__
