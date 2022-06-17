@@ -43,7 +43,7 @@ of benchmark tests. For example:
 
     $ pytest benchmarks -m create --benchmark-histogram
 
-To run all available benchmark tests:
+To simply run all available benchmark tests:
 
 .. code-block:: shell
 

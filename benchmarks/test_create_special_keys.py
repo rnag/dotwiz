@@ -1,3 +1,6 @@
+import dataclasses
+
+import addict
 import box
 import dict2dot
 import dotmap
@@ -7,8 +10,12 @@ import dotty_dict
 import metadict
 import prodict
 import pytest
+import scalpl
+from dataclass_wizard import fromdict
 
 import dotwiz
+
+from benchmarks.models import MyClassSpecialCased
 
 
 # Mark all benchmarks in this module, and assign them to the specified group.
@@ -93,15 +100,44 @@ def assert_eq4(result):
     assert result.Some__r_ndom_______Key_____here______ == 'T'
 
 
-def assert_eq5(result):
+def assert_eq5(result, subscript_list=False):
     assert result['camelCase'] == 1
     assert result['Snake_Case'] == 2
     assert result['PascalCase'] == 3
     assert result['spinal-case3'] == 4
     assert result['Hello, how\'s it going?'] == 5
     assert result['3D'] == 6
-    assert result['for.1nfinity.0.and.Beyond!'] == 8
+    key = 'for.1nfinity[0].and.Beyond!' if subscript_list else 'for.1nfinity.0.and.Beyond!'
+    assert result[key] == 8
     assert result['Some  r@ndom#$(*#@ Key##$# here   !!!'] == 'T'
+
+
+def assert_eq6(result: MyClassSpecialCased):
+    """For testing with :class:`MyClassSpecialCased` from :mod:`models.py`"""
+    assert result.camel_case == 1
+    assert result.snake_case == 2
+    assert result.pascal_case == 3
+    assert result.spinal_case3 == 4
+    assert result.hello == 5
+    assert result._3d == 6
+    assert result.for_.infinity[0].and_.beyond == 8
+    assert result.some_random_key_here == 'T'
+
+
+@pytest.mark.xfail(reason='some key names are not valid identifiers')
+def test_make_dataclass(benchmark, my_data):
+    # noinspection PyPep8Naming
+    X = benchmark(dataclasses.make_dataclass, 'X', my_data)
+
+    assert dataclasses.is_dataclass(X)
+
+
+def test_dataclass_instance_fromdict(benchmark, my_data):
+    """Test for creating a dataclass instance from a nested dict"""
+    instance = benchmark(fromdict, MyClassSpecialCased, my_data)
+    # print(instance)
+
+    assert_eq6(instance)
 
 
 def test_box(benchmark, my_data):
@@ -109,6 +145,13 @@ def test_box(benchmark, my_data):
     # print(result)
 
     assert_eq(result)
+
+
+def test_box_without_conversion(benchmark, my_data):
+    result = benchmark(box.Box, my_data, conversion_box=False)
+    # print(result)
+
+    assert_eq2(result)
 
 
 def test_dotwiz(benchmark, my_data):
@@ -184,6 +227,13 @@ def test_dict2dot(benchmark, my_data):
     assert_eq2(result)
 
 
+def test_addict(benchmark, my_data):
+    result = benchmark(addict.Dict, my_data)
+    # print(result)
+
+    assert_eq2(result)
+
+
 def test_metadict(benchmark, my_data):
     result = benchmark(metadict.MetaDict, my_data)
     # print(result)
@@ -202,3 +252,10 @@ def test_prodict(benchmark, my_data):
     #   https://github.com/ramazanpolat/prodict/issues/17
     #
     assert_eq2(result)
+
+
+def test_scalpl(benchmark, my_data):
+    result = benchmark(scalpl.Cut, my_data)
+    # print(result)
+
+    assert_eq5(result, subscript_list=True)
