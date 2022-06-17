@@ -1,22 +1,23 @@
-=======
 Dot Wiz
 =======
 
-.. image:: https://img.shields.io/pypi/v/dotwiz.svg
-        :target: https://pypi.org/project/dotwiz
+.. container:: badges
 
-.. image:: https://img.shields.io/pypi/pyversions/dotwiz.svg
-        :target: https://pypi.org/project/dotwiz
+    .. image:: https://img.shields.io/pypi/v/dotwiz.svg
+            :target: https://pypi.org/project/dotwiz
 
-.. image:: https://codecov.io/gh/rnag/dotwiz/branch/main/graph/badge.svg?token=J3YW230U8Z
-        :target: https://codecov.io/gh/rnag/dotwiz
+    .. image:: https://img.shields.io/pypi/pyversions/dotwiz.svg
+            :target: https://pypi.org/project/dotwiz
 
-.. image:: https://github.com/rnag/dotwiz/actions/workflows/dev.yml/badge.svg
-        :target: https://github.com/rnag/dotwiz/actions/workflows/dev.yml
+    .. image:: https://codecov.io/gh/rnag/dotwiz/branch/main/graph/badge.svg?token=J3YW230U8Z
+            :target: https://codecov.io/gh/rnag/dotwiz
 
-.. image:: https://pyup.io/repos/github/rnag/dotwiz/shield.svg
-        :target: https://pyup.io/repos/github/rnag/dotwiz/
-        :alt: Updates
+    .. image:: https://github.com/rnag/dotwiz/actions/workflows/dev.yml/badge.svg
+            :target: https://github.com/rnag/dotwiz/actions/workflows/dev.yml
+
+    .. image:: https://pyup.io/repos/github/rnag/dotwiz/shield.svg
+            :target: https://pyup.io/repos/github/rnag/dotwiz/
+            :alt: Updates
 
 
 A `blazing fast`_ ``dict`` subclass that enables *dot access* notation via Python

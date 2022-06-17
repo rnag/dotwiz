@@ -119,12 +119,12 @@ todo_include_todos = True
 # a list of builtin themes.
 #
 
-html_theme = 'furo'
+# html_theme = 'furo'
 
 # TODO: here are a list of additional themes I liked and wanted to try out, in
 #  my order of preference.
 #    I might need to clean up these comments sometime later.
-# html_theme = 'sphinxawesome_theme'
+html_theme = 'sphinxawesome_theme'
 # html_theme = 'press'
 # html_theme = 'alabaster'
 # html_theme = 'sphinx_rtd_theme'
@@ -142,7 +142,11 @@ html_theme = 'furo'
 #
 # TODO: commenting this out because current theme (furo) doesn't support it.
 html_theme_options = {
-#     "show_powered_by": False,
+    "show_powered_by": True,
+    "show_scrolltop": True,
+    "extra_header_links": {
+        "Docs": "https://dotwiz.readthedocs.io",
+    },
 #     "github_user": "rnag",
 #     "github_repo": "dotwiz",
 #     "github_banner": True,
@@ -153,7 +157,9 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ['custom']
+
+html_css_files = ['defaults.css', 'overrides.css']
 
 # Custom sidebar templates, maps document names to template names.
 html_sidebars = {
@@ -249,6 +255,3 @@ texinfo_documents = [
      'One line description of project.',
      'Miscellaneous'),
 ]
-
-
-

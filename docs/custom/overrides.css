@@ -1,0 +1,8 @@
+.badges {
+   display: flex;
+   gap: 0.5rem;
+}
+
+.badges img {
+   margin: 0;
+}
