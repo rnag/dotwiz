@@ -1,60 +1,122 @@
 """
 Common (shared) helpers and utilities.
 """
+import json
 
 
-def __add_repr__(name, bases, cls_dict, *, print_char='*', use_attr_dict=False):
+class DotWizEncoder(json.JSONEncoder):
     """
-    Metaclass to generate and add a `__repr__` to a class.
+    Helper class for encoding of nested DotWiz and DotWizPlus dicts into standard dict
     """
 
-    # if `use_attr_dict` is true, use attributes defined in the instance's
-    # `__dict__` instead.
-    if use_attr_dict:
-        def __repr__(self: dict):
-            fields = [f'{k}={v!r}' for k, v in self.__dict__.items()]
-            return f'{print_char}({", ".join(fields)})'
+    def default(self, o):
+        """Return dict data of DotWiz when possible or encode with standard format
+
+        :param o: Input object
+
+        :return: Serializable data
+        """
+        try:
+            return o.__dict__
+
+        except AttributeError:
+            return json.JSONEncoder.default(self, o)
+
+
+def __add_shared_methods__(name, bases, cls_dict, *, print_char='*', has_attr_dict=False):
+    """
+    Add shared methods to a class, such as :meth:`__repr__` and :meth:`to_json`.
+    """
+
+    # use attributes defined in the instance's `__dict__`.
+    def __repr__(self: object):
+        fields = [f'{k}={v!r}' for k, v in self.__dict__.items()]
+        return f'{print_char}({", ".join(fields)})'
+
+    # add a `__repr__` magic method to the class.
+    cls_dict['__repr__'] = __repr__
+
+    # add common methods to the class, such as:
+    #   - `to_dict`
+    #   - `to_json`
+    #   - `to_attr_dict` - optional, only if `has_attr_dict` is specified.
+
+    def __convert_to_dict__(o):
+        """
+        Recursively convert an object (typically a custom `dict` type) to a
+        Python `dict` type.
+        """
+        __dict = getattr(o, '__dict__', None)
+
+        if __dict:
+            return {k: __convert_to_dict__(v) for k, v in __dict.items()}
+
+        if isinstance(o, list):
+            return [__convert_to_dict__(e) for e in o]
+
+        return o
+
+    if has_attr_dict:
+        def to_dict(o, __items=dict.items):
+            """
+            Recursively convert an object (typically a `dict` subclass) to a
+            Python `dict` type, while preserving the lower-cased keys used
+            for attribute access.
+            """
+            if isinstance(o, dict):
+                # noinspection PyArgumentList
+                return {k: to_dict(v) for k, v in __items(o)}
+
+            if isinstance(o, list):
+                return [to_dict(e) for e in o]
+
+            return o
+
+        def to_json(o):
+            return json.dumps(o)
+
+        cls_dict['to_json'] = to_json
+        to_json.__doc__ = f'Serialize the :class:`{name}` instance as a JSON string.'
+
+        cls_dict['to_dict'] = to_dict
+        to_dict.__doc__ = f'Recursively convert the :class:`{name}` instance ' \
+                          'back to a ``dict``.'
+
+        cls_dict['to_attr_dict'] = __convert_to_dict__
+        __convert_to_dict__.__name__ = 'to_attr_dict'
+        __convert_to_dict__.__doc__ = f'Recursively convert the :class:`{name}` ' \
+                                      'instance back to a ``dict``, while ' \
+                                      'preserving the lower-cased keys used ' \
+                                      'for attribute access.'
 
     else:
-        def __repr__(self: dict, items_fn=dict.items):
-            # noinspection PyArgumentList
-            fields = [f'{k}={v!r}' for k, v in items_fn(self)]
-            return f'{print_char}({", ".join(fields)})'
+        def to_json(o):
+            return json.dumps(o.__dict__, cls=DotWizEncoder)
 
-    cls_dict['__repr__'] = __repr__
+        cls_dict['to_json'] = to_json
+        to_json.__doc__ = f'Serialize the :class:`{name}` instance as a JSON string.'
+
+        cls_dict['to_dict'] = __convert_to_dict__
+        __convert_to_dict__.__name__ = 'to_dict'
+        __convert_to_dict__.__doc__ = f'Recursively convert the :class:`{name}` ' \
+                                      'instance back to a ``dict``.'
 
     return type(name, bases, cls_dict)
 
 
-def __convert_to_attr_dict__(o):
+def __add_repr__(name, bases, cls_dict, *, print_char='*'):
     """
-    Recursively convert an object (typically a `dict` subclass) to a
-    Python `dict` type, while preserving the lower-cased keys used
-    for attribute access.
+    Metaclass to generate and add a `__repr__` to a class.
     """
-    if isinstance(o, dict):
-        return {k: __convert_to_attr_dict__(v) for k, v in o.__dict__.items()}
 
-    if isinstance(o, list):
-        return [__convert_to_attr_dict__(e) for e in o]
+    # use attributes defined in the instance's __dict__`.
+    def __repr__(self: object):
+        fields = [f'{k}={v!r}' for k, v in self.__dict__.items()]
+        return f'{print_char}({", ".join(fields)})'
 
-    return o
+    cls_dict['__repr__'] = __repr__
 
-
-def __convert_to_dict__(o, __items_fn=dict.items):
-    """
-    Recursively convert an object (typically a `dict` subclass) to a
-    Python `dict` type.
-    """
-    if isinstance(o, dict):
-        # use `dict.items(o)` instead of `o.items()`, to work around this issue:
-        #   https://github.com/rnag/dotwiz/issues/4
-        return {k: __convert_to_dict__(v) for k, v in __items_fn(o)}
-
-    if isinstance(o, list):
-        return [__convert_to_dict__(e) for e in o]
-
-    return o
+    return type(name, bases, cls_dict)
 
 
 def __resolve_value__(value, dict_type):

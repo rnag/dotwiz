@@ -66,6 +66,12 @@ class DotWizPlus(dict):
         """
         ...
 
+    def to_json(self) -> str:
+        """
+        Serialize the :class:`DotWizPlus` instance as a JSON string.
+        """
+        ...
+
     # noinspection PyDefaultArgument
     def update(self,
                __m: MutableMapping[_KT, _VT] = {},

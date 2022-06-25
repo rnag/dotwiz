@@ -1,9 +1,8 @@
 """Main module."""
+from typing import ItemsView, ValuesView
 
 from .common import (
-    __add_repr__,
-    __convert_to_dict__,
-    __resolve_value__,
+    __resolve_value__, __add_shared_methods__,
 )
 
 
@@ -26,7 +25,6 @@ def make_dot_wiz(*args, **kwargs):
 
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz__(self, input_dict={},
-                            __set=dict.__setitem__,
                             **kwargs):
     """
     Helper method to generate / update a :class:`DotWiz` (dot-access dict)
@@ -57,21 +55,20 @@ def __upsert_into_dot_wiz__(self, input_dict={},
             value = [__resolve_value__(e, DotWiz) for e in value]
 
         # note: this logic is the same as `DotWiz.__setitem__()`
-        __set(self, key, value)
         __dict[key] = value
 
 
-def __setitem_impl__(self, key, value, __set=dict.__setitem__):
+def __setitem_impl__(self, key, value):
     """Implementation of `DotWiz.__setitem__` to preserve dot access"""
     value = __resolve_value__(value, DotWiz)
 
-    __set(self, key, value)
     self.__dict__[key] = value
 
 
-class DotWiz(dict, metaclass=__add_repr__, print_char='✫'):
+class DotWiz(metaclass=__add_shared_methods__,
+             print_char='✫'):
     """
-    :class:`DotWiz` - a blazing *fast* ``dict`` subclass that also supports
+    :class:`DotWiz` - a blazing *fast* ``dict`` type that also supports
     *dot access* notation.
 
     Usage::
@@ -87,12 +84,56 @@ class DotWiz(dict, metaclass=__add_repr__, print_char='✫'):
 
     __init__ = update = __upsert_into_dot_wiz__
 
-    __delattr__ = __delitem__ = dict.__delitem__
     __setattr__ = __setitem__ = __setitem_impl__
 
     def __getitem__(self, key):
-        return self.__dict__[key]
+        return getattr(self, key)
 
-    to_dict = __convert_to_dict__
-    to_dict.__doc__ = 'Recursively convert the :class:`DotWiz` instance ' \
-                      'back to a ``dict``.'
+    def __delitem__(self, key):
+        return delattr(self, key)
+
+    def __eq__(self, other) -> bool:
+        return self.__dict__ == other
+
+    def __contains__(self, item):
+        # TODO: maybe use `hasattr`?
+        return item in self.__dict__
+
+    def __iter__(self):
+        return iter(self.__dict__)
+
+    def __len__(self) -> int:
+        return len(self.__dict__)
+
+    def items(self) -> ItemsView:
+        return self.__dict__.items()
+
+    def values(self) -> ValuesView:
+        return self.__dict__.values()
+
+    def copy(self):
+        """Returns a shallow copy of dictionary wrapped in DotWiz.
+
+        :return: Dotty instance
+        """
+        return DotWiz(self.__dict__.copy())
+
+    @staticmethod
+    def fromkeys(seq, value=None):
+        """Create a new dictionary with keys from seq and values set to value.
+
+        New created dictionary is wrapped in Dotty.
+
+        :param seq: Sequence of elements which is to be used as keys for the new dictionary
+        :param value: Value which is set to each element of the dictionary
+        :return: Dotty instance
+        """
+        return DotWiz(dict.fromkeys(seq, value))
+
+    def get(self, key, default=None):
+        """Get value from deep key or default if key does not exist.
+        """
+        try:
+            return self.__dict__[key]
+        except KeyError:
+            return default

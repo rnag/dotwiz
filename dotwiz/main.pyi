@@ -1,4 +1,5 @@
-from typing import TypeVar, Callable, Protocol, Mapping, MutableMapping, Iterable
+from typing import (TypeVar, Callable, Protocol, Mapping, MutableMapping,
+                    Iterable, ItemsView, ValuesView)
 
 _T = TypeVar('_T')
 _KT = TypeVar('_KT')
@@ -28,7 +29,7 @@ def __setitem_impl__(self: DotWiz,
                      *, __set: _SetItem = dict.__setitem__) -> None: ...
 
 
-class DotWiz(dict):
+class DotWiz:
 
     # noinspection PyDefaultArgument
     def __init__(self,
@@ -50,6 +51,16 @@ class DotWiz(dict):
         """
         ...
 
+    def to_json(self) -> str:
+        """
+        Serialize the :class:`DotWiz` instance as a JSON string.
+        """
+        ...
+
+    def items(self) -> ItemsView: ...
+
+    def values(self) -> ValuesView: ...
+
     # noinspection PyDefaultArgument
     def update(self,
                __m: MutableMapping[_KT, _VT] = {},
@@ -57,3 +68,5 @@ class DotWiz(dict):
                **kwargs: _T) -> None: ...
 
     def __repr__(self) -> str: ...
+
+    def __len__(self) -> int: ...

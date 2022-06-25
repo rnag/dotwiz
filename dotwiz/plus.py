@@ -5,10 +5,7 @@ import keyword
 from pyheck import snake
 
 from .common import (
-    __add_repr__,
-    __convert_to_attr_dict__,
-    __convert_to_dict__,
-    __resolve_value__,
+    __resolve_value__, __add_shared_methods__,
 )
 
 
@@ -133,9 +130,9 @@ def __setitem_impl__(self, key, value):
     __store_in_object__(self, self.__dict__, key, value)
 
 
-class DotWizPlus(dict, metaclass=__add_repr__,
+class DotWizPlus(dict, metaclass=__add_shared_methods__,
                  print_char='✪',
-                 use_attr_dict=True):
+                 has_attr_dict=True):
     # noinspection PyProtectedMember
     """
     :class:`DotWizPlus` - a blazing *fast* ``dict`` subclass that also
@@ -189,15 +186,6 @@ class DotWizPlus(dict, metaclass=__add_repr__,
 
     __delattr__ = __delitem__ = dict.__delitem__
     __setattr__ = __setitem__ = __setitem_impl__
-
-    to_attr_dict = __convert_to_attr_dict__
-    to_attr_dict.__doc__ = 'Recursively convert the :class:`DotWizPlus` instance ' \
-                           'back to a ``dict``, while preserving the lower-cased ' \
-                           'keys used for attribute access.'
-
-    to_dict = __convert_to_dict__
-    to_dict.__doc__ = 'Recursively convert the :class:`DotWizPlus` instance ' \
-                      'back to a ``dict``.'
 
 
 # A list of the public-facing methods in `DotWizPlus`
