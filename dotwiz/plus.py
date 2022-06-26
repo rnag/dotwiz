@@ -5,7 +5,7 @@ import keyword
 from pyheck import snake
 
 from .common import (
-    __resolve_value__, __add_shared_methods__,
+    __resolve_value__, __add_common_methods__,
 )
 
 
@@ -130,7 +130,7 @@ def __setitem_impl__(self, key, value):
     __store_in_object__(self, self.__dict__, key, value)
 
 
-class DotWizPlus(dict, metaclass=__add_shared_methods__,
+class DotWizPlus(dict, metaclass=__add_common_methods__,
                  print_char='✪',
                  has_attr_dict=True):
     # noinspection PyProtectedMember

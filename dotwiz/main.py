@@ -2,7 +2,7 @@
 from typing import ItemsView, ValuesView
 
 from .common import (
-    __resolve_value__, __add_shared_methods__,
+    __resolve_value__, __add_common_methods__,
 )
 
 
@@ -65,7 +65,7 @@ def __setitem_impl__(self, key, value):
     self.__dict__[key] = value
 
 
-class DotWiz(metaclass=__add_shared_methods__,
+class DotWiz(metaclass=__add_common_methods__,
              print_char='✫'):
     """
     :class:`DotWiz` - a blazing *fast* ``dict`` type that also supports
@@ -87,10 +87,16 @@ class DotWiz(metaclass=__add_shared_methods__,
     __setattr__ = __setitem__ = __setitem_impl__
 
     def __getitem__(self, key):
-        return getattr(self, key)
+        try:
+            return getattr(self, key)
+        except TypeError:  # key is not a `str`
+            return self.__dict__[key]
 
     def __delitem__(self, key):
-        return delattr(self, key)
+        try:
+            delattr(self, key)
+        except TypeError:  # key is not a `str`
+            del self.__dict__[key]
 
     def __eq__(self, other) -> bool:
         return self.__dict__ == other

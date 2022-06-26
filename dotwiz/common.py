@@ -6,15 +6,18 @@ import json
 
 class DotWizEncoder(json.JSONEncoder):
     """
-    Helper class for encoding of nested DotWiz and DotWizPlus dicts into standard dict
+    Helper class for encoding of (nested) :class:`DotWiz` and
+    :class:`DotWizPlus` objects into a standard ``dict``.
     """
 
     def default(self, o):
-        """Return dict data of DotWiz when possible or encode with standard format
+        """
+        Return the `dict` data of :class:`DotWiz` when possible, or encode
+        with standard format otherwise.
 
         :param o: Input object
-
         :return: Serializable data
+
         """
         try:
             return o.__dict__
@@ -23,12 +26,15 @@ class DotWizEncoder(json.JSONEncoder):
             return json.JSONEncoder.default(self, o)
 
 
-def __add_shared_methods__(name, bases, cls_dict, *, print_char='*', has_attr_dict=False):
+def __add_common_methods__(name, bases, cls_dict, *,
+                           print_char='*',
+                           has_attr_dict=False):
     """
-    Add shared methods to a class, such as :meth:`__repr__` and :meth:`to_json`.
+    Metaclass to generate and add common or shared methods --  such
+    as :meth:`__repr__` and :meth:`to_json` -- to a class.
     """
 
-    # use attributes defined in the instance's `__dict__`.
+    # __repr__(): use attributes defined in the instance's `__dict__`
     def __repr__(self: object):
         fields = [f'{k}={v!r}' for k, v in self.__dict__.items()]
         return f'{print_char}({", ".join(fields)})'
@@ -36,9 +42,9 @@ def __add_shared_methods__(name, bases, cls_dict, *, print_char='*', has_attr_di
     # add a `__repr__` magic method to the class.
     cls_dict['__repr__'] = __repr__
 
-    # add common methods to the class, such as:
-    #   - `to_dict`
-    #   - `to_json`
+    # add utility or helper methods to the class, such as:
+    #   - `to_dict` - convert an instance to a Python `dict` object.
+    #   - `to_json` - serialize an instance as a JSON string.
     #   - `to_attr_dict` - optional, only if `has_attr_dict` is specified.
 
     def __convert_to_dict__(o):
@@ -56,8 +62,10 @@ def __add_shared_methods__(name, bases, cls_dict, *, print_char='*', has_attr_di
 
         return o
 
+    # we need to add both `to_dict` and `to_attr_dict` in this case.
     if has_attr_dict:
-        def to_dict(o, __items=dict.items):
+
+        def __convert_to_dict_preserve_keys__(o, __items=dict.items):
             """
             Recursively convert an object (typically a `dict` subclass) to a
             Python `dict` type, while preserving the lower-cased keys used
@@ -65,57 +73,61 @@ def __add_shared_methods__(name, bases, cls_dict, *, print_char='*', has_attr_di
             """
             if isinstance(o, dict):
                 # noinspection PyArgumentList
-                return {k: to_dict(v) for k, v in __items(o)}
+                return {k: __convert_to_dict_preserve_keys__(v)
+                        for k, v in __items(o)}
 
             if isinstance(o, list):
-                return [to_dict(e) for e in o]
+                return [__convert_to_dict_preserve_keys__(e) for e in o]
 
             return o
 
         def to_json(o):
             return json.dumps(o)
 
+        # add a `to_json` method to the class.
         cls_dict['to_json'] = to_json
-        to_json.__doc__ = f'Serialize the :class:`{name}` instance as a JSON string.'
+        to_json.__doc__ = (
+            f'Serialize the :class:`{name}` instance as a JSON string.'
+        )
 
-        cls_dict['to_dict'] = to_dict
-        to_dict.__doc__ = f'Recursively convert the :class:`{name}` instance ' \
-                          'back to a ``dict``.'
+        # add a `to_dict` method to the class.
+        cls_dict['to_dict'] = __convert_to_dict_preserve_keys__
+        __convert_to_dict_preserve_keys__.__name__ = 'to_dict'
+        __convert_to_dict_preserve_keys__.__doc__ = (
+            f'Recursively convert the :class:`{name}` instance back to '
+            'a ``dict``.'
+        )
 
+        # add a `to_attr_dict` method to the class.
         cls_dict['to_attr_dict'] = __convert_to_dict__
         __convert_to_dict__.__name__ = 'to_attr_dict'
-        __convert_to_dict__.__doc__ = f'Recursively convert the :class:`{name}` ' \
-                                      'instance back to a ``dict``, while ' \
-                                      'preserving the lower-cased keys used ' \
-                                      'for attribute access.'
+        __convert_to_dict__.__doc__ = (
+            f'Recursively convert the :class:`{name}` instance back to '
+            'a ``dict``, while preserving the lower-cased keys used '
+            'for attribute access.'
+        )
 
+    # we only need to add a `to_dict` method in this case.
     else:
+
         def to_json(o):
             return json.dumps(o.__dict__, cls=DotWizEncoder)
 
+        # add a `to_json` method to the class.
         cls_dict['to_json'] = to_json
-        to_json.__doc__ = f'Serialize the :class:`{name}` instance as a JSON string.'
+        to_json.__doc__ = (
+            f'Serialize the :class:`{name}` instance as a JSON string.'
+        )
 
+        # add a `to_dict` method to the class.
         cls_dict['to_dict'] = __convert_to_dict__
         __convert_to_dict__.__name__ = 'to_dict'
-        __convert_to_dict__.__doc__ = f'Recursively convert the :class:`{name}` ' \
-                                      'instance back to a ``dict``.'
+        __convert_to_dict__.__doc__ = (
+            f'Recursively convert the :class:`{name}` instance back to '
+            f'a ``dict``.'
+        )
 
-    return type(name, bases, cls_dict)
-
-
-def __add_repr__(name, bases, cls_dict, *, print_char='*'):
-    """
-    Metaclass to generate and add a `__repr__` to a class.
-    """
-
-    # use attributes defined in the instance's __dict__`.
-    def __repr__(self: object):
-        fields = [f'{k}={v!r}' for k, v in self.__dict__.items()]
-        return f'{print_char}({", ".join(fields)})'
-
-    cls_dict['__repr__'] = __repr__
-
+    # finally, build and return the new class.
     return type(name, bases, cls_dict)
 
 

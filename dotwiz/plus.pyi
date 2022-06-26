@@ -1,4 +1,3 @@
-import keyword
 from typing import TypeVar, Callable, Protocol, Mapping, MutableMapping, Iterable
 
 _T = TypeVar('_T')
