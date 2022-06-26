@@ -1,4 +1,6 @@
-from typing import TypeVar, Callable, Protocol, Mapping, MutableMapping, Iterable
+from typing import (
+    Callable, Iterable, Mapping, MutableMapping, Protocol, TypeVar,
+)
 
 _T = TypeVar('_T')
 _KT = TypeVar('_KT')
@@ -75,5 +77,7 @@ class DotWizPlus(dict):
     def update(self,
                __m: MutableMapping[_KT, _VT] = {},
                **kwargs: _T) -> None: ...
+
+    def __dir__(self) -> Iterable[str]: ...
 
     def __repr__(self) -> str: ...
