@@ -19,7 +19,7 @@ Dot Wiz
         :alt: Updates
 
 
-A `blazing fast`_ ``dict`` type that enables *dot access* notation via Python
+A `blazing fast`_ ``dict`` wrapper that enables *dot access* notation via Python
 attribute style. Nested ``dict`` and ``list`` values are automatically
 transformed as well.
 

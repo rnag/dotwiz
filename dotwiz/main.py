@@ -68,7 +68,7 @@ def __setitem_impl__(self, key, value):
 class DotWiz(metaclass=__add_common_methods__,
              print_char='✫'):
     """
-    :class:`DotWiz` - a blazing *fast* ``dict`` type that also supports
+    :class:`DotWiz` - a blazing *fast* ``dict`` wrapper that also supports
     *dot access* notation.
 
     Usage::
