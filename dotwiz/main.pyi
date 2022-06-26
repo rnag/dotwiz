@@ -38,6 +38,7 @@ class DotWiz:
     # noinspection PyDefaultArgument
     def __init__(self,
                  input_dict: MutableMapping[_KT, _VT] = {},
+                 *, check_lists=True,
                  **kwargs: _T) -> None: ...
 
     def __bool__(self) -> bool: ...
@@ -95,7 +96,8 @@ class DotWiz:
     # noinspection PyDefaultArgument
     def update(self,
                __m: MutableMapping[_KT, _VT] = {},
-               *, __set: _SetItem = dict.__setitem__,
+               *, check_lists=True,
+               __set: _SetItem = dict.__setitem__,
                **kwargs: _T) -> None: ...
 
     def values(self) -> ValuesView: ...

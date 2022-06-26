@@ -24,7 +24,7 @@ def make_dot_wiz(*args, **kwargs):
 
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz__(self, input_dict={},
-                            **kwargs):
+                            check_lists=True, **kwargs):
     """
     Helper method to generate / update a :class:`DotWiz` (dot-access dict)
     from a Python ``dict`` object, and optional *keyword arguments*.
@@ -49,8 +49,9 @@ def __upsert_into_dot_wiz__(self, input_dict={},
         t = type(value)
 
         if t is dict:
-            value = DotWiz(value)
-        elif t is list:
+            # noinspection PyArgumentList
+            value = DotWiz(value, check_lists)
+        elif check_lists and t is list:
             value = [__resolve_value__(e, DotWiz) for e in value]
 
         # note: this logic is the same as `DotWiz.__setitem__()`
