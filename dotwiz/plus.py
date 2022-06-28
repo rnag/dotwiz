@@ -5,7 +5,7 @@ import keyword
 from pyheck import snake
 
 from .common import (
-    __resolve_value__, __add_shared_methods__,
+    __resolve_value__, __add_common_methods__,
 )
 
 
@@ -130,7 +130,7 @@ def __setitem_impl__(self, key, value):
     __store_in_object__(self, self.__dict__, key, value)
 
 
-class DotWizPlus(dict, metaclass=__add_shared_methods__,
+class DotWizPlus(dict, metaclass=__add_common_methods__,
                  print_char='✪',
                  has_attr_dict=True):
     # noinspection PyProtectedMember
@@ -186,6 +186,19 @@ class DotWizPlus(dict, metaclass=__add_shared_methods__,
 
     __delattr__ = __delitem__ = dict.__delitem__
     __setattr__ = __setitem__ = __setitem_impl__
+
+    def __dir__(self):
+        """
+        Add a ``__dir__()`` method, so that tab auto-completion and
+        attribute suggestions work as expected in IPython and Jupyter.
+
+        For more info, check out `this post`_.
+
+        .. _this post: https://stackoverflow.com/q/51917470/10237506
+        """
+        super_dir = super().__dir__()
+        string_keys = [k for k in self.__dict__ if type(k) is str]
+        return super_dir + [k for k in string_keys if k not in super_dir]
 
 
 # A list of the public-facing methods in `DotWizPlus`

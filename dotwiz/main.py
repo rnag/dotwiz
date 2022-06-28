@@ -1,8 +1,7 @@
 """Main module."""
-from typing import ItemsView, ValuesView
 
 from .common import (
-    __resolve_value__, __add_shared_methods__,
+    __resolve_value__, __add_common_methods__,
 )
 
 
@@ -25,7 +24,7 @@ def make_dot_wiz(*args, **kwargs):
 
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz__(self, input_dict={},
-                            **kwargs):
+                            check_lists=True, **kwargs):
     """
     Helper method to generate / update a :class:`DotWiz` (dot-access dict)
     from a Python ``dict`` object, and optional *keyword arguments*.
@@ -50,8 +49,9 @@ def __upsert_into_dot_wiz__(self, input_dict={},
         t = type(value)
 
         if t is dict:
-            value = DotWiz(value)
-        elif t is list:
+            # noinspection PyArgumentList
+            value = DotWiz(value, check_lists)
+        elif check_lists and t is list:
             value = [__resolve_value__(e, DotWiz) for e in value]
 
         # note: this logic is the same as `DotWiz.__setitem__()`
@@ -65,10 +65,10 @@ def __setitem_impl__(self, key, value):
     self.__dict__[key] = value
 
 
-class DotWiz(metaclass=__add_shared_methods__,
+class DotWiz(metaclass=__add_common_methods__,
              print_char='✫'):
     """
-    :class:`DotWiz` - a blazing *fast* ``dict`` type that also supports
+    :class:`DotWiz` - a blazing *fast* ``dict`` wrapper that also supports
     *dot access* notation.
 
     Usage::
@@ -84,56 +84,98 @@ class DotWiz(metaclass=__add_shared_methods__,
 
     __init__ = update = __upsert_into_dot_wiz__
 
-    __setattr__ = __setitem__ = __setitem_impl__
-
-    def __getitem__(self, key):
-        return getattr(self, key)
-
-    def __delitem__(self, key):
-        return delattr(self, key)
-
-    def __eq__(self, other) -> bool:
-        return self.__dict__ == other
+    def __bool__(self):
+        return True if self.__dict__ else False
 
     def __contains__(self, item):
-        # TODO: maybe use `hasattr`?
-        return item in self.__dict__
+        # assuming that item is usually a `str`, this is actually faster
+        # than simply: `item in self.__dict__`
+        try:
+            _ = getattr(self, item)
+            return True
+        except AttributeError:
+            return False
+        except TypeError:  # item is not a `str`
+            return item in self.__dict__
+
+    def __eq__(self, other):
+        return self.__dict__ == other
+
+    def __ne__(self, other):
+        return self.__dict__ != other
+
+    def __delitem__(self, key):
+        # in general, this is little faster than simply: `self.__dict__[key]`
+        try:
+            delattr(self, key)
+        except TypeError:  # key is not a `str`
+            del self.__dict__[key]
+
+    def __getitem__(self, key):
+        # in general, this is little faster than simply: `self.__dict__[key]`
+        try:
+            return getattr(self, key)
+        except TypeError:  # key is not a `str`
+            return self.__dict__[key]
+
+    __setattr__ = __setitem__ = __setitem_impl__
 
     def __iter__(self):
         return iter(self.__dict__)
 
-    def __len__(self) -> int:
+    def __len__(self):
         return len(self.__dict__)
 
-    def items(self) -> ItemsView:
-        return self.__dict__.items()
-
-    def values(self) -> ValuesView:
-        return self.__dict__.values()
+    def clear(self):
+        return self.__dict__.clear()
 
     def copy(self):
-        """Returns a shallow copy of dictionary wrapped in DotWiz.
+        """
+        Returns a shallow copy of the `dict` wrapped in :class:`DotWiz`.
 
-        :return: Dotty instance
+        :return: DotWiz instance
         """
         return DotWiz(self.__dict__.copy())
 
-    @staticmethod
-    def fromkeys(seq, value=None):
-        """Create a new dictionary with keys from seq and values set to value.
-
-        New created dictionary is wrapped in Dotty.
-
-        :param seq: Sequence of elements which is to be used as keys for the new dictionary
-        :param value: Value which is set to each element of the dictionary
-        :return: Dotty instance
+    # noinspection PyIncorrectDocstring
+    @classmethod
+    def fromkeys(cls, seq, value=None, __from_keys=dict.fromkeys):
         """
-        return DotWiz(dict.fromkeys(seq, value))
+        Create a new dictionary with keys from `seq` and values set to `value`.
 
-    def get(self, key, default=None):
-        """Get value from deep key or default if key does not exist.
+        New created dictionary is wrapped in :class:`DotWiz`.
+
+        :param seq: Sequence of elements which is to be used as keys for
+          the new dictionary.
+        :param value: Value which is set to each element of the dictionary.
+        :return: DotWiz instance
+        """
+        return cls(__from_keys(seq, value))
+
+    def get(self, k, default=None):
+        """
+        Get value from :class:`DotWiz` instance, or default if the key
+        does not exist.
         """
         try:
-            return self.__dict__[key]
+            return self.__dict__[k]
         except KeyError:
             return default
+
+    def keys(self):
+        return self.__dict__.keys()
+
+    def items(self):
+        return self.__dict__.items()
+
+    def pop(self, k):
+        return self.__dict__.pop(k)
+
+    def popitem(self):
+        return self.__dict__.popitem()
+
+    def setdefault(self, k, default=None):
+        return self.__dict__.setdefault(k, default)
+
+    def values(self):
+        return self.__dict__.values()

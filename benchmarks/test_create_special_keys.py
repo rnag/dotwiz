@@ -177,6 +177,13 @@ def test_dotwiz(benchmark, my_data):
     assert_eq2(result)
 
 
+def test_dotwiz_without_check_lists(benchmark, my_data):
+    result = benchmark(dotwiz.DotWiz, my_data, check_lists=False)
+    # print(result)
+
+    assert_eq2(result)
+
+
 def test_make_dot_wiz(benchmark, my_data):
     result = benchmark(dotwiz.make_dot_wiz, my_data)
     # print(result)
