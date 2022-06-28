@@ -1,6 +1,7 @@
 import dataclasses
 
 import addict
+import attrdict
 import box
 import dict2dot
 import dotmap
@@ -124,6 +125,21 @@ def assert_eq6(result: MyClassSpecialCased):
     assert result.some_random_key_here == 'T'
 
 
+def assert_eq7(result, ns_to_dict):
+    """For testing with a `types.SimpleNamespace` object, primarily"""
+    assert result.camelCase == 1
+    assert result.Snake_Case == 2
+    assert result.PascalCase == 3
+
+    result_dict = ns_to_dict(result)
+
+    assert result_dict['spinal-case3'] == 4
+    assert result_dict['Hello, how\'s it going?'] == 5
+    assert result_dict['3D'] == 6
+    assert result_dict['for']['1nfinity'][0]['and']['Beyond!'] == 8
+    assert result_dict['Some  r@ndom#$(*#@ Key##$# here   !!!'] == 'T'
+
+
 @pytest.mark.xfail(reason='some key names are not valid identifiers')
 def test_make_dataclass(benchmark, my_data):
     # noinspection PyPep8Naming
@@ -234,6 +250,13 @@ def test_addict(benchmark, my_data):
     assert_eq2(result)
 
 
+def test_attrdict(benchmark, my_data):
+    result = benchmark(attrdict.AttrDict, my_data)
+    # print(result)
+
+    assert_eq2(result)
+
+
 def test_metadict(benchmark, my_data):
     result = benchmark(metadict.MetaDict, my_data)
     # print(result)
@@ -259,3 +282,10 @@ def test_scalpl(benchmark, my_data):
     # print(result)
 
     assert_eq5(result, subscript_list=True)
+
+
+def test_simple_namespace(benchmark, my_data, parse_to_ns, ns_to_dict):
+    result = benchmark(parse_to_ns, my_data)
+    # print(result)
+
+    assert_eq7(result, ns_to_dict)

@@ -1,6 +1,7 @@
 import dataclasses
 
 import addict
+import attrdict
 import box
 import dict2dot
 import dotmap
@@ -149,6 +150,14 @@ def test_addict(benchmark, my_data):
     assert result == 77
 
 
+def test_attrdict(benchmark, my_data):
+    o = attrdict.AttrDict(my_data)
+    # print(o)
+
+    result = benchmark(lambda: o.c.bb[0].x)
+    assert result == 77
+
+
 def test_glom(benchmark, my_data):
     o = my_data
     # print(o)
@@ -186,4 +195,12 @@ def test_scalpl(benchmark, my_data):
     # print(o)
 
     result = benchmark(lambda: o['c.bb[0].x'])
+    assert result == 77
+
+
+def test_simple_namespace(benchmark, my_data, parse_to_ns):
+    o = parse_to_ns(my_data)
+    # print(o)
+
+    result = benchmark(lambda: o.c.bb[0].x)
     assert result == 77

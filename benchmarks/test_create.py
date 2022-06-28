@@ -1,6 +1,7 @@
 import dataclasses
 
 import addict
+import attrdict
 import box
 import dict2dot
 import dotmap
@@ -152,6 +153,13 @@ def test_addict(benchmark, my_data):
     assert result.c.bb[0].x == 77
 
 
+def test_attrdict(benchmark, my_data):
+    result = benchmark(attrdict.AttrDict, my_data)
+    # print(result)
+
+    assert result.c.bb[0].x == 77
+
+
 def test_metadict(benchmark, my_data):
     result = benchmark(metadict.MetaDict, my_data)
     # print(result)
@@ -183,3 +191,10 @@ def test_scalpl(benchmark, my_data):
     # print(result)
 
     assert result['c.bb[0].x'] == 77
+
+
+def test_simple_namespace(benchmark, my_data, parse_to_ns):
+    result = benchmark(parse_to_ns, my_data)
+    # print(result)
+
+    assert result.c.bb[0].x == 77
