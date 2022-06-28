@@ -1,10 +1,17 @@
+import json
 from typing import (
-    Callable, Iterable, Mapping, MutableMapping, Protocol, TypeVar,
+    AnyStr, Any, Callable, Iterable,
+    Mapping, MutableMapping,
+    Protocol, TypeVar,
 )
 
 _T = TypeVar('_T')
 _KT = TypeVar('_KT')
 _VT = TypeVar('_VT')
+
+# Valid collection types in JSON.
+_JSONList = list[Any]
+_JSONObject = dict[str, Any]
 
 _SetItem = Callable[[dict, _KT, _VT], None]
 
@@ -13,6 +20,16 @@ class _Update(Protocol):
     def __call__(self, instance: dict,
                  __m: Mapping[_KT, _VT] | None = None,
                  **kwargs: _T) -> None: ...
+
+class Encoder(Protocol):
+    """
+    Represents an encoder for Python object -> JSON, e.g. analogous to
+    `json.dumps`
+    """
+
+    def __call__(self, obj: _JSONObject | _JSONList,
+                 **kwargs) -> AnyStr:
+        ...
 
 
 __SPECIAL_KEYS: dict[str, str] = ...
@@ -67,7 +84,9 @@ class DotWizPlus(dict):
         """
         ...
 
-    def to_json(self) -> str:
+    def to_json(self, *,
+                encoder: Encoder = json.dumps,
+                **encoder_kwargs) -> AnyStr:
         """
         Serialize the :class:`DotWizPlus` instance as a JSON string.
         """

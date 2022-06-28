@@ -1,4 +1,5 @@
 """Tests for `dotwiz` package."""
+from datetime import datetime
 
 import pytest
 
@@ -173,3 +174,35 @@ def test_dotwiz_to_dict():
             }
         ]
     }
+
+
+def test_dotwiz_to_json():
+    """Confirm intended functionality of `DotWiz.to_json`"""
+    dw = DotWiz(hello=[{"key": "value", "another-key": {"a": "b"}}])
+
+    assert dw.to_json(indent=4) == """\
+{
+    "hello": [
+        {
+            "key": "value",
+            "another-key": {
+                "a": "b"
+            }
+        }
+    ]
+}"""
+
+
+def test_dotwiz_to_json_with_non_serializable_type():
+    """
+    Confirm intended functionality of `DotWiz.to_json` when an object
+    doesn't define a `__dict__`, so the default `JSONEncoder.default`
+    implementation is called.
+    """
+
+    dw = DotWiz(string='val', dt=datetime.min)
+    # print(dw)
+
+    # TypeError: Object of type `datetime` is not JSON serializable
+    with pytest.raises(TypeError):
+        _ = dw.to_json()

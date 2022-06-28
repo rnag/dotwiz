@@ -81,8 +81,8 @@ def __add_common_methods__(name, bases, cls_dict, *,
 
             return o
 
-        def to_json(o):
-            return json.dumps(o)
+        def to_json(o, encoder=json.dumps, **encoder_kwargs):
+            return encoder(o, **encoder_kwargs)
 
         # add a `to_json` method to the class.
         cls_dict['to_json'] = to_json
@@ -110,8 +110,9 @@ def __add_common_methods__(name, bases, cls_dict, *,
     # we only need to add a `to_dict` method in this case.
     else:
 
-        def to_json(o):
-            return json.dumps(o.__dict__, cls=DotWizEncoder)
+        def to_json(o, encoder=json.dumps, **encoder_kwargs):
+            cls = encoder_kwargs.pop('cls', DotWizEncoder)
+            return encoder(o.__dict__, cls=cls, **encoder_kwargs)
 
         # add a `to_json` method to the class.
         cls_dict['to_json'] = to_json
