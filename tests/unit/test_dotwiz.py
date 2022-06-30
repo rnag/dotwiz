@@ -247,7 +247,7 @@ def test_or(op1, op2, result):
     actual = op1 | op2
 
     assert type(actual) == type(result)
-    assert op1 | op2 == result
+    assert actual == result
 
 
 def test_ror():
