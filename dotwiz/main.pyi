@@ -3,7 +3,7 @@ from typing import (
     Callable, Protocol, TypeVar,
     Iterable, Iterator,
     KeysView, ItemsView, ValuesView,
-    Mapping, MutableMapping, AnyStr, Any,
+    Mapping, MutableMapping, AnyStr, Any, overload,
 )
 
 _T = TypeVar('_T')
@@ -86,6 +86,9 @@ class DotWiz:
                 **encoder_kwargs) -> AnyStr:
         """
         Serialize the :class:`DotWiz` instance as a JSON string.
+
+        :param encoder: The encoder to serialize with, defaults to `json.dumps`.
+        :param encoder_kwargs: The keyword arguments to pass in to the encoder.
         """
         ...
 
@@ -105,7 +108,11 @@ class DotWiz:
 
     def items(self) -> ItemsView: ...
 
+    @overload
     def pop(self, k: _KT) -> _VT: ...
+
+    @overload
+    def pop(self, k: _KT, default: _VT | _T) -> _VT | _T: ...
 
     def popitem(self) -> tuple[_KT, _VT]: ...
 

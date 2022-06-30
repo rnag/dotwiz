@@ -89,6 +89,9 @@ class DotWizPlus(dict):
                 **encoder_kwargs) -> AnyStr:
         """
         Serialize the :class:`DotWizPlus` instance as a JSON string.
+
+        :param encoder: The encoder to serialize with, defaults to `json.dumps`.
+        :param encoder_kwargs: The keyword arguments to pass in to the encoder.
         """
         ...
 

@@ -168,8 +168,8 @@ class DotWiz(metaclass=__add_common_methods__,
     def items(self):
         return self.__dict__.items()
 
-    def pop(self, k):
-        return self.__dict__.pop(k)
+    def pop(self, key: str, *args):
+        return self.__dict__.pop(key, *args)
 
     def popitem(self):
         return self.__dict__.popitem()
