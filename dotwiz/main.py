@@ -3,6 +3,7 @@
 from .common import (
     __resolve_value__, __add_common_methods__,
 )
+from .constants import __PY_38_OR_ABOVE__, __PY_39_OR_ABOVE__
 
 
 def make_dot_wiz(*args, **kwargs):
@@ -65,21 +66,69 @@ def __setitem_impl__(self, key, value, check_lists=True):
     self.__dict__[key] = value
 
 
-def __merge_impl_fn__(op, check_lists=True, __set=object.__setattr__):
-    """Implementation of `__or__` and `__ror__`, to merge `DotWiz` and `dict` objects."""
-    def __merge_impl__(self, other):
+if __PY_38_OR_ABOVE__:  # pragma: no cover, Python >= 3.8
+    def __reversed_impl__(self):
+        """Implementation of `__reversed__`, to reverse the keys in a `DotWiz` instance."""
+        return reversed(self.__dict__)
+
+else:  # Python < 3.8
+    # Note: in Python 3.7, `dict` objects are not reversible by default.
+
+    def __reversed_impl__(self):
+        """Implementation of `__reversed__`, to reverse the keys in a `DotWiz` instance."""
+        return reversed(list(self.__dict__))
+
+
+if __PY_39_OR_ABOVE__:  # pragma: no cover, Python >= 3.9
+    def __merge_impl_fn__(op, check_lists=True, __set=object.__setattr__):
+        """Implementation of `__or__` and `__ror__`, to merge `DotWiz` and `dict` objects."""
+
+        def __merge_impl__(self, other):
+            __other_dict = getattr(other, '__dict__', None) or {
+                k: __resolve_value__(other[k], DotWiz, check_lists)
+                for k in other
+            }
+            __merged_dict = op(self.__dict__, __other_dict)
+
+            __merged = DotWiz()
+            __set(__merged, '__dict__', __merged_dict)
+
+            return __merged
+
+        return __merge_impl__
+
+    __or_impl__ = __merge_impl_fn__(dict.__or__)
+    __ror_impl__ = __merge_impl_fn__(dict.__ror__)
+
+else:  # Python < 3.9
+    # Note: this is *before* Union operators were introduced to `dict`,
+    # in https://peps.python.org/pep-0584/
+
+    def __or_impl__(self, other, check_lists=True, __set=object.__setattr__):
+        """Implementation of `__or__` to merge `DotWiz` and `dict` objects."""
         __other_dict = getattr(other, '__dict__', None) or {
             k: __resolve_value__(other[k], DotWiz, check_lists)
             for k in other
         }
-        __merged_dict = op(self.__dict__, __other_dict)
+        __merged_dict = {**self.__dict__, **__other_dict}
 
         __merged = DotWiz()
         __set(__merged, '__dict__', __merged_dict)
 
         return __merged
 
-    return __merge_impl__
+    def __ror_impl__(self, other, check_lists=True, __set=object.__setattr__):
+        """Implementation of `__ror__` to merge `DotWiz` and `dict` objects."""
+        __other_dict = getattr(other, '__dict__', None) or {
+            k: __resolve_value__(other[k], DotWiz, check_lists)
+            for k in other
+        }
+        __merged_dict = {**__other_dict, **self.__dict__}
+
+        __merged = DotWiz()
+        __set(__merged, '__dict__', __merged_dict)
+
+        return __merged
 
 
 def __imerge_impl__(self, other, check_lists=True, __update=dict.update):
@@ -156,12 +205,11 @@ class DotWiz(metaclass=__add_common_methods__,
     def __len__(self):
         return len(self.__dict__)
 
-    __or__ = __merge_impl_fn__(dict.__or__)
+    __or__ = __or_impl__
     __ior__ = __imerge_impl__
-    __ror__ = __merge_impl_fn__(dict.__ror__)
+    __ror__ = __ror_impl__
 
-    def __reversed__(self):
-        return reversed(self.__dict__)
+    __reversed__ = __reversed_impl__
 
     def clear(self):
         return self.__dict__.clear()

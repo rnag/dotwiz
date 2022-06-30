@@ -54,6 +54,16 @@ def __merge_impl_fn__(op: Callable[[dict, dict], dict],
                       __set: _SetAttribute = object.__setattr__
                       ) -> Callable[[DotWiz, DotWiz | dict], DotWiz]: ...
 
+def __or_impl__(self: DotWiz,
+                other: DotWiz | dict,
+                *, check_lists=True,
+                __set: _SetAttribute = object.__setattr__) -> DotWiz: ...
+
+def __ror_impl__(self: DotWiz,
+                 other: DotWiz | dict,
+                 *, check_lists=True,
+                 __set: _SetAttribute = object.__setattr__) -> DotWiz: ...
+
 def __imerge_impl__(self: DotWiz,
                     other: DotWiz | dict,
                     *, check_lists=True,
