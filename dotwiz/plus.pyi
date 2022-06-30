@@ -39,27 +39,29 @@ __IS_KEYWORD: Callable[[object], bool] = ...
 def make_dot_wiz_plus(*args: Iterable[_KT, _VT],
                       **kwargs: _T) -> DotWizPlus: ...
 
-def __store_in_object__(self: DotWizPlus,
-                        __self_dict: MutableMapping[_KT, _VT],
+def __store_in_object__(__self_dict: MutableMapping[_KT, _VT],
+                        __self_orig_dict: MutableMapping[_KT, _VT],
                         key: _KT,
-                        value: _VT,
-                        *, __set: _SetItem = dict.__setitem__) -> None: ...
+                        value: _VT) -> None: ...
 
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz_plus__(self: DotWizPlus,
                                  input_dict: MutableMapping[_KT, _VT] = {},
+                                 *, check_lists=True,
                                  **kwargs: _T) -> None: ...
 
 def __setitem_impl__(self: DotWizPlus,
                      key: _KT,
-                     value: _VT) -> None: ...
+                     value: _VT,
+                     *, check_lists=True) -> None: ...
 
 
-class DotWizPlus(dict):
+class DotWizPlus:
 
     # noinspection PyDefaultArgument
     def __init__(self,
                  input_dict: MutableMapping[_KT, _VT] = {},
+                 *, check_lists=True,
                  **kwargs: _T) -> None: ...
 
     def __delattr__(self, item: str) -> None: ...
@@ -98,6 +100,7 @@ class DotWizPlus(dict):
     # noinspection PyDefaultArgument
     def update(self,
                __m: MutableMapping[_KT, _VT] = {},
+               *, check_lists=True,
                **kwargs: _T) -> None: ...
 
     def __dir__(self) -> Iterable[str]: ...

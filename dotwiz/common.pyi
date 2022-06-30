@@ -15,6 +15,9 @@ _ItemsFn = Callable[[_D ], ItemsView[_KT, _VT]]
 class DotWizEncoder(json.JSONEncoder):
     def default(self, o: Any) -> Any: ...
 
+class DotWizPlusEncoder(json.JSONEncoder):
+    def default(self, o: Any) -> Any: ...
+
 
 def __add_common_methods__(name: str,
                            bases: tuple[type, ...],

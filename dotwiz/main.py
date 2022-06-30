@@ -220,7 +220,7 @@ class DotWiz(metaclass=__add_common_methods__,
 
         :return: DotWiz instance
         """
-        return DotWiz(self.__dict__.copy())
+        return DotWiz(self.__dict__.copy(), check_lists=False)
 
     # noinspection PyIncorrectDocstring
     @classmethod

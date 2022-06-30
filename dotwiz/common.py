@@ -6,8 +6,8 @@ import json
 
 class DotWizEncoder(json.JSONEncoder):
     """
-    Helper class for encoding of (nested) :class:`DotWiz` and
-    :class:`DotWizPlus` objects into a standard ``dict``.
+    Helper class for encoding of (nested) :class:`DotWiz` objects
+    into a standard ``dict``.
     """
 
     def default(self, o):
@@ -21,6 +21,28 @@ class DotWizEncoder(json.JSONEncoder):
         """
         try:
             return o.__dict__
+
+        except AttributeError:
+            return json.JSONEncoder.default(self, o)
+
+
+class DotWizPlusEncoder(json.JSONEncoder):
+    """
+    Helper class for encoding of (nested) :class:`DotWizPlus` objects
+    into a standard ``dict``.
+    """
+
+    def default(self, o):
+        """
+        Return the `dict` data of :class:`DotWizPlus` when possible, or encode
+        with standard format otherwise.
+
+        :param o: Input object
+        :return: Serializable data
+
+        """
+        try:
+            return o.__orig_dict__
 
         except AttributeError:
             return json.JSONEncoder.default(self, o)
@@ -82,7 +104,8 @@ def __add_common_methods__(name, bases, cls_dict, *,
             return o
 
         def to_json(o, encoder=json.dumps, **encoder_kwargs):
-            return encoder(o, **encoder_kwargs)
+            cls = encoder_kwargs.pop('cls', DotWizPlusEncoder)
+            return encoder(o.__orig_dict__, cls=cls, **encoder_kwargs)
 
         # add a `to_json` method to the class.
         cls_dict['to_json'] = to_json
