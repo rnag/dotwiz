@@ -65,11 +65,11 @@ def __setitem_impl__(self, key, value, check_lists=True):
     self.__dict__[key] = value
 
 
-def __merge_impl_fn__(op, __set=object.__setattr__):
+def __merge_impl_fn__(op, check_lists=True, __set=object.__setattr__):
     """Implementation of `__or__` and `__ror__`, to merge `DotWiz` and `dict` objects."""
     def __merge_impl__(self, other):
         __other_dict = getattr(other, '__dict__', None) or {
-            k: __resolve_value__(other[k], DotWiz)
+            k: __resolve_value__(other[k], DotWiz, check_lists)
             for k in other
         }
         __merged_dict = op(self.__dict__, __other_dict)
@@ -82,10 +82,10 @@ def __merge_impl_fn__(op, __set=object.__setattr__):
     return __merge_impl__
 
 
-def __imerge_impl__(self, other, __update=dict.update):
+def __imerge_impl__(self, other, check_lists=True, __update=dict.update):
     """Implementation of `__ior__` to incrementally update a `DotWiz` instance."""
     __other_dict = getattr(other, '__dict__', None) or {
-        k: __resolve_value__(other[k], DotWiz)
+        k: __resolve_value__(other[k], DotWiz, check_lists)
         for k in other
     }
     __update(self.__dict__, __other_dict)

@@ -50,12 +50,14 @@ def __setitem_impl__(self: DotWiz,
                      *, check_lists=True) -> None: ...
 
 def __merge_impl_fn__(op: Callable[[dict, dict], dict],
+                      *, check_lists=True,
                       __set: _SetAttribute = object.__setattr__
                       ) -> Callable[[DotWiz, DotWiz | dict], DotWiz]: ...
 
 def __imerge_impl__(self: DotWiz,
                     other: DotWiz | dict,
-                    *, __update: _Update = dict.update): ...
+                    *, check_lists=True,
+                    __update: _Update = dict.update): ...
 
 
 class DotWiz:
