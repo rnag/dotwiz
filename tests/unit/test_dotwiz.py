@@ -231,6 +231,11 @@ def test_len():
     assert len(dw) == 3
 
 
+def test_reversed():
+    dw = DotWiz({"a": 1, "b": 2, "c": 3})
+    assert list(reversed(dw)) == ["c", "b", "a"]
+
+
 def test_popitem():
     dw = DotWiz({"a": 1, "b": 2, "c": 3})
     dw.popitem()

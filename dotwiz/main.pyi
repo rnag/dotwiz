@@ -1,9 +1,10 @@
 import json
 from typing import (
     Callable, Protocol, TypeVar,
-    Iterable, Iterator,
+    Iterable, Iterator, Reversible,
     KeysView, ItemsView, ValuesView,
-    Mapping, MutableMapping, AnyStr, Any, overload,
+    Mapping, MutableMapping, AnyStr, Any,
+    overload,
 )
 
 _T = TypeVar('_T')
@@ -74,6 +75,7 @@ class DotWiz:
 
     def __iter__(self) -> Iterator: ...
     def __len__(self) -> int: ...
+    def __reversed__(self) -> Reversible: ...
 
     def to_dict(self) -> dict[_KT, _VT]:
         """

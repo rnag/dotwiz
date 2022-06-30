@@ -126,6 +126,9 @@ class DotWiz(metaclass=__add_common_methods__,
     def __len__(self):
         return len(self.__dict__)
 
+    def __reversed__(self):
+        return reversed(self.__dict__)
+
     def clear(self):
         return self.__dict__.clear()
 
