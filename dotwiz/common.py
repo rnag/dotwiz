@@ -132,14 +132,14 @@ def __add_common_methods__(name, bases, cls_dict, *,
     return type(name, bases, cls_dict)
 
 
-def __resolve_value__(value, dict_type):
+def __resolve_value__(value, dict_type, check_lists=True):
     """Resolve `value`, which can be a complex type like `dict` or `list`"""
     t = type(value)
 
     if t is dict:
         value = dict_type(value)
 
-    elif t is list:
-        value = [__resolve_value__(e, dict_type) for e in value]
+    elif check_lists and t is list:
+        value = [__resolve_value__(e, dict_type, check_lists) for e in value]
 
     return value

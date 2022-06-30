@@ -58,11 +58,39 @@ def __upsert_into_dot_wiz__(self, input_dict={},
         __dict[key] = value
 
 
-def __setitem_impl__(self, key, value):
+def __setitem_impl__(self, key, value, check_lists=True):
     """Implementation of `DotWiz.__setitem__` to preserve dot access"""
-    value = __resolve_value__(value, DotWiz)
+    value = __resolve_value__(value, DotWiz, check_lists)
 
     self.__dict__[key] = value
+
+
+def __merge_impl_fn__(op, __set=object.__setattr__):
+    """Implementation of `__or__` and `__ror__`, to merge `DotWiz` and `dict` objects."""
+    def __merge_impl__(self, other):
+        __other_dict = getattr(other, '__dict__', None) or {
+            k: __resolve_value__(other[k], DotWiz)
+            for k in other
+        }
+        __merged_dict = op(self.__dict__, __other_dict)
+
+        __merged = DotWiz()
+        __set(__merged, '__dict__', __merged_dict)
+
+        return __merged
+
+    return __merge_impl__
+
+
+def __imerge_impl__(self, other, __update=dict.update):
+    """Implementation of `__ior__` to incrementally update a `DotWiz` instance."""
+    __other_dict = getattr(other, '__dict__', None) or {
+        k: __resolve_value__(other[k], DotWiz)
+        for k in other
+    }
+    __update(self.__dict__, __other_dict)
+
+    return self
 
 
 class DotWiz(metaclass=__add_common_methods__,
@@ -127,6 +155,10 @@ class DotWiz(metaclass=__add_common_methods__,
 
     def __len__(self):
         return len(self.__dict__)
+
+    __or__ = __merge_impl_fn__(dict.__or__)
+    __ior__ = __imerge_impl__
+    __ror__ = __merge_impl_fn__(dict.__ror__)
 
     def __reversed__(self):
         return reversed(self.__dict__)

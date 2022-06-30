@@ -236,6 +236,34 @@ def test_reversed():
     assert list(reversed(dw)) == ["c", "b", "a"]
 
 
+@pytest.mark.parametrize(
+    "op1,op2,result",
+    [
+        (DotWiz(a=1, b=2), DotWiz(b=1.5, c=3), DotWiz({'a': 1, 'b': 1.5, 'c': 3})),
+        (DotWiz(a=1, b=2), dict(b=1.5, c=3), DotWiz({'a': 1, 'b': 1.5, 'c': 3})),
+    ],
+)
+def test_or(op1, op2, result):
+    actual = op1 | op2
+
+    assert type(actual) == type(result)
+    assert op1 | op2 == result
+
+
+def test_ror():
+    op1 = {'a': 1, 'b': 2}
+    op2 = DotWiz(b=1.5, c=3)
+
+    assert op1 | op2 == DotWiz({'a': 1, 'b': 1.5, 'c': 3})
+
+
+def test_ior():
+    op1 = DotWiz(a=1, b=2)
+    op1 |= {'b': 1.5, 'c': 3}
+
+    assert op1 == DotWiz(a=1, b=1.5, c=3)
+
+
 def test_popitem():
     dw = DotWiz({"a": 1, "b": 2, "c": 3})
     dw.popitem()

@@ -15,7 +15,7 @@ _VT = TypeVar('_VT')
 _JSONList = list[Any]
 _JSONObject = dict[str, Any]
 
-_SetItem = Callable[[dict, _KT, _VT], None]
+_SetAttribute = Callable[[DotWiz, str, Any], None]
 
 
 # Ref: https://stackoverflow.com/a/68392079/10237506
@@ -41,13 +41,21 @@ def make_dot_wiz(*args: Iterable[_KT, _VT],
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz__(self: DotWiz,
                             input_dict: MutableMapping[_KT, _VT] = {},
-                            *, __set: _SetItem =dict.__setitem__,
+                            *, check_lists=True,
                             **kwargs: _T) -> None: ...
 
 def __setitem_impl__(self: DotWiz,
                      key: _KT,
                      value: _VT,
-                     *, __set: _SetItem = dict.__setitem__) -> None: ...
+                     *, check_lists=True) -> None: ...
+
+def __merge_impl_fn__(op: Callable[[dict, dict], dict],
+                      __set: _SetAttribute = object.__setattr__
+                      ) -> Callable[[DotWiz, DotWiz | dict], DotWiz]: ...
+
+def __imerge_impl__(self: DotWiz,
+                    other: DotWiz | dict,
+                    *, __update: _Update = dict.update): ...
 
 
 class DotWiz:
@@ -76,6 +84,10 @@ class DotWiz:
     def __iter__(self) -> Iterator: ...
     def __len__(self) -> int: ...
     def __reversed__(self) -> Reversible: ...
+
+    def __or__(self, other: DotWiz | dict) -> DotWiz: ...
+    def __ior__(self, other: DotWiz | dict) -> DotWiz: ...
+    def __ror__(self, other: DotWiz | dict) -> DotWiz: ...
 
     def to_dict(self) -> dict[_KT, _VT]:
         """
@@ -124,7 +136,6 @@ class DotWiz:
     def update(self,
                __m: MutableMapping[_KT, _VT] = {},
                *, check_lists=True,
-               __set: _SetItem = dict.__setitem__,
                **kwargs: _T) -> None: ...
 
     def values(self) -> ValuesView: ...
