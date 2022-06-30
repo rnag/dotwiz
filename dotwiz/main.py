@@ -148,6 +148,7 @@ class DotWiz(metaclass=__add_common_methods__,
         :param seq: Sequence of elements which is to be used as keys for
           the new dictionary.
         :param value: Value which is set to each element of the dictionary.
+
         :return: DotWiz instance
         """
         return cls(__from_keys(seq, value))
@@ -168,7 +169,7 @@ class DotWiz(metaclass=__add_common_methods__,
     def items(self):
         return self.__dict__.items()
 
-    def pop(self, key: str, *args):
+    def pop(self, key, *args):
         return self.__dict__.pop(key, *args)
 
     def popitem(self):
