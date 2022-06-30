@@ -78,6 +78,8 @@ class DotWiz(metaclass=__add_common_methods__,
         >>> assert dw.key_1[0].k == 'v'
         >>> assert dw.keyTwo == '5'
         >>> assert dw['key-3'] == 3.21
+        >>> dw.to_json()
+        '{"key_1": [{"k": "v"}], "keyTwo": "5", "key-3": 3.21}'
 
     """
     __slots__ = ('__dict__', )
