@@ -103,6 +103,17 @@ def test_dotwiz_plus(benchmark, my_data):
     assert result.c.bb[0].x == 77
 
 
+def test_dotwiz_plus_without_check_lists(benchmark, my_data):
+    result = benchmark(dotwiz.DotWizPlus, my_data, check_lists=False)
+    # print(result)
+
+    # now similar to `dict2dot`, `dict`s nested within `lists` won't work
+    # assert result.c.bb[0].x == 77
+
+    # instead, dict access should work fine:
+    assert result.c.bb[0]['x'] == 77
+
+
 def test_make_dot_wiz_plus(benchmark, my_data):
     result = benchmark(dotwiz.make_dot_wiz_plus, my_data)
     # print(result)

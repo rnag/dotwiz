@@ -79,14 +79,17 @@ def assert_eq2(result):
     assert result['Some  r@ndom#$(*#@ Key##$# here   !!!'] == 'T'
 
 
-def assert_eq3(result):
+def assert_eq3(result, nested_in_list=True):
     assert result.camel_case == 1
     assert result.snake_case == 2
     assert result.pascal_case == 3
     assert result.spinal_case3 == 4
     assert result.hello_how_s_it_going == 5
     assert result._3d == 6
-    assert result.for_._1nfinity[0].and_.beyond == 8
+    if nested_in_list:
+        assert result.for_._1nfinity[0].and_.beyond == 8
+    else:
+        assert result.for_._1nfinity[0]['and']['Beyond!'] == 8
     assert result.some_r_ndom_key_here == 'T'
 
 
@@ -196,6 +199,13 @@ def test_dotwiz_plus(benchmark, my_data):
     # print(result)
 
     assert_eq3(result)
+
+
+def test_dotwiz_plus_without_check_lists(benchmark, my_data):
+    result = benchmark(dotwiz.DotWizPlus, my_data, check_lists=False)
+    # print(result)
+
+    assert_eq3(result, nested_in_list=False)
 
 
 def test_make_dot_wiz_plus(benchmark, my_data):
