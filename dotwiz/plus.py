@@ -229,11 +229,19 @@ else:  # Python < 3.9
 
 def __imerge_impl__(self, other, check_lists=True, __update=dict.update):
     """Implementation of `__ior__` to incrementally update a `DotWizPlus` instance."""
-    __other_dict = getattr(other, '__dict__', None) or {
-        k: __resolve_value__(other[k], DotWizPlus, check_lists)
-        for k in other
-    }
-    __update(self.__dict__, __other_dict)
+    __other_dict = getattr(other, '__dict__', None)
+
+    if __other_dict is not None:  # other is a `DotWizPlus` instance
+        __update(self.__dict__, __other_dict)
+        __update(self.__orig_dict__, other.__orig_dict__)
+
+    else:  # other is a `dict` instance
+        __dict = self.__dict__
+        __orig_dict = self.__orig_dict__
+
+        for key in other:
+            value = __resolve_value__(other[key], DotWizPlus, check_lists)
+            __store_in_object__(__dict, __orig_dict, key, value)
 
     return self
 

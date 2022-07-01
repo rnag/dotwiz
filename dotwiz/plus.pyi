@@ -85,6 +85,9 @@ def __imerge_impl__(self: DotWizPlus,
 
 class DotWizPlus:
 
+    __dict__: dict[_KT, _VT]
+    __orig_dict__: dict[_KT, _VT]
+
     # noinspection PyDefaultArgument
     def __init__(self,
                  input_dict: MutableMapping[_KT, _VT] = {},
