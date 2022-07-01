@@ -87,16 +87,17 @@ def __add_common_methods__(name, bases, cls_dict, *,
     # we need to add both `to_dict` and `to_attr_dict` in this case.
     if has_attr_dict:
 
-        def __convert_to_dict_preserve_keys__(o, __items=dict.items):
+        def __convert_to_dict_preserve_keys__(o):
             """
             Recursively convert an object (typically a `dict` subclass) to a
             Python `dict` type, while preserving the lower-cased keys used
             for attribute access.
             """
-            if isinstance(o, dict):
-                # noinspection PyArgumentList
+            __dict = getattr(o, '__orig_dict__', None)
+
+            if __dict:
                 return {k: __convert_to_dict_preserve_keys__(v)
-                        for k, v in __items(o)}
+                        for k, v in __dict.items()}
 
             if isinstance(o, list):
                 return [__convert_to_dict_preserve_keys__(e) for e in o]
