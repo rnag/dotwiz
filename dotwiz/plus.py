@@ -93,25 +93,27 @@ def __store_in_object__(__self_dict, __self_orig_dict, key, value):
 
 
 # noinspection PyDefaultArgument
-def __upsert_into_dot_wiz_plus__(self, input_dict={}, check_lists=True,
+def __upsert_into_dot_wiz_plus__(self, input_dict=None, check_lists=True,
                                  __set=object.__setattr__, **kwargs):
     """
     Helper method to generate / update a :class:`DotWizPlus` (dot-access dict)
     from a Python ``dict`` object, and optional *keyword arguments*.
 
     """
-    __dict = self.__dict__
-
-    __orig_dict = {}
-    __set(self, '__orig_dict__', __orig_dict)
-
     if kwargs:
-        # avoids the potential pitfall of a "mutable default argument" -
-        # only update or modify `input_dict` if the param is passed in.
         if input_dict:
             input_dict.update(kwargs)
         else:
             input_dict = kwargs
+
+    elif not input_dict:  # nothing to do.
+        return None
+
+    __dict = self.__dict__
+
+    # create `__orig_dict__` attribute on the instance
+    __orig_dict = {}
+    __set(self, '__orig_dict__', __orig_dict)
 
     for key in input_dict:
         # note: this logic is the same as `__resolve_value__()`
@@ -166,14 +168,18 @@ if __PY_39_OR_ABOVE__:  # pragma: no cover, Python >= 3.9
         """Implementation of `__or__` and `__ror__`, to merge `DotWizPlus` and `dict` objects."""
 
         def __merge_impl__(self, other):
-            __other_dict = getattr(other, '__dict__', None) or {
-                k: __resolve_value__(other[k], DotWizPlus, check_lists)
-                for k in other
-            }
+            __other_dict = getattr(other, '__dict__', None)
+
+            if __other_dict is None:  # other is not a `DotWizPlus` instance
+                other = DotWizPlus(other, check_lists=check_lists)
+                __other_dict = other.__dict__
+
             __merged_dict = op(self.__dict__, __other_dict)
+            __merged_orig_dict = op(self.__orig_dict__, other.__orig_dict__)
 
             __merged = DotWizPlus()
             __set(__merged, '__dict__', __merged_dict)
+            __set(__merged, '__orig_dict__', __merged_orig_dict)
 
             return __merged
 
@@ -188,27 +194,35 @@ else:  # Python < 3.9
 
     def __or_impl__(self, other, check_lists=True, __set=object.__setattr__):
         """Implementation of `__or__` to merge `DotWizPlus` and `dict` objects."""
-        __other_dict = getattr(other, '__dict__', None) or {
-            k: __resolve_value__(other[k], DotWizPlus, check_lists)
-            for k in other
-        }
+        __other_dict = getattr(other, '__dict__', None)
+
+        if __other_dict is None:  # other is not a `DotWizPlus` instance
+            other = DotWizPlus(other, check_lists=check_lists)
+            __other_dict = other.__dict__
+
         __merged_dict = {**self.__dict__, **__other_dict}
+        __merged_orig_dict = {**self.__orig_dict__, **other.__orig_dict__}
 
         __merged = DotWizPlus()
         __set(__merged, '__dict__', __merged_dict)
+        __set(__merged, '__orig_dict__', __merged_orig_dict)
 
         return __merged
 
     def __ror_impl__(self, other, check_lists=True, __set=object.__setattr__):
         """Implementation of `__ror__` to merge `DotWizPlus` and `dict` objects."""
-        __other_dict = getattr(other, '__dict__', None) or {
-            k: __resolve_value__(other[k], DotWizPlus, check_lists)
-            for k in other
-        }
+        __other_dict = getattr(other, '__dict__', None)
+
+        if __other_dict is None:  # other is not a `DotWizPlus` instance
+            other = DotWizPlus(other, check_lists=check_lists)
+            __other_dict = other.__dict__
+
         __merged_dict = {**__other_dict, **self.__dict__}
+        __merged_orig_dict = {**other.__orig_dict__, **self.__orig_dict__}
 
         __merged = DotWizPlus()
         __set(__merged, '__dict__', __merged_dict)
+        __set(__merged, '__orig_dict__', __merged_orig_dict)
 
         return __merged
 

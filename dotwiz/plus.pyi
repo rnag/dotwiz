@@ -15,6 +15,7 @@ _JSONObject = dict[str, Any]
 
 _SetAttribute = Callable[[DotWizPlus, str, Any], None]
 
+
 # Ref: https://stackoverflow.com/a/68392079/10237506
 class _Update(Protocol):
     def __call__(self, instance: dict,
@@ -46,7 +47,7 @@ def __store_in_object__(__self_dict: MutableMapping[_KT, _VT],
 
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz_plus__(self: DotWizPlus,
-                                 input_dict: MutableMapping[_KT, _VT] = {},
+                                 input_dict: MutableMapping[_KT, _VT] = None,
                                  *, check_lists=True,
                                  __set: _SetAttribute = object.__setattr__,
                                  **kwargs: _T) -> None: ...
@@ -60,6 +61,26 @@ def __setitem_impl__(self: DotWizPlus,
                      key: _KT,
                      value: _VT,
                      *, check_lists=True) -> None: ...
+
+def __merge_impl_fn__(op: Callable[[dict, dict], dict],
+                      *, check_lists=True,
+                      __set: _SetAttribute = object.__setattr__
+                      ) -> Callable[[DotWizPlus, DotWizPlus | dict], DotWizPlus]: ...
+
+def __or_impl__(self: DotWizPlus,
+                other: DotWizPlus | dict,
+                *, check_lists=True,
+                __set: _SetAttribute = object.__setattr__) -> DotWizPlus: ...
+
+def __ror_impl__(self: DotWizPlus,
+                 other: DotWizPlus | dict,
+                 *, check_lists=True,
+                 __set: _SetAttribute = object.__setattr__) -> DotWizPlus: ...
+
+def __imerge_impl__(self: DotWizPlus,
+                    other: DotWizPlus | dict,
+                    *, check_lists=True,
+                    __update: _Update = dict.update): ...
 
 
 class DotWizPlus:
