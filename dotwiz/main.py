@@ -131,7 +131,7 @@ else:  # Python < 3.9
         return __merged
 
 
-def __imerge_impl__(self, other, check_lists=True, __update=dict.update):
+def __ior_impl__(self, other, check_lists=True, __update=dict.update):
     """Implementation of `__ior__` to incrementally update a `DotWiz` instance."""
     __other_dict = getattr(other, '__dict__', None) or {
         k: __resolve_value__(other[k], DotWiz, check_lists)
@@ -206,7 +206,7 @@ class DotWiz(metaclass=__add_common_methods__,
         return len(self.__dict__)
 
     __or__ = __or_impl__
-    __ior__ = __imerge_impl__
+    __ior__ = __ior_impl__
     __ror__ = __ror_impl__
 
     __reversed__ = __reversed_impl__
@@ -214,13 +214,16 @@ class DotWiz(metaclass=__add_common_methods__,
     def clear(self):
         return self.__dict__.clear()
 
-    def copy(self):
+    def copy(self, __copy=dict.copy, __set=object.__setattr__):
         """
         Returns a shallow copy of the `dict` wrapped in :class:`DotWiz`.
 
         :return: DotWiz instance
         """
-        return DotWiz(self.__dict__.copy(), check_lists=False)
+        dw = DotWiz()
+        __set(dw, '__dict__', __copy(self.__dict__))
+
+        return dw
 
     # noinspection PyIncorrectDocstring
     @classmethod
@@ -260,8 +263,21 @@ class DotWiz(metaclass=__add_common_methods__,
     def popitem(self):
         return self.__dict__.popitem()
 
-    def setdefault(self, k, default=None):
-        return self.__dict__.setdefault(k, default)
+    def setdefault(self, k, default=None, check_lists=True, __get=dict.get):
+        """
+        Insert key with a value of default if key is not in the dictionary.
+
+        Return the value for key if key is in the dictionary, else default.
+        """
+        __dict = self.__dict__
+        result = __get(__dict, k)
+
+        if result is not None:
+            return result
+
+        __dict[k] = default = __resolve_value__(default, DotWiz, check_lists)
+
+        return default
 
     def values(self):
         return self.__dict__.values()

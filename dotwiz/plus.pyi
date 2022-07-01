@@ -2,7 +2,7 @@ import json
 from typing import (
     AnyStr, Any, Callable, Iterable,
     Mapping, MutableMapping,
-    Protocol, TypeVar,
+    Protocol, TypeVar, overload,
 )
 
 _T = TypeVar('_T')
@@ -33,7 +33,15 @@ class Encoder(Protocol):
         ...
 
 
+class DictGet(Protocol):
+    @overload
+    def __call__(self, key: _KT) -> _VT | None: ...
+    @overload
+    def __call__(self, key: _KT, default: _VT | _T) -> _VT | _T: ...
+
+
 __SPECIAL_KEYS: dict[str, str] = ...
+__GET_SPECIAL_KEY__: DictGet = ...
 __IS_KEYWORD: Callable[[object], bool] = ...
 
 
@@ -42,13 +50,15 @@ def make_dot_wiz_plus(*args: Iterable[_KT, _VT],
 
 def __store_in_object__(__self_dict: MutableMapping[_KT, _VT],
                         __self_orig_dict: MutableMapping[_KT, _VT],
+                        __self_orig_keys: MutableMapping[str, _KT],
                         key: _KT,
                         value: _VT) -> None: ...
 
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz_plus__(self: DotWizPlus,
-                                 input_dict: MutableMapping[_KT, _VT] = None,
+                                 input_dict: MutableMapping[_KT, _VT] = {},
                                  *, check_lists=True,
+                                 __skip_init=False,
                                  __set: _SetAttribute = object.__setattr__,
                                  **kwargs: _T) -> None: ...
 
@@ -77,21 +87,23 @@ def __ror_impl__(self: DotWizPlus,
                  *, check_lists=True,
                  __set: _SetAttribute = object.__setattr__) -> DotWizPlus: ...
 
-def __imerge_impl__(self: DotWizPlus,
-                    other: DotWizPlus | dict,
-                    *, check_lists=True,
-                    __update: _Update = dict.update): ...
+def __ior_impl__(self: DotWizPlus,
+                 other: DotWizPlus | dict,
+                 *, check_lists=True,
+                 __update: _Update = dict.update): ...
 
 
 class DotWizPlus:
 
     __dict__: dict[_KT, _VT]
     __orig_dict__: dict[_KT, _VT]
+    __orig_keys__: dict[str, _KT]
 
     # noinspection PyDefaultArgument
     def __init__(self,
                  input_dict: MutableMapping[_KT, _VT] = {},
                  *, check_lists=True,
+                 __skip_init=False,
                  **kwargs: _T) -> None: ...
 
     def __delattr__(self, item: str) -> None: ...
@@ -131,6 +143,7 @@ class DotWizPlus:
     def update(self,
                __m: MutableMapping[_KT, _VT] = {},
                *, check_lists=True,
+               __skip_init=False,
                **kwargs: _T) -> None: ...
 
     def __dir__(self) -> Iterable[str]: ...

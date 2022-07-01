@@ -14,6 +14,8 @@ from .constants import __PY_38_OR_ABOVE__, __PY_39_OR_ABOVE__
 # transformed before.
 __SPECIAL_KEYS = {}
 
+__GET_SPECIAL_KEY__ = __SPECIAL_KEYS.get
+
 
 def make_dot_wiz_plus(*args, **kwargs):
     """
@@ -32,7 +34,8 @@ def make_dot_wiz_plus(*args, **kwargs):
     return DotWizPlus(kwargs)
 
 
-def __store_in_object__(__self_dict, __self_orig_dict, key, value):
+def __store_in_object__(__self_dict, __self_orig_dict, __self_orig_keys,
+                        key, value):
     """
     Helper method to store a key-value pair in an object :param:`self` (a
     ``DotWizPlus`` instance). This implementation stores the key if it's
@@ -47,6 +50,7 @@ def __store_in_object__(__self_dict, __self_orig_dict, key, value):
 
     if orig_key in __SPECIAL_KEYS:
         key = __SPECIAL_KEYS[orig_key]
+        __self_orig_keys[key] = orig_key
 
     else:
         # in case of other types, like `int`
@@ -59,6 +63,7 @@ def __store_in_object__(__self_dict, __self_orig_dict, key, value):
         # attribute access can then work.
         if __IS_KEYWORD(lower_key):
             __SPECIAL_KEYS[orig_key] = key = f'{lower_key}_'
+            __self_orig_keys[key] = orig_key
 
         # handle special cases: if the key is not lowercase, or it's not a
         # valid identifier in python.
@@ -86,6 +91,7 @@ def __store_in_object__(__self_dict, __self_orig_dict, key, value):
                 lower_snake = f'_{ch}{lower_snake[1:]}'
 
             __SPECIAL_KEYS[orig_key] = key = lower_snake
+            __self_orig_keys[key] = orig_key
 
     # note: this logic is the same as `DotWizPlus.__setitem__()`
     __self_orig_dict[orig_key] = value
@@ -93,27 +99,34 @@ def __store_in_object__(__self_dict, __self_orig_dict, key, value):
 
 
 # noinspection PyDefaultArgument
-def __upsert_into_dot_wiz_plus__(self, input_dict=None, check_lists=True,
-                                 __set=object.__setattr__, **kwargs):
+def __upsert_into_dot_wiz_plus__(self, input_dict={},
+                                 check_lists=True,
+                                 __skip_init=False,
+                                 __set=object.__setattr__,
+                                 **kwargs):
     """
     Helper method to generate / update a :class:`DotWizPlus` (dot-access dict)
     from a Python ``dict`` object, and optional *keyword arguments*.
 
     """
+    if __skip_init:
+        return None
+
+    __dict = self.__dict__
+
     if kwargs:
         if input_dict:
             input_dict.update(kwargs)
         else:
             input_dict = kwargs
 
-    elif not input_dict:  # nothing to do.
-        return None
-
-    __dict = self.__dict__
-
-    # create `__orig_dict__` attribute on the instance
+    # create the instance attribute `__orig_dict__`
     __orig_dict = {}
     __set(self, '__orig_dict__', __orig_dict)
+
+    # create the instance attribute `__orig_keys__`
+    __orig_keys = {}
+    __set(self, '__orig_keys__', __orig_keys)
 
     for key in input_dict:
         # note: this logic is the same as `__resolve_value__()`
@@ -129,7 +142,7 @@ def __upsert_into_dot_wiz_plus__(self, input_dict=None, check_lists=True,
         elif check_lists and t is list:
             value = [__resolve_value__(e, DotWizPlus) for e in value]
 
-        __store_in_object__(__dict, __orig_dict, key, value)
+        __store_in_object__(__dict, __orig_dict, __orig_keys, key, value)
 
 
 def __setattr_impl__(self, item, value, check_lists=True):
@@ -147,7 +160,8 @@ def __setitem_impl__(self, key, value, check_lists=True):
     """Implementation of `DotWizPlus.__setitem__` to preserve dot access"""
     value = __resolve_value__(value, DotWizPlus, check_lists)
 
-    __store_in_object__(self.__dict__, self.__orig_dict__, key, value)
+    __store_in_object__(self.__dict__, self.__orig_dict__, self.__orig_keys__,
+                        key, value)
 
 
 if __PY_38_OR_ABOVE__:  # pragma: no cover, Python >= 3.8
@@ -176,10 +190,12 @@ if __PY_39_OR_ABOVE__:  # pragma: no cover, Python >= 3.9
 
             __merged_dict = op(self.__dict__, __other_dict)
             __merged_orig_dict = op(self.__orig_dict__, other.__orig_dict__)
+            __merged_orig_keys = op(self.__orig_keys__, other.__orig_keys__)
 
-            __merged = DotWizPlus()
+            __merged = DotWizPlus(__skip_init=True)
             __set(__merged, '__dict__', __merged_dict)
             __set(__merged, '__orig_dict__', __merged_orig_dict)
+            __set(__merged, '__orig_keys__', __merged_orig_keys)
 
             return __merged
 
@@ -202,10 +218,12 @@ else:  # Python < 3.9
 
         __merged_dict = {**self.__dict__, **__other_dict}
         __merged_orig_dict = {**self.__orig_dict__, **other.__orig_dict__}
+        __merged_orig_keys = {**self.__orig_keys__, **other.__orig_keys__}
 
-        __merged = DotWizPlus()
+        __merged = DotWizPlus(__skip_init=True)
         __set(__merged, '__dict__', __merged_dict)
         __set(__merged, '__orig_dict__', __merged_orig_dict)
+        __set(__merged, '__orig_keys__', __merged_orig_keys)
 
         return __merged
 
@@ -219,29 +237,33 @@ else:  # Python < 3.9
 
         __merged_dict = {**__other_dict, **self.__dict__}
         __merged_orig_dict = {**other.__orig_dict__, **self.__orig_dict__}
+        __merged_orig_keys = {**other.__orig_keys__, **self.__orig_keys__}
 
-        __merged = DotWizPlus()
+        __merged = DotWizPlus(__skip_init=True)
         __set(__merged, '__dict__', __merged_dict)
         __set(__merged, '__orig_dict__', __merged_orig_dict)
+        __set(__merged, '__orig_keys__', __merged_orig_keys)
 
         return __merged
 
 
-def __imerge_impl__(self, other, check_lists=True, __update=dict.update):
+def __ior_impl__(self, other, check_lists=True, __update=dict.update):
     """Implementation of `__ior__` to incrementally update a `DotWizPlus` instance."""
     __dict = self.__dict__
     __orig_dict = self.__orig_dict__
+    __orig_keys = self.__orig_keys__
 
     __other_dict = getattr(other, '__dict__', None)
 
     if __other_dict is not None:  # other is a `DotWizPlus` instance
         __update(__dict, __other_dict)
         __update(__orig_dict, other.__orig_dict__)
+        __update(__orig_keys, other.__orig_keys__)
 
     else:  # other is a `dict` instance
         for key in other:
             value = __resolve_value__(other[key], DotWizPlus, check_lists)
-            __store_in_object__(__dict, __orig_dict, key, value)
+            __store_in_object__(__dict, __orig_dict, __orig_keys, key, value)
 
     return self
 
@@ -296,6 +318,7 @@ class DotWizPlus(metaclass=__add_common_methods__,
     __slots__ = (
         '__dict__',
         '__orig_dict__',
+        '__orig_keys__',
     )
 
     __init__ = update = __upsert_into_dot_wiz_plus__
@@ -327,27 +350,19 @@ class DotWizPlus(metaclass=__add_common_methods__,
 
     def __delattr__(self, item):
         del self.__dict__[item]
-        # TODO
-        del self.__orig_dict__[item]
+
+        __orig_key = self.__orig_keys__.pop(item, item)
+        del self.__orig_dict__[__orig_key]
 
     def __delitem__(self, key):
+        __dict_key = __GET_SPECIAL_KEY__(key)
+        if __dict_key:
+            del self.__orig_keys__[__dict_key]
+        else:
+            __dict_key = key
+
+        del self.__dict__[__dict_key]
         del self.__orig_dict__[key]
-        try:
-            del self.__dict__[key]
-        except KeyError:
-            # in case of other types, like `int`
-            key = str(key)
-            lower_key = key.lower()
-
-            # if it's a keyword like `for` or `class`, or overlaps with a `dict`
-            # method name such as `items`, add an underscore to key so that
-            # attribute access can then work.
-            if __IS_KEYWORD(lower_key):
-                key = f'{lower_key}_'
-            else:
-                key = __SPECIAL_KEYS[key]
-
-            del self.__dict__[key]
 
     # __getattr__: Use the default `object.__getattr__` implementation.
 
@@ -364,22 +379,29 @@ class DotWizPlus(metaclass=__add_common_methods__,
         return len(self.__orig_dict__)
 
     __or__ = __or_impl__
-    __ior__ = __imerge_impl__
+    __ior__ = __ior_impl__
     __ror__ = __ror_impl__
 
     __reversed__ = __reversed_impl__
 
     def clear(self, __clear=dict.clear):
         __clear(self.__orig_dict__)
+        __clear(self.__orig_keys__)
+
         return __clear(self.__dict__)
 
-    def copy(self):
+    def copy(self, __copy=dict.copy, __set=object.__setattr__):
         """
         Returns a shallow copy of the `dict` wrapped in :class:`DotWizPlus`.
 
         :return: DotWizPlus instance
         """
-        return DotWizPlus(self.__dict__.copy(), check_lists=False)
+        dw = DotWizPlus(__skip_init=True)
+        __set(dw, '__dict__', __copy(self.__dict__))
+        __set(dw, '__orig_dict__', __copy(self.__orig_dict__))
+        __set(dw, '__orig_keys__', __copy(self.__orig_keys__))
+
+        return dw
 
     # noinspection PyIncorrectDocstring
     @classmethod
@@ -414,36 +436,43 @@ class DotWizPlus(metaclass=__add_common_methods__,
         return self.__orig_dict__.items()
 
     def pop(self, key, *args):
-        return self.__orig_dict__.pop(key, *args)
+        result = self.__orig_dict__.pop(key, *args)
+
+        __dict_key = __GET_SPECIAL_KEY__(key)
+        if __dict_key:
+            del self.__orig_keys__[__dict_key]
+        else:
+            __dict_key = key
+
+        _ = self.__dict__.pop(__dict_key, None)
+        return result
 
     def popitem(self):
+        key, _ = self.__dict__.popitem()
+        self.__orig_keys__.pop(key, None)
+
         return self.__orig_dict__.popitem()
 
-    def setdefault(self, k, default=None):
-        return self.__orig_dict__.setdefault(k, default)
+    def setdefault(self, k, default=None, check_lists=True, __get=dict.get, ):
+        """
+        Insert key with a value of default if key is not in the dictionary.
+
+        Return the value for key if key is in the dictionary, else default.
+        """
+        result = __get(self.__orig_dict__, k)
+
+        if result is not None:
+            return result
+
+        default = __resolve_value__(default, DotWizPlus, check_lists)
+        __store_in_object__(
+            self.__dict__, self.__orig_dict__, self.__orig_keys__, k, default
+        )
+
+        return default
 
     def values(self):
         return self.__orig_dict__.values()
-
-
-def to_blah(o):
-    """
-    Recursively convert an object (typically a custom `dict` type) to a
-    Python `dict` type.
-    """
-    __dict = getattr(o, '__dict__', None)
-
-    if __dict:
-        __orig_dict = o.__orig_dict__
-        return {__orig_dict[k]: to_blah(__dict[k]) for k in __dict}
-
-    if isinstance(o, list):
-        return [to_blah(e) for e in o]
-
-    return o
-
-
-DotWizPlus.to_blah = to_blah
 
 
 # A list of the public-facing methods in `DotWizPlus`

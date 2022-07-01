@@ -15,6 +15,7 @@ _VT = TypeVar('_VT')
 _JSONList = list[Any]
 _JSONObject = dict[str, Any]
 
+_Copy = Callable[[dict[_KT, _VT]], dict[_KT, _VT]]
 _SetAttribute = Callable[[DotWiz, str, Any], None]
 
 
@@ -64,10 +65,10 @@ def __ror_impl__(self: DotWiz,
                  *, check_lists=True,
                  __set: _SetAttribute = object.__setattr__) -> DotWiz: ...
 
-def __imerge_impl__(self: DotWiz,
-                    other: DotWiz | dict,
-                    *, check_lists=True,
-                    __update: _Update = dict.update): ...
+def __ior_impl__(self: DotWiz,
+                 other: DotWiz | dict,
+                 *, check_lists=True,
+                 __update: _Update = dict.update): ...
 
 
 class DotWiz:
@@ -120,7 +121,9 @@ class DotWiz:
 
     def clear(self) -> None: ...
 
-    def copy(self) -> DotWiz: ...
+    def copy(self,
+             *, __copy: _Copy = dict.copy,
+             __set: _SetAttribute = object.__setattr__) -> DotWiz: ...
 
     @classmethod
     def fromkeys(cls: type[DotWiz],
@@ -142,7 +145,9 @@ class DotWiz:
 
     def popitem(self) -> tuple[_KT, _VT]: ...
 
-    def setdefault(self, k: _KT, default=None) -> _VT: ...
+    def setdefault(self, k: _KT, default=None,
+                   *, check_lists=True,
+                   __get=dict.get) -> _VT: ...
 
     # noinspection PyDefaultArgument
     def update(self,
