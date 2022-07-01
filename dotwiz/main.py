@@ -241,15 +241,12 @@ class DotWiz(metaclass=__add_common_methods__,
         """
         return cls(__from_keys(seq, value))
 
-    def get(self, k, default=None):
+    def get(self, k, default=None, __get=dict.get):
         """
         Get value from :class:`DotWiz` instance, or default if the key
         does not exist.
         """
-        try:
-            return self.__dict__[k]
-        except KeyError:
-            return default
+        return __get(self.__dict__, k, default)
 
     def keys(self):
         return self.__dict__.keys()

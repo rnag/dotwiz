@@ -19,12 +19,6 @@ _Copy = Callable[[dict[_KT, _VT]], dict[_KT, _VT]]
 _SetAttribute = Callable[[DotWiz, str, Any], None]
 
 
-# Ref: https://stackoverflow.com/a/68392079/10237506
-class _Update(Protocol):
-    def __call__(self, instance: dict,
-                 __m: Mapping[_KT, _VT] | None = None,
-                 **kwargs: _T) -> None: ...
-
 class Encoder(Protocol):
     """
     Represents an encoder for Python object -> JSON, e.g. analogous to
@@ -34,6 +28,18 @@ class Encoder(Protocol):
     def __call__(self, obj: _JSONObject | _JSONList,
                  **kwargs) -> AnyStr:
         ...
+
+# Ref: https://stackoverflow.com/a/68392079/10237506
+class _Update(Protocol):
+    def __call__(self, instance: dict,
+                 __m: Mapping[_KT, _VT] | None = None,
+                 **kwargs: _T) -> None: ...
+
+class _RawDictGet(Protocol):
+    @overload
+    def __call__(self, obj: dict, key: _KT) -> _VT | None: ...
+    @overload
+    def __call__(self, obj: dict, key: _KT, default: _VT | _T) -> _VT | _T: ...
 
 
 def make_dot_wiz(*args: Iterable[_KT, _VT],
@@ -125,13 +131,19 @@ class DotWiz:
              *, __copy: _Copy = dict.copy,
              __set: _SetAttribute = object.__setattr__) -> DotWiz: ...
 
+    # noinspection PyUnresolvedReferences
     @classmethod
     def fromkeys(cls: type[DotWiz],
                  seq: Iterable,
                  value: Iterable | None = None,
                  *, __from_keys=dict.fromkeys): ...
 
-    def get(self, k: _KT, default=None) -> _VT | None: ...
+    @overload
+    def get(self, k: _KT,
+            *, __get: _RawDictGet = dict.get) -> _VT | None: ...
+    @overload
+    def get(self, k: _KT, default: _VT | _T,
+            *, __get: _RawDictGet = dict.get) -> _VT | _T: ...
 
     def keys(self) -> KeysView: ...
 

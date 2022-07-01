@@ -334,6 +334,7 @@ class DotWizPlus(metaclass=__add_common_methods__,
         """
         super_dir = super().__dir__()
         string_keys = [k for k in self.__dict__ if type(k) is str]
+        # noinspection PyUnresolvedReferences
         return super_dir + [k for k in string_keys if k not in super_dir]
 
     def __bool__(self):
@@ -419,15 +420,12 @@ class DotWizPlus(metaclass=__add_common_methods__,
         """
         return cls(__from_keys(seq, value))
 
-    def get(self, k, default=None):
+    def get(self, k, default=None, __get=dict.get):
         """
         Get value from :class:`DotWizPlus` instance, or default if the key
         does not exist.
         """
-        try:
-            return self.__orig_dict__[k]
-        except KeyError:
-            return default
+        return __get(self.__orig_dict__, k, default)
 
     def keys(self):
         return self.__orig_dict__.keys()
