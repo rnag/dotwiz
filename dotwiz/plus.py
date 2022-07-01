@@ -164,12 +164,12 @@ def __setitem_impl__(self, key, value, check_lists=True):
                         key, value)
 
 
-if __PY_38_OR_ABOVE__:  # pragma: no cover, Python >= 3.8
+if __PY_38_OR_ABOVE__:  # Python >= 3.8, pragma: no cover
     def __reversed_impl__(self):
         """Implementation of `__reversed__`, to reverse the keys in a `DotWizPlus` instance."""
         return reversed(self.__orig_dict__)
 
-else:  # Python < 3.8
+else:  # Python < 3.8, pragma: no cover
     # Note: in Python 3.7, `dict` objects are not reversible by default.
 
     def __reversed_impl__(self):
@@ -177,7 +177,7 @@ else:  # Python < 3.8
         return reversed(list(self.__orig_dict__))
 
 
-if __PY_39_OR_ABOVE__:  # pragma: no cover, Python >= 3.9
+if __PY_39_OR_ABOVE__:  # Python >= 3.9, pragma: no cover
     def __merge_impl_fn__(op, check_lists=True, __set=object.__setattr__):
         """Implementation of `__or__` and `__ror__`, to merge `DotWizPlus` and `dict` objects."""
 
@@ -204,7 +204,7 @@ if __PY_39_OR_ABOVE__:  # pragma: no cover, Python >= 3.9
     __or_impl__ = __merge_impl_fn__(dict.__or__)
     __ror_impl__ = __merge_impl_fn__(dict.__ror__)
 
-else:  # Python < 3.9
+else:  # Python < 3.9, pragma: no cover
     # Note: this is *before* Union operators were introduced to `dict`,
     # in https://peps.python.org/pep-0584/
 
