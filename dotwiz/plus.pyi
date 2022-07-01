@@ -13,7 +13,7 @@ _VT = TypeVar('_VT')
 _JSONList = list[Any]
 _JSONObject = dict[str, Any]
 
-_SetItem = Callable[[dict, _KT, _VT], None]
+_SetAttribute = Callable[[DotWizPlus, str, Any], None]
 
 # Ref: https://stackoverflow.com/a/68392079/10237506
 class _Update(Protocol):
@@ -48,7 +48,13 @@ def __store_in_object__(__self_dict: MutableMapping[_KT, _VT],
 def __upsert_into_dot_wiz_plus__(self: DotWizPlus,
                                  input_dict: MutableMapping[_KT, _VT] = {},
                                  *, check_lists=True,
+                                 __set: _SetAttribute = object.__setattr__,
                                  **kwargs: _T) -> None: ...
+
+def __setattr_impl__(self: DotWizPlus,
+                     item: str,
+                     value: _VT,
+                     *, check_lists=True) -> None: ...
 
 def __setitem_impl__(self: DotWizPlus,
                      key: _KT,

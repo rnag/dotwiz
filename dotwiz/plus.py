@@ -44,26 +44,28 @@ def __store_in_object__(__self_dict, __self_orig_dict, key, value):
 
     """
     orig_key = key
-    # in case of other types, like `int`
-    key = str(key)
 
-    lower_key = key.lower()
+    if orig_key in __SPECIAL_KEYS:
+        key = __SPECIAL_KEYS[orig_key]
 
-    # if it's a keyword like `for` or `class`, or overlaps with a `dict`
-    # method name such as `items`, add an underscore to key so that
-    # attribute access can then work.
-    if __IS_KEYWORD(lower_key):
-        key = f'{lower_key}_'
+    else:
+        # in case of other types, like `int`
+        key = str(key)
 
-    # handle special cases: if the key is not lowercase, or it's not a
-    # valid identifier in python.
-    #
-    #   examples: `ThisIsATest` | `hey, world!` | `hi-there` | `3D`
-    elif not key == lower_key or not key.isidentifier():
+        lower_key = key.lower()
 
-        if key in __SPECIAL_KEYS:
-            key = __SPECIAL_KEYS[key]
-        else:
+        # if it's a keyword like `for` or `class`, or overlaps with a `dict`
+        # method name such as `items`, add an underscore to key so that
+        # attribute access can then work.
+        if __IS_KEYWORD(lower_key):
+            __SPECIAL_KEYS[orig_key] = key = f'{lower_key}_'
+
+        # handle special cases: if the key is not lowercase, or it's not a
+        # valid identifier in python.
+        #
+        #   examples: `ThisIsATest` | `hey, world!` | `hi-there` | `3D`
+        elif not key == lower_key or not key.isidentifier():
+
             # transform key to `snake case` and cache the result.
             lower_snake = snake(key)
 
@@ -83,7 +85,7 @@ def __store_in_object__(__self_dict, __self_orig_dict, key, value):
             if ch.isdigit():  # the key has a leading digit, which is invalid.
                 lower_snake = f'_{ch}{lower_snake[1:]}'
 
-            __SPECIAL_KEYS[key] = key = lower_snake
+            __SPECIAL_KEYS[orig_key] = key = lower_snake
 
     # note: this logic is the same as `DotWizPlus.__setitem__()`
     __self_orig_dict[orig_key] = value
@@ -128,9 +130,21 @@ def __upsert_into_dot_wiz_plus__(self, input_dict={}, check_lists=True,
         __store_in_object__(__dict, __orig_dict, key, value)
 
 
-def __setitem_impl__(self, key, value, check_lists=True, __set=object.__setattr__):
+def __setattr_impl__(self, item, value, check_lists=True):
+    """
+    Implementation of `DotWizPlus.__setattr__`, which bypasses mutation of
+    the key name and passes through the original key.
+    """
+    value = __resolve_value__(value, DotWizPlus, check_lists)
+
+    self.__dict__[item] = value
+    self.__orig_dict__[item] = value
+
+
+def __setitem_impl__(self, key, value, check_lists=True):
     """Implementation of `DotWizPlus.__setitem__` to preserve dot access"""
     value = __resolve_value__(value, DotWizPlus, check_lists)
+
     __store_in_object__(self.__dict__, self.__orig_dict__, key, value)
 
 
@@ -318,7 +332,8 @@ class DotWizPlus(metaclass=__add_common_methods__,
     def __getitem__(self, key):
         return self.__orig_dict__[key]
 
-    __setattr__ = __setitem__ = __setitem_impl__
+    __setattr__ = __setattr_impl__
+    __setitem__ = __setitem_impl__
 
     def __iter__(self):
         return iter(self.__orig_dict__)
@@ -387,6 +402,26 @@ class DotWizPlus(metaclass=__add_common_methods__,
 
     def values(self):
         return self.__orig_dict__.values()
+
+
+def to_blah(o):
+    """
+    Recursively convert an object (typically a custom `dict` type) to a
+    Python `dict` type.
+    """
+    __dict = getattr(o, '__dict__', None)
+
+    if __dict:
+        __orig_dict = o.__orig_dict__
+        return {__orig_dict[k]: to_blah(__dict[k]) for k in __dict}
+
+    if isinstance(o, list):
+        return [to_blah(e) for e in o]
+
+    return o
+
+
+DotWizPlus.to_blah = to_blah
 
 
 # A list of the public-facing methods in `DotWizPlus`
