@@ -48,6 +48,29 @@ class DotWizPlusEncoder(json.JSONEncoder):
             return json.JSONEncoder.default(self, o)
 
 
+class DotWizPlusSnakeEncoder(json.JSONEncoder):
+    """
+    Helper class for encoding of (nested) :class:`DotWizPlus` objects
+    into a standard ``dict``.
+    """
+
+    def default(self, o):
+        """
+        Return the snake-cased `dict` data of :class:`DotWizPlus` when
+        possible, or encode with standard format otherwise.
+
+        :param o: Input object
+        :return: Serializable data
+
+        """
+        try:
+            __dict = o.__dict__
+            return {k.strip('_'): __dict[k] for k in __dict}
+
+        except AttributeError:
+            return json.JSONEncoder.default(self, o)
+
+
 def __add_common_methods__(name, bases, cls_dict, *,
                            print_char='*',
                            has_attr_dict=False):
@@ -87,12 +110,31 @@ def __add_common_methods__(name, bases, cls_dict, *,
     # we need to add both `to_dict` and `to_attr_dict` in this case.
     if has_attr_dict:
 
-        def __convert_to_dict_preserve_keys__(o):
+        def __convert_to_dict_snake_cased__(o, __strip=str.strip):
             """
-            Recursively convert an object (typically a `dict` subclass) to a
+            Recursively convert an object (typically a custom `dict` type) to
+            a Python `dict` type, while preserving snake-cased keys.
+            """
+            __dict = getattr(o, '__dict__', None)
+
+            if __dict:
+                return {k.strip('_'): __convert_to_dict_snake_cased__(v)
+                        for k, v in __dict.items()}
+
+            if isinstance(o, list):
+                return [__convert_to_dict_snake_cased__(e) for e in o]
+
+            return o
+
+        def __convert_to_dict_preserve_keys__(o, snake=False):
+            """
+            Recursively convert an object (typically a custom `dict` type) to a
             Python `dict` type, while preserving the lower-cased keys used
             for attribute access.
             """
+            if snake:
+                return __convert_to_dict_snake_cased__(o)
+
             __dict = getattr(o, '__orig_dict__', None)
 
             if __dict:
@@ -104,15 +146,46 @@ def __add_common_methods__(name, bases, cls_dict, *,
 
             return o
 
-        def to_json(o, encoder=json.dumps, **encoder_kwargs):
-            cls = encoder_kwargs.pop('cls', DotWizPlusEncoder)
-            return encoder(o.__orig_dict__, cls=cls, **encoder_kwargs)
+        def to_json(o, attr=False, snake=False,
+                    filename=None, encoding='utf-8', errors='strict',
+                    file_encoder=json.dump,
+                    encoder=json.dumps, **encoder_kwargs):
+            if attr:
+                __default_encoder = DotWizEncoder
+                __initial_dict = o.__dict__
+            elif snake:
+                __default_encoder = DotWizPlusSnakeEncoder
+                __initial_dict = o.__dict__
+            else:
+                __default_encoder = DotWizPlusEncoder
+                __initial_dict = o.__orig_dict__
+
+            cls = encoder_kwargs.pop('cls', __default_encoder)
+
+            if filename:
+                with open(filename, 'w', encoding=encoding, errors=errors) as f:
+                    file_encoder(__initial_dict, f, cls=cls, **encoder_kwargs)
+            else:
+                return encoder(__initial_dict, cls=cls, **encoder_kwargs)
 
         # add a `to_json` method to the class.
         cls_dict['to_json'] = to_json
-        to_json.__doc__ = (
-            f'Serialize the :class:`{name}` instance as a JSON string.'
-        )
+        to_json.__doc__ = f"""
+Serialize the :class:`{name}` instance as a JSON string.
+
+:param attr: True to return the lower-cased keys used for attribute
+  access.
+:param snake: True to return the `snake_case` variant of keys,
+  i.e. with leading and trailing underscores (_) stripped out.
+:param filename: If provided, will save to a file.
+:param encoding: File encoding.
+:param errors: How to handle encoding errors.
+:param file_encoder: The encoder to use, when `filename` is passed.
+:param encoder: The encoder to serialize with, defaults to `json.dumps`.
+:param encoder_kwargs: The keyword arguments to pass in to the encoder.
+
+:return: a string in JSON format (if no filename is provided)
+"""
 
         # add a `to_dict` method to the class.
         cls_dict['to_dict'] = __convert_to_dict_preserve_keys__
@@ -134,15 +207,32 @@ def __add_common_methods__(name, bases, cls_dict, *,
     # we only need to add a `to_dict` method in this case.
     else:
 
-        def to_json(o, encoder=json.dumps, **encoder_kwargs):
+        def to_json(o, filename=None, encoding='utf-8', errors='strict',
+                    file_encoder=json.dump,
+                    encoder=json.dumps, **encoder_kwargs):
+
             cls = encoder_kwargs.pop('cls', DotWizEncoder)
-            return encoder(o.__dict__, cls=cls, **encoder_kwargs)
+
+            if filename:
+                with open(filename, 'w', encoding=encoding, errors=errors) as f:
+                    file_encoder(o.__dict__, f, cls=cls, **encoder_kwargs)
+            else:
+                return encoder(o.__dict__, cls=cls, **encoder_kwargs)
 
         # add a `to_json` method to the class.
         cls_dict['to_json'] = to_json
-        to_json.__doc__ = (
-            f'Serialize the :class:`{name}` instance as a JSON string.'
-        )
+        to_json.__doc__ = f"""
+Serialize the :class:`{name}` instance as a JSON string.
+
+:param filename: If provided, will save to a file.
+:param encoding: File encoding.
+:param errors: How to handle encoding errors.
+:param file_encoder: The encoder to use, when `filename` is passed.
+:param encoder: The encoder to serialize with, defaults to `json.dumps`.
+:param encoder_kwargs: The keyword arguments to pass in to the encoder.
+
+:return: a string in JSON format (if no filename is provided)
+"""
 
         # add a `to_dict` method to the class.
         cls_dict['to_dict'] = __convert_to_dict__

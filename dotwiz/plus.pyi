@@ -1,4 +1,5 @@
 import json
+from os import PathLike
 from typing import (
     Callable, Protocol, TypeVar,
     Iterable, Iterator, Reversible,
@@ -138,9 +139,12 @@ class DotWizPlus:
     def __ior__(self, other: DotWizPlus | dict) -> DotWizPlus: ...
     def __ror__(self, other: DotWizPlus | dict) -> DotWizPlus: ...
 
-    def to_dict(self) -> dict[_KT, _VT]:
+    def to_dict(self, *, snake=False) -> dict[_KT, _VT]:
         """
         Recursively convert the :class:`DotWizPlus` instance back to a ``dict``.
+
+        :param snake: True to return the `snake_case` variant of keys,
+          i.e. with leading and trailing underscores (_) stripped out.
         """
         ...
 
@@ -152,13 +156,29 @@ class DotWizPlus:
         ...
 
     def to_json(self, *,
+                attr=False,
+                snake=False,
+                filename: str | PathLike = ...,
+                encoding: str = ...,
+                errors: str = ...,
+                file_encoder=json.dump,
                 encoder: Encoder = json.dumps,
                 **encoder_kwargs) -> AnyStr:
         """
         Serialize the :class:`DotWizPlus` instance as a JSON string.
 
+        :param attr: True to return the lower-cased keys used for attribute
+          access.
+        :param snake: True to return the `snake_case` variant of keys,
+          i.e. with leading and trailing underscores (_) stripped out.
+        :param filename: If provided, will save to a file.
+        :param encoding: File encoding.
+        :param errors: How to handle encoding errors.
+        :param file_encoder: The encoder to use, when `filename` is passed.
         :param encoder: The encoder to serialize with, defaults to `json.dumps`.
         :param encoder_kwargs: The keyword arguments to pass in to the encoder.
+
+        :return: a string in JSON format (if no filename is provided)
         """
         ...
 

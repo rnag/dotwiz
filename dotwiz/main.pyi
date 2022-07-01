@@ -1,4 +1,5 @@
 import json
+from os import PathLike
 from typing import (
     Callable, Protocol, TypeVar,
     Iterable, Iterator, Reversible,
@@ -115,13 +116,23 @@ class DotWiz:
         ...
 
     def to_json(self, *,
+                filename: str | PathLike = ...,
+                encoding: str = ...,
+                errors: str = ...,
+                file_encoder=json.dump,
                 encoder: Encoder = json.dumps,
                 **encoder_kwargs) -> AnyStr:
         """
         Serialize the :class:`DotWiz` instance as a JSON string.
 
+        :param filename: If provided, will save to a file.
+        :param encoding: File encoding.
+        :param errors: How to handle encoding errors.
+        :param file_encoder: The encoder to use, when `filename` is passed.
         :param encoder: The encoder to serialize with, defaults to `json.dumps`.
         :param encoder_kwargs: The keyword arguments to pass in to the encoder.
+
+        :return: a string in JSON format (if no filename is provided)
         """
         ...
 
