@@ -96,7 +96,8 @@ def __add_common_methods__(name, bases, cls_dict, *,
                 __initial_dict = o.__dict__
             elif snake:
                 __default_encoder = DotWizPlusSnakeEncoder
-                __initial_dict = o.__dict__
+                __initial_dict = {k.strip('_'): v
+                                  for k, v in o.__dict__.items()}
             else:
                 __default_encoder = DotWizPlusEncoder
                 __initial_dict = o.__orig_dict__
