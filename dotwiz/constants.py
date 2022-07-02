@@ -1,5 +1,5 @@
 """
-Project-specific constant values
+Project-specific constant values.
 """
 __all__ = [
     '__PY_VERSION__',
