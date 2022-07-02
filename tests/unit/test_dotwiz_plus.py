@@ -186,6 +186,27 @@ def test_dotwiz_plus_to_dict():
     }
 
 
+def test_dotwiz_to_json():
+    """Confirm intended functionality of `DotWizPlus.to_json`"""
+    dw = DotWizPlus(hello=[{"Key": "value", "Another-KEY": {"a": "b"}}],
+                    camelCased={r"th@#$%is.is.!@#$%^&*()a{}\:<?>/~`.T'e'\"st": True})
+
+    assert dw.to_json(indent=4) == r"""
+{
+    "hello": [
+        {
+            "Key": "value",
+            "Another-KEY": {
+                "a": "b"
+            }
+        }
+    ],
+    "camelCased": {
+        "th@#$%is.is.!@#$%^&*()a{}\\:<?>/~`.T'e'\\\"st": true
+    }
+}""".lstrip()
+
+
 def test_dotwiz_plus_to_attr_dict():
     """Confirm intended functionality of `DotWizPlus.to_dict`"""
     dw = DotWizPlus(hello=[{"Key": "value", "Another-KEY": {"a": "b"}}],
@@ -213,3 +234,19 @@ def test_key_in_special_keys():
 
     dw = DotWizPlus({'3D': True})
     assert dw._3d
+
+
+def test_dir():
+    """"Confirm intended functionality of `DotWizPlus.__dir__`"""
+    dw = DotWizPlus({'1string': 'value', 'lambda': 42})
+
+    obj_dir = dir(dw)
+
+    assert 'keys' in obj_dir
+    assert 'to_attr_dict' in obj_dir
+
+    assert '_1string' in obj_dir
+    assert 'lambda_' in obj_dir
+
+    assert '1string' not in obj_dir
+    assert 'lambda' not in obj_dir

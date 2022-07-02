@@ -2,7 +2,7 @@
 ``dotwiz``
 ~~~~~~~~~~
 
-DotWiz is a ``dict`` subclass that enables accessing (nested) keys
+DotWiz is a ``dict`` wrapper that enables accessing (nested) keys
 in dot notation.
 
 Sample Usage::
