@@ -3,9 +3,7 @@ Common (shared) helpers and utilities.
 """
 import json
 
-from dotwiz.encoders import (
-    DotWizEncoder, DotWizPlusEncoder, DotWizPlusSnakeEncoder
-)
+from dotwiz.encoders import DotWizEncoder, DotWizPlusEncoder
 
 
 def __add_common_methods__(name, bases, cls_dict, *,
@@ -47,7 +45,7 @@ def __add_common_methods__(name, bases, cls_dict, *,
     # we need to add both `to_dict` and `to_attr_dict` in this case.
     if has_attr_dict:
 
-        def __convert_to_dict_snake_cased__(o, __strip=str.strip):
+        def __convert_to_dict_snake_cased__(o):
             """
             Recursively convert an object (typically a custom `dict` type) to
             a Python `dict` type, while preserving snake-cased keys.
@@ -82,7 +80,8 @@ def __add_common_methods__(name, bases, cls_dict, *,
 
         def __convert_to_dict_preserve_keys__(o, snake=False):
             if snake:
-                return __convert_to_dict_snake_cased__(o)
+                return {k.strip('_'): __convert_to_dict_snake_cased__(v)
+                        for k, v in o.__dict__.items()}
 
             return {k: __convert_to_dict_preserve_keys_inner__(v)
                     for k, v in o.__orig_dict__.items()}
@@ -95,9 +94,11 @@ def __add_common_methods__(name, bases, cls_dict, *,
                 __default_encoder = DotWizEncoder
                 __initial_dict = o.__dict__
             elif snake:
-                __default_encoder = DotWizPlusSnakeEncoder
-                __initial_dict = {k.strip('_'): v
-                                  for k, v in o.__dict__.items()}
+                __default_encoder = None
+                __initial_dict = {
+                    k.strip('_'): __convert_to_dict_snake_cased__(v)
+                    for k, v in o.__dict__.items()
+                }
             else:
                 __default_encoder = DotWizPlusEncoder
                 __initial_dict = o.__orig_dict__
