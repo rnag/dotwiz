@@ -1,4 +1,3 @@
-import json
 from typing import Any, Callable, ItemsView, TypeVar
 
 from dotwiz import DotWiz, DotWizPlus
@@ -10,13 +9,6 @@ _KT = TypeVar('_KT')
 _VT = TypeVar('_VT')
 
 _ItemsFn = Callable[[_D ], ItemsView[_KT, _VT]]
-
-
-class DotWizEncoder(json.JSONEncoder):
-    def default(self, o: Any) -> Any: ...
-
-class DotWizPlusEncoder(json.JSONEncoder):
-    def default(self, o: Any) -> Any: ...
 
 
 def __add_common_methods__(name: str,

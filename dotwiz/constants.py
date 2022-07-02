@@ -1,4 +1,6 @@
-"""Project-specific constant values"""
+"""
+Project-specific constant values
+"""
 __all__ = [
     '__PY_VERSION__',
     '__PY_38_OR_ABOVE__',
