@@ -63,25 +63,29 @@ def __add_common_methods__(name, bases, cls_dict, *,
 
             return o
 
-        def __convert_to_dict_preserve_keys__(o, snake=False):
+        def __convert_to_dict_preserve_keys_inner__(o):
             """
             Recursively convert an object (typically a custom `dict` type) to a
             Python `dict` type, while preserving the lower-cased keys used
             for attribute access.
             """
-            if snake:
-                return __convert_to_dict_snake_cased__(o)
-
             __dict = getattr(o, '__orig_dict__', None)
 
             if __dict:
-                return {k: __convert_to_dict_preserve_keys__(v)
+                return {k: __convert_to_dict_preserve_keys_inner__(v)
                         for k, v in __dict.items()}
 
             if isinstance(o, list):
-                return [__convert_to_dict_preserve_keys__(e) for e in o]
+                return [__convert_to_dict_preserve_keys_inner__(e) for e in o]
 
             return o
+
+        def __convert_to_dict_preserve_keys__(o, snake=False):
+            if snake:
+                return __convert_to_dict_snake_cased__(o)
+
+            return {k: __convert_to_dict_preserve_keys_inner__(v)
+                    for k, v in o.__orig_dict__.items()}
 
         def to_json(o, attr=False, snake=False,
                     filename=None, encoding='utf-8', errors='strict',
@@ -129,7 +133,9 @@ Serialize the :class:`{name}` instance as a JSON string.
         __convert_to_dict_preserve_keys__.__name__ = 'to_dict'
         __convert_to_dict_preserve_keys__.__doc__ = (
             f'Recursively convert the :class:`{name}` instance back to '
-            'a ``dict``.'
+            'a ``dict``.\n\n'
+            ':param snake: True to return the `snake_case` variant of keys,\n'
+            '  i.e. with leading and trailing underscores (_) stripped out.'
         )
 
         # add a `to_attr_dict` method to the class.

@@ -12,6 +12,22 @@ dotwiz.common module
    :undoc-members:
    :show-inheritance:
 
+dotwiz.constants module
+-----------------------
+
+.. automodule:: dotwiz.constants
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dotwiz.encoders module
+----------------------
+
+.. automodule:: dotwiz.encoders
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dotwiz.main module
 ------------------
 
