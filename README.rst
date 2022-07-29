@@ -172,6 +172,54 @@ as compared to other libraries such as ``prodict`` -- or close to **15x** faster
 than creating a `Box`_ -- and up to *10x* faster in general to access keys
 by *dot* notation -- or almost **30x** faster than accessing keys from a `DotMap`_.
 
+Type Hints and Auto Completion
+------------------------------
+
+For better code quality and to keep IDEs happy, it is possible to achieve auto-completion of key or attribute names,
+as well as provide type hinting and auto-suggestion of ``str`` methods for example.
+
+The simplest way to do it, is to extend from ``DotWiz`` or ``DotWiz+`` and use type annotations, as below.
+
+    Note that this approach does **not** perform auto type conversion, such as ``str`` to ``int``.
+
+.. code:: python3
+
+    from __future__ import annotations
+
+    from dotwiz import DotWiz
+
+
+    class MyTypedWiz(DotWiz):
+        # add attribute names and annotations for better type hinting!
+        i: int
+        b: bool
+        nested: list[Nested]
+
+
+    class Nested:
+        s: str
+
+
+    dw = MyTypedWiz(i=42, b=False, f=3.21, nested=[{'s': 'Hello, world!!'}])
+    print(dw)
+    # >  ✫(i=42, b=False, f=3.21, nested=[✫(s='Hello world!!')])
+
+    # note that field (and method) auto-completion now works as expected!
+    assert dw.nested[0].s.lower().rstrip('!') == 'hello, world'
+
+    # we can still access non-declared fields, however auto-completion and type
+    # hinting won't work as desired.
+    assert dw.f == 3.21
+
+    print('\nPrettified JSON string:')
+    print(dw.to_json(indent=2))
+    # prints:
+    #   {
+    #     "i": 42,
+    #     "b": false,
+    #     ...
+    #   }
+
 Contributing
 ------------
 
