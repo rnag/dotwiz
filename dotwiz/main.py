@@ -140,36 +140,6 @@ def __ior_impl__(self, other, check_lists=True, __update=dict.update):
     return self
 
 
-def __from_json__(json_string=None, filename=None,
-                  encoding='utf-8', errors='strict',
-                  multiline=False,
-                  file_decoder=json.load,
-                  decoder=json.loads,
-                  __object_hook=lambda d: DotWiz(d, __set_dict=True),
-                  **decoder_kwargs):
-    """
-    Helper function to create and return a :class:`DotWiz` (dot-access dict)
-    -- or a list of :class:`DotWiz` instances -- from a JSON string.
-
-    """
-    if filename:
-        with open(filename, encoding=encoding, errors=errors) as f:
-            if multiline:
-                return [
-                    decoder(line.strip(), object_hook=__object_hook,
-                            **decoder_kwargs)
-                    for line in f
-                    if line.strip() and not line.strip().startswith('#')
-                ]
-
-            else:
-                return file_decoder(f, object_hook=__object_hook,
-                                    **decoder_kwargs)
-
-    return decoder(json_string, object_hook=__object_hook,
-                   **decoder_kwargs)
-
-
 class DotWiz(metaclass=__add_common_methods__,
              print_char='✫'):
     """
@@ -238,8 +208,6 @@ class DotWiz(metaclass=__add_common_methods__,
     __ror__ = __ror_impl__
 
     __reversed__ = __reversed_impl__
-
-    from_json = __from_json__
 
     def clear(self):
         return self.__dict__.clear()

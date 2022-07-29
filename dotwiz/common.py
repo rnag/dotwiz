@@ -2,6 +2,7 @@
 Common (shared) helpers and utilities.
 """
 import json
+from typing import Callable
 
 from dotwiz.encoders import DotWizEncoder, DotWizPlusEncoder
 
@@ -23,9 +24,60 @@ def __add_common_methods__(name, bases, cls_dict, *,
     cls_dict['__repr__'] = __repr__
 
     # add utility or helper methods to the class, such as:
-    #   - `to_dict` - convert an instance to a Python `dict` object.
-    #   - `to_json` - serialize an instance as a JSON string.
-    #   - `to_attr_dict` - optional, only if `has_attr_dict` is specified.
+    #   - `from_json`     - de-serialize a JSON string into an instance.
+    #   - `to_dict`       - convert an instance to a Python `dict` object.
+    #   - `to_json`       - serialize an instance as a JSON string.
+    #   - `to_attr_dict`  - optional, only if `has_attr_dict` is specified.
+
+    cls: type
+    __object_hook: Callable
+
+    def __from_json__(json_string=None, filename=None,
+                      encoding='utf-8', errors='strict',
+                      multiline=False,
+                      file_decoder=json.load,
+                      decoder=json.loads,
+                      **decoder_kwargs):
+        """
+        De-serialize a JSON string (or file) as a `DotWiz` or `DotWizPlus`
+        instance.
+        """
+        if filename:
+            with open(filename, encoding=encoding, errors=errors) as f:
+                if multiline:
+                    return [
+                        decoder(line.strip(), object_hook=__object_hook,
+                                **decoder_kwargs)
+                        for line in f
+                        if line.strip() and not line.strip().startswith('#')
+                    ]
+
+                else:
+                    return file_decoder(f, object_hook=__object_hook,
+                                        **decoder_kwargs)
+
+        return decoder(json_string, object_hook=__object_hook,
+                       **decoder_kwargs)
+
+    # add a `from_json` method to the class.
+    cls_dict['from_json'] = __from_json__
+    __from_json__.__doc__ = f"""
+De-serialize a JSON string (or file) into a :class:`{name}` instance,
+or a list of :class:`{name}` instances.
+
+:param json_string: The JSON string to de-serialize.
+:param filename: If provided, will instead read from a file.
+:param encoding: File encoding.
+:param errors: How to handle encoding errors.
+:param multiline: If enabled, reads the file in JSONL format,
+  i.e. where each line in the file represents a JSON object.
+:param file_decoder: The decoder to use, when `filename` is passed.
+:param decoder: The decoder to de-serialize with, defaults
+  to `json.loads`.
+:param decoder_kwargs: The keyword arguments to pass in to the decoder.
+
+:return: a `{name}` instance, or a list of `{name}` instances.
+"""
 
     def __convert_to_dict__(o):
         """
@@ -44,6 +96,9 @@ def __add_common_methods__(name, bases, cls_dict, *,
 
     # we need to add both `to_dict` and `to_attr_dict` in this case.
     if has_attr_dict:
+
+        def __object_hook(d):
+            return cls(d, check_types=False)
 
         def __convert_to_dict_snake_cased__(o):
             """
@@ -152,6 +207,9 @@ Serialize the :class:`{name}` instance as a JSON string.
     # we only need to add a `to_dict` method in this case.
     else:
 
+        def __object_hook(d):
+            return cls(d, __set_dict=True)
+
         def to_json(o, filename=None, encoding='utf-8', errors='strict',
                     file_encoder=json.dump,
                     encoder=json.dumps, **encoder_kwargs):
@@ -188,7 +246,8 @@ Serialize the :class:`{name}` instance as a JSON string.
         )
 
     # finally, build and return the new class.
-    return type(name, bases, cls_dict)
+    cls = type(name, bases, cls_dict)
+    return cls
 
 
 def __resolve_value__(value, dict_type, check_lists=True):

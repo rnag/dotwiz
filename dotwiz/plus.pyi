@@ -103,17 +103,6 @@ def __ior_impl__(self: DotWizPlus,
                  *, check_lists=True,
                  __update: _Update = dict.update): ...
 
-def __from_json__(json_string: str = ..., *,
-                  filename: str | PathLike = ...,
-                  encoding: str = ...,
-                  errors: str = ...,
-                  multiline: bool = False,
-                  file_decoder=json.load,
-                  decoder=json.loads,
-                  __object_hook = ...,
-                  **decoder_kwargs
-                  ) -> Union[DotWizPlus, list[DotWizPlus]]: ...
-
 
 class DotWizPlus:
 
@@ -160,12 +149,24 @@ class DotWizPlus:
                        multiline: bool = False,
                        file_decoder=json.load,
                        decoder=json.loads,
-                       __object_hook=...,
                        **decoder_kwargs
                   ) -> Union[DotWizPlus, list[DotWizPlus]]:
         """
-        De-serialize a JSON string into a :class:`DotWizPlus` instance, or a
-        list of :class:`DotWizPlus` instances.
+        De-serialize a JSON string (or file) into a :class:`DotWizPlus`
+        instance, or a list of :class:`DotWizPlus` instances.
+
+        :param json_string: The JSON string to de-serialize.
+        :param filename: If provided, will instead read from a file.
+        :param encoding: File encoding.
+        :param errors: How to handle encoding errors.
+        :param multiline: If enabled, reads the file in JSONL format,
+          i.e. where each line in the file represents a JSON object.
+        :param file_decoder: The decoder to use, when `filename` is passed.
+        :param decoder: The decoder to de-serialize with, defaults
+          to `json.loads`.
+        :param decoder_kwargs: The keyword arguments to pass in to the decoder.
+
+        :return: a `DotWizPlus` instance, or a list of `DotWizPlus` instances.
         """
         ...
 
