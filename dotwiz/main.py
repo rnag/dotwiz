@@ -1,8 +1,9 @@
 """Main module."""
-import json
 
 from .common import (
-    __resolve_value__, __add_common_methods__,
+    __add_common_methods__,
+    __resolve_value__,
+    __set__,
 )
 from .constants import __PY_38_OR_ABOVE__, __PY_39_OR_ABOVE__
 
@@ -27,7 +28,6 @@ def make_dot_wiz(*args, **kwargs):
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz__(self, input_dict={},
                             check_lists=True,
-                            __set=object.__setattr__,
                             __set_dict=False,
                             **kwargs):
     """
@@ -36,7 +36,7 @@ def __upsert_into_dot_wiz__(self, input_dict={},
 
     """
     if __set_dict:
-        __set(self, '__dict__', input_dict)
+        __set__(self, '__dict__', input_dict)
         return None
 
     __dict = self.__dict__

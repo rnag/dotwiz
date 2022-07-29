@@ -17,7 +17,6 @@ _JSONList = list[Any]
 _JSONObject = dict[str, Any]
 
 _Copy = Callable[[dict[_KT, _VT]], dict[_KT, _VT]]
-_SetAttribute = Callable[[DotWiz, str, Any], None]
 
 
 class Encoder(Protocol):
@@ -50,7 +49,6 @@ def make_dot_wiz(*args: Iterable[_KT, _VT],
 def __upsert_into_dot_wiz__(self: DotWiz,
                             input_dict: MutableMapping[_KT, _VT] = {},
                             *, check_lists=True,
-                            __set: _SetAttribute = object.__setattr__,
                             __set_dict=False,
                             **kwargs: _T) -> None: ...
 
@@ -86,7 +84,6 @@ class DotWiz:
     def __init__(self,
                  input_dict: MutableMapping[_KT, _VT] = {},
                  *, check_lists=True,
-                 __set: _SetAttribute = object.__setattr__,
                  __set_dict=False,
                  **kwargs: _T) -> None: ...
 
@@ -208,7 +205,6 @@ class DotWiz:
     def update(self,
                __m: MutableMapping[_KT, _VT] = {},
                *, check_lists=True,
-               __set: _SetAttribute = object.__setattr__,
                __set_dict=False,
                **kwargs: _T) -> None: ...
 

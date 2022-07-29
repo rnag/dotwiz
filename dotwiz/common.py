@@ -7,6 +7,10 @@ from typing import Callable
 from dotwiz.encoders import DotWizEncoder, DotWizPlusEncoder
 
 
+# noinspection PyTypeChecker
+__set__ = object.__setattr__
+
+
 def __add_common_methods__(name, bases, cls_dict, *,
                            print_char='*',
                            has_attr_dict=False):
@@ -29,7 +33,7 @@ def __add_common_methods__(name, bases, cls_dict, *,
     #   - `to_json`       - serialize an instance as a JSON string.
     #   - `to_attr_dict`  - optional, only if `has_attr_dict` is specified.
 
-    cls: type
+    __cls__: type
     __object_hook__: Callable
 
     def __from_json__(json_string=None, filename=None,
@@ -98,7 +102,7 @@ or a list of :class:`{name}` instances.
     if has_attr_dict:
 
         def __object_hook__(d):
-            return cls(d, check_types=False)
+            return __cls__(d, check_types=False)
 
         def __convert_to_dict_snake_cased__(o):
             """
@@ -208,7 +212,7 @@ Serialize the :class:`{name}` instance as a JSON string.
     else:
 
         def __object_hook__(d):
-            return cls(d, __set_dict=True)
+            return __cls__(d, __set_dict=True)
 
         def to_json(o, filename=None, encoding='utf-8', errors='strict',
                     file_encoder=json.dump,
@@ -246,8 +250,8 @@ Serialize the :class:`{name}` instance as a JSON string.
         )
 
     # finally, build and return the new class.
-    cls = type(name, bases, cls_dict)
-    return cls
+    __cls__ = type(name, bases, cls_dict)
+    return __cls__
 
 
 def __resolve_value__(value, dict_type, check_lists=True):

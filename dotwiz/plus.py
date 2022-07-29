@@ -1,12 +1,13 @@
 """Dot Wiz Plus module."""
 import itertools
-import json
 import keyword
 
 from pyheck import snake
 
 from .common import (
-    __resolve_value__, __add_common_methods__,
+    __add_common_methods__,
+    __resolve_value__,
+    __set__,
 )
 from .constants import __PY_38_OR_ABOVE__, __PY_39_OR_ABOVE__
 
@@ -104,7 +105,6 @@ def __upsert_into_dot_wiz_plus__(self, input_dict={},
                                  check_lists=True,
                                  check_types=True,
                                  __skip_init=False,
-                                 __set=object.__setattr__,
                                  **kwargs):
     """
     Helper method to generate / update a :class:`DotWizPlus` (dot-access dict)
@@ -124,11 +124,11 @@ def __upsert_into_dot_wiz_plus__(self, input_dict={},
 
     # create the instance attribute `__orig_dict__`
     __orig_dict = {}
-    __set(self, '__orig_dict__', __orig_dict)
+    __set__(self, '__orig_dict__', __orig_dict)
 
     # create the instance attribute `__orig_keys__`
     __orig_keys = {}
-    __set(self, '__orig_keys__', __orig_keys)
+    __set__(self, '__orig_keys__', __orig_keys)
 
     if check_types:
 
@@ -187,7 +187,7 @@ else:  # Python < 3.8, pragma: no cover
 
 
 if __PY_39_OR_ABOVE__:  # Python >= 3.9, pragma: no cover
-    def __merge_impl_fn__(op, check_lists=True, __set=object.__setattr__):
+    def __merge_impl_fn__(op, check_lists=True):
         """Implementation of `__or__` and `__ror__`, to merge `DotWizPlus` and `dict` objects."""
 
         def __merge_impl__(self, other):
@@ -202,9 +202,9 @@ if __PY_39_OR_ABOVE__:  # Python >= 3.9, pragma: no cover
             __merged_orig_keys = op(self.__orig_keys__, other.__orig_keys__)
 
             __merged = DotWizPlus(__skip_init=True)
-            __set(__merged, '__dict__', __merged_dict)
-            __set(__merged, '__orig_dict__', __merged_orig_dict)
-            __set(__merged, '__orig_keys__', __merged_orig_keys)
+            __set__(__merged, '__dict__', __merged_dict)
+            __set__(__merged, '__orig_dict__', __merged_orig_dict)
+            __set__(__merged, '__orig_keys__', __merged_orig_keys)
 
             return __merged
 
@@ -217,7 +217,7 @@ else:  # Python < 3.9, pragma: no cover
     # Note: this is *before* Union operators were introduced to `dict`,
     # in https://peps.python.org/pep-0584/
 
-    def __or_impl__(self, other, check_lists=True, __set=object.__setattr__):
+    def __or_impl__(self, other, check_lists=True):
         """Implementation of `__or__` to merge `DotWizPlus` and `dict` objects."""
         __other_dict = getattr(other, '__dict__', None)
 
@@ -230,13 +230,13 @@ else:  # Python < 3.9, pragma: no cover
         __merged_orig_keys = {**self.__orig_keys__, **other.__orig_keys__}
 
         __merged = DotWizPlus(__skip_init=True)
-        __set(__merged, '__dict__', __merged_dict)
-        __set(__merged, '__orig_dict__', __merged_orig_dict)
-        __set(__merged, '__orig_keys__', __merged_orig_keys)
+        __set__(__merged, '__dict__', __merged_dict)
+        __set__(__merged, '__orig_dict__', __merged_orig_dict)
+        __set__(__merged, '__orig_keys__', __merged_orig_keys)
 
         return __merged
 
-    def __ror_impl__(self, other, check_lists=True, __set=object.__setattr__):
+    def __ror_impl__(self, other, check_lists=True):
         """Implementation of `__ror__` to merge `DotWizPlus` and `dict` objects."""
         __other_dict = getattr(other, '__dict__', None)
 
@@ -249,9 +249,9 @@ else:  # Python < 3.9, pragma: no cover
         __merged_orig_keys = {**other.__orig_keys__, **self.__orig_keys__}
 
         __merged = DotWizPlus(__skip_init=True)
-        __set(__merged, '__dict__', __merged_dict)
-        __set(__merged, '__orig_dict__', __merged_orig_dict)
-        __set(__merged, '__orig_keys__', __merged_orig_keys)
+        __set__(__merged, '__dict__', __merged_dict)
+        __set__(__merged, '__orig_dict__', __merged_orig_dict)
+        __set__(__merged, '__orig_keys__', __merged_orig_keys)
 
         return __merged
 
@@ -402,16 +402,16 @@ class DotWizPlus(metaclass=__add_common_methods__,
 
         return __clear(self.__dict__)
 
-    def copy(self, __copy=dict.copy, __set=object.__setattr__):
+    def copy(self, __copy=dict.copy):
         """
         Returns a shallow copy of the `dict` wrapped in :class:`DotWizPlus`.
 
         :return: DotWizPlus instance
         """
         dw = DotWizPlus(__skip_init=True)
-        __set(dw, '__dict__', __copy(self.__dict__))
-        __set(dw, '__orig_dict__', __copy(self.__orig_dict__))
-        __set(dw, '__orig_keys__', __copy(self.__orig_keys__))
+        __set__(dw, '__dict__', __copy(self.__dict__))
+        __set__(dw, '__orig_dict__', __copy(self.__orig_dict__))
+        __set__(dw, '__orig_keys__', __copy(self.__orig_keys__))
 
         return dw
 

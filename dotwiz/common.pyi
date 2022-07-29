@@ -1,4 +1,4 @@
-from typing import Any, Callable, ItemsView, TypeVar
+from typing import Any, Callable, ItemsView, TypeVar, Union
 
 from dotwiz import DotWiz, DotWizPlus
 
@@ -9,6 +9,9 @@ _KT = TypeVar('_KT')
 _VT = TypeVar('_VT')
 
 _ItemsFn = Callable[[_D ], ItemsView[_KT, _VT]]
+_SetAttribute = Callable[[Union[DotWiz, DotWizPlus], str, Any], None]
+
+__set__: _SetAttribute
 
 
 def __add_common_methods__(name: str,

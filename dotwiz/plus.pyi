@@ -18,7 +18,6 @@ _JSONObject = dict[str, Any]
 
 _Clear = Callable[[dict[_KT, _VT]], None]
 _Copy = Callable[[dict[_KT, _VT]], dict[_KT, _VT]]
-_SetAttribute = Callable[[DotWizPlus, str, Any], None]
 
 
 class Encoder(Protocol):
@@ -70,7 +69,6 @@ def __upsert_into_dot_wiz_plus__(self: DotWizPlus,
                                  *, check_lists=True,
                                  check_types=True,
                                  __skip_init=False,
-                                 __set: _SetAttribute = object.__setattr__,
                                  **kwargs: _T) -> None: ...
 
 def __setattr_impl__(self: DotWizPlus,
@@ -85,18 +83,17 @@ def __setitem_impl__(self: DotWizPlus,
 
 def __merge_impl_fn__(op: Callable[[dict, dict], dict],
                       *, check_lists=True,
-                      __set: _SetAttribute = object.__setattr__
                       ) -> Callable[[DotWizPlus, DotWizPlus | dict], DotWizPlus]: ...
 
 def __or_impl__(self: DotWizPlus,
                 other: DotWizPlus | dict,
                 *, check_lists=True,
-                __set: _SetAttribute = object.__setattr__) -> DotWizPlus: ...
+                ) -> DotWizPlus: ...
 
 def __ror_impl__(self: DotWizPlus,
                  other: DotWizPlus | dict,
                  *, check_lists=True,
-                 __set: _SetAttribute = object.__setattr__) -> DotWizPlus: ...
+                 ) -> DotWizPlus: ...
 
 def __ior_impl__(self: DotWizPlus,
                  other: DotWizPlus | dict,
@@ -218,7 +215,7 @@ class DotWizPlus:
 
     def copy(self,
              *, __copy: _Copy = dict.copy,
-             __set: _SetAttribute = object.__setattr__) -> DotWizPlus: ...
+             ) -> DotWizPlus: ...
 
     # noinspection PyUnresolvedReferences
     @classmethod
