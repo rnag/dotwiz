@@ -64,7 +64,7 @@ def __store_in_object__(__self_dict, __self_orig_dict, __self_orig_keys,
         # method name such as `items`, add an underscore to key so that
         # attribute access can then work.
         if __IS_KEYWORD(lower_key):
-            __SPECIAL_KEYS[orig_key] = key = f'{lower_key}_'
+            key = __SPECIAL_KEYS[orig_key] = f'{lower_key}_'
             __self_orig_keys[key] = orig_key
 
         # handle special cases: if the key is not lowercase, or it's not a
@@ -74,25 +74,24 @@ def __store_in_object__(__self_dict, __self_orig_dict, __self_orig_keys,
         elif not key == lower_key or not key.isidentifier():
 
             # transform key to `snake case` and cache the result.
-            lower_snake = snake(key)
+            key = snake(key)
 
             # I've noticed for keys like `a.b.c` or `a'b'c`, the result isn't
             # `a_b_c` as we'd want it to be. So for now, do the conversion
             # ourselves.
             #   See also: https://github.com/kevinheavey/pyheck/issues/10
             for ch in ('.', '\''):
-                if ch in lower_snake:
-                    lower_snake = lower_snake.replace(ch, '_').replace('__', '_')
+                if ch in key:
+                    key = key.replace(ch, '_').replace('__', '_')
 
             # note: this hurts performance a little, but in any case we need
             # to check for words with a leading digit such as `123test` -
             # since these are not valid identifiers in python, unfortunately.
-            ch = lower_snake[0]
 
-            if ch.isdigit():  # the key has a leading digit, which is invalid.
-                lower_snake = f'_{ch}{lower_snake[1:]}'
+            if key[0].isdigit():  # the key has a leading digit, which is invalid.
+                key = f'_{key}'
 
-            __SPECIAL_KEYS[orig_key] = key = lower_snake
+            __SPECIAL_KEYS[orig_key] = key
             __self_orig_keys[key] = orig_key
 
     # note: this logic is the same as `DotWizPlus.__setitem__()`

@@ -4,7 +4,7 @@ Common (shared) helpers and utilities.
 import json
 from typing import Callable
 
-from dotwiz.encoders import DotWizEncoder, DotWizPlusEncoder
+from .encoders import DotWizEncoder, DotWizPlusEncoder
 
 
 # noinspection PyTypeChecker
