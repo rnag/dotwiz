@@ -1,7 +1,7 @@
 import json
 from os import PathLike
 from typing import (
-    Callable, Protocol, TypeVar,
+    Callable, Protocol, TypeVar, Union,
     Iterable, Iterator, Reversible,
     KeysView, ItemsView, ValuesView,
     Mapping, MutableMapping, AnyStr, Any,
@@ -68,6 +68,7 @@ def __store_in_object__(__self_dict: MutableMapping[_KT, _VT],
 def __upsert_into_dot_wiz_plus__(self: DotWizPlus,
                                  input_dict: MutableMapping[_KT, _VT] = {},
                                  *, check_lists=True,
+                                 check_types=True,
                                  __skip_init=False,
                                  __set: _SetAttribute = object.__setattr__,
                                  **kwargs: _T) -> None: ...
@@ -102,6 +103,17 @@ def __ior_impl__(self: DotWizPlus,
                  *, check_lists=True,
                  __update: _Update = dict.update): ...
 
+def __from_json__(json_string: str = ..., *,
+                  filename: str | PathLike = ...,
+                  encoding: str = ...,
+                  errors: str = ...,
+                  multiline: bool = False,
+                  file_decoder=json.load,
+                  decoder=json.loads,
+                  __object_hook = ...,
+                  **decoder_kwargs
+                  ) -> Union[DotWizPlus, list[DotWizPlus]]: ...
+
 
 class DotWizPlus:
 
@@ -113,6 +125,7 @@ class DotWizPlus:
     def __init__(self,
                  input_dict: MutableMapping[_KT, _VT] = {},
                  *, check_lists=True,
+                 check_types=True,
                  __skip_init=False,
                  **kwargs: _T) -> None: ...
 
@@ -138,6 +151,23 @@ class DotWizPlus:
     def __or__(self, other: DotWizPlus | dict) -> DotWizPlus: ...
     def __ior__(self, other: DotWizPlus | dict) -> DotWizPlus: ...
     def __ror__(self, other: DotWizPlus | dict) -> DotWizPlus: ...
+
+    @classmethod
+    def from_json(cls, json_string: str = ..., *,
+                       filename: str | PathLike = ...,
+                       encoding: str = ...,
+                       errors: str = ...,
+                       multiline: bool = False,
+                       file_decoder=json.load,
+                       decoder=json.loads,
+                       __object_hook=...,
+                       **decoder_kwargs
+                  ) -> Union[DotWizPlus, list[DotWizPlus]]:
+        """
+        De-serialize a JSON string into a :class:`DotWizPlus` instance, or a
+        list of :class:`DotWizPlus` instances.
+        """
+        ...
 
     def to_dict(self, *, snake=False) -> dict[_KT, _VT]:
         """
@@ -223,6 +253,7 @@ class DotWizPlus:
     def update(self,
                __m: MutableMapping[_KT, _VT] = {},
                *, check_lists=True,
+               check_types=True,
                __skip_init=False,
                **kwargs: _T) -> None: ...
 

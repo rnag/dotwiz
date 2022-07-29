@@ -1,4 +1,5 @@
 """Main module."""
+import json
 
 from .common import (
     __resolve_value__, __add_common_methods__,
@@ -25,12 +26,19 @@ def make_dot_wiz(*args, **kwargs):
 
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz__(self, input_dict={},
-                            check_lists=True, **kwargs):
+                            check_lists=True,
+                            __set=object.__setattr__,
+                            __set_dict=False,
+                            **kwargs):
     """
     Helper method to generate / update a :class:`DotWiz` (dot-access dict)
     from a Python ``dict`` object, and optional *keyword arguments*.
 
     """
+    if __set_dict:
+        __set(self, '__dict__', input_dict)
+        return None
+
     __dict = self.__dict__
 
     if kwargs:
@@ -79,7 +87,7 @@ else:  # Python < 3.8, pragma: no cover
 
 
 if __PY_39_OR_ABOVE__:  # Python >= 3.9, pragma: no cover
-    def __merge_impl_fn__(op, check_lists=True, __set=object.__setattr__):
+    def __merge_impl_fn__(op, check_lists=True):
         """Implementation of `__or__` and `__ror__`, to merge `DotWiz` and `dict` objects."""
 
         def __merge_impl__(self, other):
@@ -89,10 +97,7 @@ if __PY_39_OR_ABOVE__:  # Python >= 3.9, pragma: no cover
             }
             __merged_dict = op(self.__dict__, __other_dict)
 
-            __merged = DotWiz()
-            __set(__merged, '__dict__', __merged_dict)
-
-            return __merged
+            return DotWiz(__merged_dict, __set_dict=True)
 
         return __merge_impl__
 
@@ -103,7 +108,7 @@ else:  # Python < 3.9, pragma: no cover
     # Note: this is *before* Union operators were introduced to `dict`,
     # in https://peps.python.org/pep-0584/
 
-    def __or_impl__(self, other, check_lists=True, __set=object.__setattr__):
+    def __or_impl__(self, other, check_lists=True):
         """Implementation of `__or__` to merge `DotWiz` and `dict` objects."""
         __other_dict = getattr(other, '__dict__', None) or {
             k: __resolve_value__(other[k], DotWiz, check_lists)
@@ -111,12 +116,9 @@ else:  # Python < 3.9, pragma: no cover
         }
         __merged_dict = {**self.__dict__, **__other_dict}
 
-        __merged = DotWiz()
-        __set(__merged, '__dict__', __merged_dict)
+        return DotWiz(__merged_dict, __set_dict=True)
 
-        return __merged
-
-    def __ror_impl__(self, other, check_lists=True, __set=object.__setattr__):
+    def __ror_impl__(self, other, check_lists=True):
         """Implementation of `__ror__` to merge `DotWiz` and `dict` objects."""
         __other_dict = getattr(other, '__dict__', None) or {
             k: __resolve_value__(other[k], DotWiz, check_lists)
@@ -124,10 +126,7 @@ else:  # Python < 3.9, pragma: no cover
         }
         __merged_dict = {**__other_dict, **self.__dict__}
 
-        __merged = DotWiz()
-        __set(__merged, '__dict__', __merged_dict)
-
-        return __merged
+        return DotWiz(__merged_dict, __set_dict=True)
 
 
 def __ior_impl__(self, other, check_lists=True, __update=dict.update):
@@ -139,6 +138,36 @@ def __ior_impl__(self, other, check_lists=True, __update=dict.update):
     __update(self.__dict__, __other_dict)
 
     return self
+
+
+def __from_json__(json_string=None, filename=None,
+                  encoding='utf-8', errors='strict',
+                  multiline=False,
+                  file_decoder=json.load,
+                  decoder=json.loads,
+                  __object_hook=lambda d: DotWiz(d, __set_dict=True),
+                  **decoder_kwargs):
+    """
+    Helper function to create and return a :class:`DotWiz` (dot-access dict)
+    -- or a list of :class:`DotWiz` instances -- from a JSON string.
+
+    """
+    if filename:
+        with open(filename, encoding=encoding, errors=errors) as f:
+            if multiline:
+                return [
+                    decoder(line.strip(), object_hook=__object_hook,
+                            **decoder_kwargs)
+                    for line in f
+                    if line.strip() and not line.strip().startswith('#')
+                ]
+
+            else:
+                return file_decoder(f, object_hook=__object_hook,
+                                    **decoder_kwargs)
+
+    return decoder(json_string, object_hook=__object_hook,
+                   **decoder_kwargs)
 
 
 class DotWiz(metaclass=__add_common_methods__,
@@ -210,19 +239,18 @@ class DotWiz(metaclass=__add_common_methods__,
 
     __reversed__ = __reversed_impl__
 
+    from_json = __from_json__
+
     def clear(self):
         return self.__dict__.clear()
 
-    def copy(self, __copy=dict.copy, __set=object.__setattr__):
+    def copy(self, __copy=dict.copy):
         """
         Returns a shallow copy of the `dict` wrapped in :class:`DotWiz`.
 
         :return: DotWiz instance
         """
-        dw = DotWiz()
-        __set(dw, '__dict__', __copy(self.__dict__))
-
-        return dw
+        return DotWiz(__copy(self.__dict__), __set_dict=True)
 
     # noinspection PyIncorrectDocstring
     @classmethod

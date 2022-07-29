@@ -1,7 +1,7 @@
 import json
 from os import PathLike
 from typing import (
-    Callable, Protocol, TypeVar,
+    Callable, Protocol, TypeVar, Union,
     Iterable, Iterator, Reversible,
     KeysView, ItemsView, ValuesView,
     Mapping, MutableMapping, AnyStr, Any,
@@ -50,6 +50,8 @@ def make_dot_wiz(*args: Iterable[_KT, _VT],
 def __upsert_into_dot_wiz__(self: DotWiz,
                             input_dict: MutableMapping[_KT, _VT] = {},
                             *, check_lists=True,
+                            __set: _SetAttribute = object.__setattr__,
+                            __set_dict=False,
                             **kwargs: _T) -> None: ...
 
 def __setitem_impl__(self: DotWiz,
@@ -58,24 +60,35 @@ def __setitem_impl__(self: DotWiz,
                      *, check_lists=True) -> None: ...
 
 def __merge_impl_fn__(op: Callable[[dict, dict], dict],
-                      *, check_lists=True,
-                      __set: _SetAttribute = object.__setattr__
+                      *,
+                      check_lists=True
                       ) -> Callable[[DotWiz, DotWiz | dict], DotWiz]: ...
 
 def __or_impl__(self: DotWiz,
                 other: DotWiz | dict,
-                *, check_lists=True,
-                __set: _SetAttribute = object.__setattr__) -> DotWiz: ...
+                *, check_lists=True
+                ) -> DotWiz: ...
 
 def __ror_impl__(self: DotWiz,
                  other: DotWiz | dict,
-                 *, check_lists=True,
-                 __set: _SetAttribute = object.__setattr__) -> DotWiz: ...
+                 *, check_lists=True
+                 ) -> DotWiz: ...
 
 def __ior_impl__(self: DotWiz,
                  other: DotWiz | dict,
                  *, check_lists=True,
                  __update: _Update = dict.update): ...
+
+def __from_json__(json_string: str = ..., *,
+                  filename: str | PathLike = ...,
+                  encoding: str = ...,
+                  errors: str = ...,
+                  multiline: bool = False,
+                  file_decoder=json.load,
+                  decoder=json.loads,
+                  __object_hook = ...,
+                  **decoder_kwargs
+                  ) -> Union[DotWiz, list[DotWiz]]: ...
 
 
 class DotWiz:
@@ -84,6 +97,8 @@ class DotWiz:
     def __init__(self,
                  input_dict: MutableMapping[_KT, _VT] = {},
                  *, check_lists=True,
+                 __set: _SetAttribute = object.__setattr__,
+                 __set_dict=False,
                  **kwargs: _T) -> None: ...
 
     def __bool__(self) -> bool: ...
@@ -108,6 +123,23 @@ class DotWiz:
     def __or__(self, other: DotWiz | dict) -> DotWiz: ...
     def __ior__(self, other: DotWiz | dict) -> DotWiz: ...
     def __ror__(self, other: DotWiz | dict) -> DotWiz: ...
+
+    @classmethod
+    def from_json(cls, json_string: str = ..., *,
+                       filename: str | PathLike = ...,
+                       encoding: str = ...,
+                       errors: str = ...,
+                       multiline: bool = False,
+                       file_decoder=json.load,
+                       decoder=json.loads,
+                       __object_hook=...,
+                       **decoder_kwargs
+                  ) -> Union[DotWiz, list[DotWiz]]:
+        """
+        De-serialize a JSON string into a :class:`DotWiz` instance, or a list
+        of :class:`DotWiz` instances.
+        """
+        ...
 
     def to_dict(self) -> dict[_KT, _VT]:
         """
@@ -139,8 +171,7 @@ class DotWiz:
     def clear(self) -> None: ...
 
     def copy(self,
-             *, __copy: _Copy = dict.copy,
-             __set: _SetAttribute = object.__setattr__) -> DotWiz: ...
+             *, __copy: _Copy = dict.copy) -> DotWiz: ...
 
     # noinspection PyUnresolvedReferences
     @classmethod
@@ -176,6 +207,8 @@ class DotWiz:
     def update(self,
                __m: MutableMapping[_KT, _VT] = {},
                *, check_lists=True,
+               __set: _SetAttribute = object.__setattr__,
+               __set_dict=False,
                **kwargs: _T) -> None: ...
 
     def values(self) -> ValuesView: ...

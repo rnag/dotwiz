@@ -168,6 +168,74 @@ def test_dotwiz_plus_update_with_no_args():
     assert dd.a == 2
 
 
+def test_from_json():
+    """Confirm intended functionality of `DotWizPlus.from_json`"""
+
+    dw = DotWizPlus.from_json("""
+    {
+        "key": {"nested": "value"},
+        "second-key": [3, {"nestedKey": true}]
+    }
+    """)
+
+    assert dw == DotWizPlus(
+        {
+            'key': {'nested': 'value'},
+            'second-key': [3, {'nestedKey': True}]
+        }
+    )
+
+    assert dw.second_key[1].nested_key
+
+
+def test_from_json_with_filename(mock_file_open):
+    """
+    Confirm intended functionality of `DotWizPlus.from_json` when `filename`
+    is passed.
+    """
+
+    file_contents = """
+    {
+        "key": {"nested": "value"},
+        "second-key": [3, {"nestedKey": true}]
+    }
+    """
+
+    mock_file_open.read_data = file_contents
+
+    dw = DotWizPlus.from_json(filename='test.json')
+
+    assert dw == DotWizPlus(
+        {
+            'key': {'nested': 'value'},
+            'second-key': [3, {'nestedKey': True}]
+        }
+    )
+
+    assert dw.second_key[1].nested_key
+
+
+def test_from_json_with_multiline(mock_file_open):
+    """
+    Confirm intended functionality of `DotWizPlus.from_json` when `filename`
+    is passed, and `multiline` is enabled.
+    """
+
+    file_contents = """
+    {"key": {"nested": "value"}}
+    {"second-key": [3, {"nestedKey": true}]}
+    """
+
+    mock_file_open.read_data = file_contents
+
+    dw_list = DotWizPlus.from_json(filename='test.json', multiline=True)
+
+    assert dw_list == [DotWizPlus(key={'nested': 'value'}),
+                       DotWizPlus({'second-key': [3, {'nestedKey': True}]})]
+
+    assert dw_list[1].second_key[1].nested_key
+
+
 def test_dotwiz_plus_to_dict():
     """Confirm intended functionality of `DotWizPlus.to_dict`"""
     dw = DotWizPlus(hello=[{"Key": "value", "Another-KEY": {"a": "b"}}],

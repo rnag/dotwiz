@@ -1,5 +1,6 @@
 """Dot Wiz Plus module."""
 import itertools
+import json
 import keyword
 
 from pyheck import snake
@@ -101,6 +102,7 @@ def __store_in_object__(__self_dict, __self_orig_dict, __self_orig_keys,
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz_plus__(self, input_dict={},
                                  check_lists=True,
+                                 check_types=True,
                                  __skip_init=False,
                                  __set=object.__setattr__,
                                  **kwargs):
@@ -128,21 +130,28 @@ def __upsert_into_dot_wiz_plus__(self, input_dict={},
     __orig_keys = {}
     __set(self, '__orig_keys__', __orig_keys)
 
-    for key in input_dict:
-        # note: this logic is the same as `__resolve_value__()`
-        #
-        # *however*, I decided to inline it because it's actually faster
-        # to eliminate a function call here.
-        value = input_dict[key]
-        t = type(value)
+    if check_types:
 
-        if t is dict:
-            # noinspection PyArgumentList
-            value = DotWizPlus(value, check_lists)
-        elif check_lists and t is list:
-            value = [__resolve_value__(e, DotWizPlus) for e in value]
+        for key in input_dict:
+            # note: this logic is the same as `__resolve_value__()`
+            #
+            # *however*, I decided to inline it because it's actually faster
+            # to eliminate a function call here.
+            value = input_dict[key]
+            t = type(value)
 
-        __store_in_object__(__dict, __orig_dict, __orig_keys, key, value)
+            if t is dict:
+                # noinspection PyArgumentList
+                value = DotWizPlus(value, check_lists)
+            elif check_lists and t is list:
+                value = [__resolve_value__(e, DotWizPlus) for e in value]
+
+            __store_in_object__(__dict, __orig_dict, __orig_keys, key, value)
+
+    else:  # don't check for any nested `dict` and `list` types
+
+        for key, value in input_dict.items():
+            __store_in_object__(__dict, __orig_dict, __orig_keys, key, value)
 
 
 def __setattr_impl__(self, item, value, check_lists=True):
@@ -268,6 +277,36 @@ def __ior_impl__(self, other, check_lists=True, __update=dict.update):
     return self
 
 
+def __from_json__(json_string=None, filename=None,
+                  encoding='utf-8', errors='strict',
+                  multiline=False,
+                  file_decoder=json.load,
+                  decoder=json.loads,
+                  __object_hook=lambda d: DotWizPlus(d, check_types=False),
+                  **decoder_kwargs):
+    """
+    Helper function to create and return a :class:`DotWiz` (dot-access dict)
+    -- or a list of :class:`DotWiz` instances -- from a JSON string.
+
+    """
+    if filename:
+        with open(filename, encoding=encoding, errors=errors) as f:
+            if multiline:
+                return [
+                    decoder(line.strip(), object_hook=__object_hook,
+                            **decoder_kwargs)
+                    for line in f
+                    if line.strip() and not line.strip().startswith('#')
+                ]
+
+            else:
+                return file_decoder(f, object_hook=__object_hook,
+                                    **decoder_kwargs)
+
+    return decoder(json_string, object_hook=__object_hook,
+                   **decoder_kwargs)
+
+
 class DotWizPlus(metaclass=__add_common_methods__,
                  print_char='✪',
                  has_attr_dict=True):
@@ -384,6 +423,8 @@ class DotWizPlus(metaclass=__add_common_methods__,
     __ror__ = __ror_impl__
 
     __reversed__ = __reversed_impl__
+
+    from_json = __from_json__
 
     def clear(self, __clear=dict.clear):
         __clear(self.__orig_dict__)
