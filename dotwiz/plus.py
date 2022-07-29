@@ -328,6 +328,8 @@ class DotWizPlus(metaclass=__add_common_methods__,
         {'Key 1': [{'3D': {'with': 2}}], 'keyTwo': '5', 'r-2!@d.2?': 3.21}
         >>> dw.to_attr_dict()
         {'key_1': [{'_3d': {'with_': 2}}], 'key_two': '5', 'r_2_d_2': 3.21}
+        >>> dw.to_json(snake=True)
+        '{"key_1": [{"3d": {"with": 2}}], "key_two": "5", "r_2_d_2": 3.21}'
 
     **Issues with Invalid Characters**
 

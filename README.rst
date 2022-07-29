@@ -97,6 +97,9 @@ creating a ``DotWiz`` object:
     assert dw['easy: as~ pie?']
     assert dw.AnyKey == 'value'
 
+    print(dw.to_json())
+    #> {"AnyKey": "value", "hello, world!": 123, "easy: as~ pie?": true}
+
 ``DotWizPlus``
 ~~~~~~~~~~~~~~
 
@@ -112,7 +115,7 @@ on `Issues with Invalid Characters`_ below.
     dw = DotWizPlus(my_dict)
 
     print(dw)
-    #> ✪(this=✪(_1=✪(is_=[✪(for_=✪(all_of=✪(my_fans=True)))])))
+    # >  ✪(this=✪(_1=✪(is_=[✪(for_=✪(all_of=✪(my_fans=True)))])))
 
     # True
     assert dw.this._1.is_[0].for_.all_of.my_fans
@@ -121,10 +124,13 @@ on `Issues with Invalid Characters`_ below.
     assert dw['THIS']['1']['is'][0]['For']['AllOf']['My !@ Fans!']
 
     print(dw.to_dict())
-    # {'THIS': {'1': {'is': [{'For': {'AllOf': {'My !@ Fans!': True}}}]}}}
+    # >  {'THIS': {'1': {'is': [{'For': {'AllOf': {'My !@ Fans!': True}}}]}}}
 
     print(dw.to_attr_dict())
-    # {'this': {'_1': {'is_': [{'for_': {'all_of': {'my_fans': True}}}]}}}
+    # >  {'this': {'_1': {'is_': [{'for_': {'all_of': {'my_fans': True}}}]}}
+
+    print(dw.to_json(snake=True))
+    # >  {"this": {"1": {"is": [{"for": {"all_of": {"my_fans": true}}}]}}}
 
 Issues with Invalid Characters
 ******************************

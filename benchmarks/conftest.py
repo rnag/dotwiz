@@ -26,6 +26,10 @@ def parse_to_ns():
 
 @pytest.fixture
 def ns_to_dict():
+    """
+    Return a helper function to convert a `SimpleNamespace` object to
+    a `dict`.
+    """
 
     def to_dict(ns):
         """Recursively converts a `SimpleNamespace` object to a `dict`."""
