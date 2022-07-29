@@ -42,11 +42,17 @@ are made safe for attribute access:
     # the original keys can also be accessed like a normal `dict`, if needed
     assert dw['items']['To']['1NFINITY']['AND']['Beyond  !! ']
 
-    print(dw.to_dict())
+    print('to_dict() ->', dw.to_dict())
     # >  {'items': {'camelCase': 1, 'TitleCase': 2, ...}}
 
-    print(dw.to_attr_dict())
+    print('to_attr_dict() ->', dw.to_attr_dict())
     # >  {'items_': {'camel_case': 1, 'title_case': 2, ...}}
+
+    # get a JSON string representation with snake-cased keys, which strips out
+    # underscores from the ends, such as for `and_` or `_42`.
+
+    print('to_json(snake=True) ->', dw.to_json(snake=True))
+    # >  {"items": {"camel_case": 1, "title_case": 2, ...}}
 
 Complete Example
 ~~~~~~~~~~~~~~~~
