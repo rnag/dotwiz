@@ -30,7 +30,7 @@ def __add_common_methods__(name, bases, cls_dict, *,
     #   - `to_attr_dict`  - optional, only if `has_attr_dict` is specified.
 
     cls: type
-    __object_hook: Callable
+    __object_hook__: Callable
 
     def __from_json__(json_string=None, filename=None,
                       encoding='utf-8', errors='strict',
@@ -46,17 +46,17 @@ def __add_common_methods__(name, bases, cls_dict, *,
             with open(filename, encoding=encoding, errors=errors) as f:
                 if multiline:
                     return [
-                        decoder(line.strip(), object_hook=__object_hook,
+                        decoder(line.strip(), object_hook=__object_hook__,
                                 **decoder_kwargs)
                         for line in f
                         if line.strip() and not line.strip().startswith('#')
                     ]
 
                 else:
-                    return file_decoder(f, object_hook=__object_hook,
+                    return file_decoder(f, object_hook=__object_hook__,
                                         **decoder_kwargs)
 
-        return decoder(json_string, object_hook=__object_hook,
+        return decoder(json_string, object_hook=__object_hook__,
                        **decoder_kwargs)
 
     # add a `from_json` method to the class.
@@ -97,7 +97,7 @@ or a list of :class:`{name}` instances.
     # we need to add both `to_dict` and `to_attr_dict` in this case.
     if has_attr_dict:
 
-        def __object_hook(d):
+        def __object_hook__(d):
             return cls(d, check_types=False)
 
         def __convert_to_dict_snake_cased__(o):
@@ -207,7 +207,7 @@ Serialize the :class:`{name}` instance as a JSON string.
     # we only need to add a `to_dict` method in this case.
     else:
 
-        def __object_hook(d):
+        def __object_hook__(d):
             return cls(d, __set_dict=True)
 
         def to_json(o, filename=None, encoding='utf-8', errors='strict',
