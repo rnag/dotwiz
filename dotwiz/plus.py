@@ -109,6 +109,19 @@ def __upsert_into_dot_wiz_plus__(self, input_dict={},
     Helper method to generate / update a :class:`DotWizPlus` (dot-access dict)
     from a Python ``dict`` object, and optional *keyword arguments*.
 
+    :param input_dict: Input `dict` object to process the key-value pairs of.
+    :param check_lists: False to not check for nested `list` values. Defaults
+      to True.
+    :param check_types: False to not check for nested `dict` and `list` values.
+      This is a minor performance improvement, if we know an input `dict` only
+      contains simple values, and no nested `dict` or `list` values.
+      Defaults to True.
+    :param __skip_init: True to simply return, and skip the initialization
+      logic. This is useful to create an empty `DotWizPlus` instance.
+      Defaults to False.
+    :param kwargs: Additional keyword arguments to process, in addition to
+      `input_dict`.
+
     """
     if __skip_init:
         return None

@@ -113,7 +113,24 @@ class DotWizPlus:
                  *, check_lists=True,
                  check_types=True,
                  __skip_init=False,
-                 **kwargs: _T) -> None: ...
+                 **kwargs: _T) -> None:
+        """Create a new :class:`DotWizPlus` instance.
+
+        :param input_dict: Input `dict` object to process the key-value pairs of.
+        :param check_lists: False to not check for nested `list` values. Defaults
+          to True.
+        :param check_types: False to not check for nested `dict` and `list` values.
+          This is a minor performance improvement, if we know an input `dict` only
+          contains simple values, and no nested `dict` or `list` values.
+          Defaults to True.
+        :param __skip_init: True to simply return, and skip the initialization
+          logic. This is useful to create an empty `DotWizPlus` instance.
+          Defaults to False.
+        :param kwargs: Additional keyword arguments to process, in addition to
+          `input_dict`.
+
+        """
+        ...
 
     def __bool__(self) -> bool: ...
     def __contains__(self, item: _KT) -> bool: ...
