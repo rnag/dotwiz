@@ -85,7 +85,21 @@ class DotWiz:
                  input_dict: MutableMapping[_KT, _VT] = {},
                  *, check_lists=True,
                  __set_dict=False,
-                 **kwargs: _T) -> None: ...
+                 **kwargs: _T) -> None:
+        """Create a new :class:`DotWiz` instance.
+
+        :param input_dict: Input `dict` object to process the key-value pairs of.
+        :param check_lists: False to not check for nested `list` values. Defaults
+          to True.
+        :param __set_dict: True to use `input_dict` as is, and skip the bulk of
+          the initialization logic, such as iterating over the key-value pairs.
+          This is a huge performance improvement, if we know an input `dict`
+          only contains simple values, and no nested `dict` or `list` values.
+        :param kwargs: Additional keyword arguments to process, in addition to
+          `input_dict`.
+
+        """
+        ...
 
     def __bool__(self) -> bool: ...
     def __contains__(self, item: _KT) -> bool: ...
