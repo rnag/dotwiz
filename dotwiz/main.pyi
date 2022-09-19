@@ -48,8 +48,9 @@ def make_dot_wiz(*args: Iterable[_KT, _VT],
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz__(self: DotWiz,
                             input_dict: MutableMapping[_KT, _VT] = {},
-                            *, _check_lists=True,
-                            _set_dict=False,
+                            *,
+                            _check_lists=True,
+                            _check_types=True,
                             **kwargs: _T) -> None: ...
 
 def __setitem_impl__(self: DotWiz,
@@ -85,14 +86,15 @@ class DotWiz(Generic[_KT, _VT]):
                  input_dict: MutableMapping[_KT, _VT] = {},
                  *,
                  _check_lists=True,
-                 _set_dict=False,
+                 _check_types=True,
                  **kwargs: _T) -> None:
         """Create a new :class:`DotWiz` instance.
 
         :param input_dict: Input `dict` object to process the key-value pairs of.
         :param _check_lists: False to not check for nested `list` values. Defaults
           to True.
-        :param _set_dict: True to use `input_dict` as is, and skip the bulk of
+        :param _check_types: False to not check for nested `dict` and `list` values.
+          In this case, we use `input_dict` as is, and skip the bulk of
           the initialization logic, such as iterating over the key-value pairs.
           This is a huge performance improvement, if we know an input `dict`
           only contains simple values, and no nested `dict` or `list` values.
@@ -222,7 +224,7 @@ class DotWiz(Generic[_KT, _VT]):
                __m: MutableMapping[_KT, _VT] = {},
                *,
                _check_lists=True,
-               _set_dict=False,
+               _check_types=True,
                **kwargs: _T) -> None: ...
 
     def values(self) -> ValuesView: ...

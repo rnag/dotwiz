@@ -19,6 +19,7 @@ from benchmarks.models import MyClass
 
 
 # Mark all benchmarks in this module, and assign them to the specified group.
+#   use with: `pytest benchmarks -m create`
 pytestmark = [pytest.mark.create,
               pytest.mark.benchmark(group='create')]
 
@@ -87,6 +88,17 @@ def test_dotwiz_without_check_lists(benchmark, my_data):
 
     # instead, dict access should work fine:
     assert result.c.bb[0]['x'] == 77
+
+
+def test_dotwiz_without_check_types(benchmark, my_data):
+    result = benchmark(dotwiz.DotWiz, my_data, _check_types=False)
+    # print(result)
+
+    # now, `dict`s and `lists` nested within the input `dict` won't work
+    # assert result.c.bb[0].x == 77
+
+    # instead, dict access should work fine:
+    assert result.c['bb'][0]['x'] == 77
 
 
 def test_make_dot_wiz(benchmark, my_data):
