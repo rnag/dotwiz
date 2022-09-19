@@ -5,12 +5,12 @@ from typing import (
     Iterable, Iterator, Reversible,
     KeysView, ItemsView, ValuesView,
     Mapping, MutableMapping, AnyStr, Any,
-    overload,
+    overload, Generic,
 )
 
 _T = TypeVar('_T')
-_KT = TypeVar('_KT')
-_VT = TypeVar('_VT')
+_KT = TypeVar('_KT')  # Key type.
+_VT = TypeVar('_VT')  # Value type.
 
 # Valid collection types in JSON.
 _JSONList = list[Any]
@@ -48,8 +48,8 @@ def make_dot_wiz(*args: Iterable[_KT, _VT],
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz__(self: DotWiz,
                             input_dict: MutableMapping[_KT, _VT] = {},
-                            *, check_lists=True,
-                            __set_dict=False,
+                            *, _check_lists=True,
+                            _set_dict=False,
                             **kwargs: _T) -> None: ...
 
 def __setitem_impl__(self: DotWiz,
@@ -78,20 +78,21 @@ def __ior_impl__(self: DotWiz,
                  __update: _Update = dict.update): ...
 
 
-class DotWiz:
+class DotWiz(Generic[_KT, _VT]):
 
     # noinspection PyDefaultArgument
     def __init__(self,
                  input_dict: MutableMapping[_KT, _VT] = {},
-                 *, check_lists=True,
-                 __set_dict=False,
+                 *,
+                 _check_lists=True,
+                 _set_dict=False,
                  **kwargs: _T) -> None:
         """Create a new :class:`DotWiz` instance.
 
         :param input_dict: Input `dict` object to process the key-value pairs of.
-        :param check_lists: False to not check for nested `list` values. Defaults
+        :param _check_lists: False to not check for nested `list` values. Defaults
           to True.
-        :param __set_dict: True to use `input_dict` as is, and skip the bulk of
+        :param _set_dict: True to use `input_dict` as is, and skip the bulk of
           the initialization logic, such as iterating over the key-value pairs.
           This is a huge performance improvement, if we know an input `dict`
           only contains simple values, and no nested `dict` or `list` values.
@@ -212,14 +213,16 @@ class DotWiz:
     def popitem(self) -> tuple[_KT, _VT]: ...
 
     def setdefault(self, k: _KT, default=None,
-                   *, check_lists=True,
+                   *,
+                   check_lists=True,
                    __get=dict.get) -> _VT: ...
 
     # noinspection PyDefaultArgument
     def update(self,
                __m: MutableMapping[_KT, _VT] = {},
-               *, check_lists=True,
-               __set_dict=False,
+               *,
+               _check_lists=True,
+               _set_dict=False,
                **kwargs: _T) -> None: ...
 
     def values(self) -> ValuesView: ...

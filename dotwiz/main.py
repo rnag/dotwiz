@@ -27,17 +27,17 @@ def make_dot_wiz(*args, **kwargs):
 
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz__(self, input_dict={},
-                            check_lists=True,
-                            __set_dict=False,
+                            _check_lists=True,
+                            _set_dict=False,
                             **kwargs):
     """
     Helper method to generate / update a :class:`DotWiz` (dot-access dict)
     from a Python ``dict`` object, and optional *keyword arguments*.
 
     :param input_dict: Input `dict` object to process the key-value pairs of.
-    :param check_lists: False to not check for nested `list` values. Defaults
+    :param _check_lists: False to not check for nested `list` values. Defaults
       to True.
-    :param __set_dict: True to use `input_dict` as is, and skip the bulk of
+    :param _set_dict: True to use `input_dict` as is, and skip the bulk of
       the initialization logic, such as iterating over the key-value pairs.
       This is a huge performance improvement, if we know an input `dict`
       only contains simple values, and no nested `dict` or `list` values.
@@ -45,7 +45,7 @@ def __upsert_into_dot_wiz__(self, input_dict={},
       `input_dict`.
 
     """
-    if __set_dict:
+    if _set_dict:
         __set__(self, '__dict__', input_dict)
         return None
 
@@ -69,8 +69,8 @@ def __upsert_into_dot_wiz__(self, input_dict={},
 
         if t is dict:
             # noinspection PyArgumentList
-            value = DotWiz(value, check_lists)
-        elif check_lists and t is list:
+            value = DotWiz(value, _check_lists)
+        elif _check_lists and t is list:
             value = [__resolve_value__(e, DotWiz) for e in value]
 
         # note: this logic is the same as `DotWiz.__setitem__()`
@@ -107,7 +107,7 @@ if __PY_39_OR_ABOVE__:  # Python >= 3.9, pragma: no cover
             }
             __merged_dict = op(self.__dict__, __other_dict)
 
-            return DotWiz(__merged_dict, __set_dict=True)
+            return DotWiz(__merged_dict, _set_dict=True)
 
         return __merge_impl__
 
@@ -126,7 +126,7 @@ else:  # Python < 3.9, pragma: no cover
         }
         __merged_dict = {**self.__dict__, **__other_dict}
 
-        return DotWiz(__merged_dict, __set_dict=True)
+        return DotWiz(__merged_dict, _set_dict=True)
 
     def __ror_impl__(self, other, check_lists=True):
         """Implementation of `__ror__` to merge `DotWiz` and `dict` objects."""
@@ -136,7 +136,7 @@ else:  # Python < 3.9, pragma: no cover
         }
         __merged_dict = {**__other_dict, **self.__dict__}
 
-        return DotWiz(__merged_dict, __set_dict=True)
+        return DotWiz(__merged_dict, _set_dict=True)
 
 
 def __ior_impl__(self, other, check_lists=True, __update=dict.update):
@@ -228,7 +228,7 @@ class DotWiz(metaclass=__add_common_methods__,
 
         :return: DotWiz instance
         """
-        return DotWiz(__copy(self.__dict__), __set_dict=True)
+        return DotWiz(__copy(self.__dict__), _set_dict=True)
 
     # noinspection PyIncorrectDocstring
     @classmethod

@@ -79,7 +79,7 @@ def test_dotwiz(benchmark, my_data):
 
 
 def test_dotwiz_without_check_lists(benchmark, my_data):
-    result = benchmark(dotwiz.DotWiz, my_data, check_lists=False)
+    result = benchmark(dotwiz.DotWiz, my_data, _check_lists=False)
     # print(result)
 
     # now similar to `dict2dot`, `dict`s nested within `lists` won't work
@@ -104,7 +104,7 @@ def test_dotwiz_plus(benchmark, my_data):
 
 
 def test_dotwiz_plus_without_check_lists(benchmark, my_data):
-    result = benchmark(dotwiz.DotWizPlus, my_data, check_lists=False)
+    result = benchmark(dotwiz.DotWizPlus, my_data, _check_lists=False)
     # print(result)
 
     # now similar to `dict2dot`, `dict`s nested within `lists` won't work

@@ -101,29 +101,29 @@ def __store_in_object__(__self_dict, __self_orig_dict, __self_orig_keys,
 
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz_plus__(self, input_dict={},
-                                 check_lists=True,
-                                 check_types=True,
-                                 __skip_init=False,
+                                 _check_lists=True,
+                                 _check_types=True,
+                                 _skip_init=False,
                                  **kwargs):
     """
     Helper method to generate / update a :class:`DotWizPlus` (dot-access dict)
     from a Python ``dict`` object, and optional *keyword arguments*.
 
     :param input_dict: Input `dict` object to process the key-value pairs of.
-    :param check_lists: False to not check for nested `list` values. Defaults
+    :param _check_lists: False to not check for nested `list` values. Defaults
       to True.
-    :param check_types: False to not check for nested `dict` and `list` values.
+    :param _check_types: False to not check for nested `dict` and `list` values.
       This is a minor performance improvement, if we know an input `dict` only
       contains simple values, and no nested `dict` or `list` values.
       Defaults to True.
-    :param __skip_init: True to simply return, and skip the initialization
+    :param _skip_init: True to simply return, and skip the initialization
       logic. This is useful to create an empty `DotWizPlus` instance.
       Defaults to False.
     :param kwargs: Additional keyword arguments to process, in addition to
       `input_dict`.
 
     """
-    if __skip_init:
+    if _skip_init:
         return None
 
     __dict = self.__dict__
@@ -142,7 +142,7 @@ def __upsert_into_dot_wiz_plus__(self, input_dict={},
     __orig_keys = {}
     __set__(self, '__orig_keys__', __orig_keys)
 
-    if check_types:
+    if _check_types:
 
         for key in input_dict:
             # note: this logic is the same as `__resolve_value__()`
@@ -154,8 +154,8 @@ def __upsert_into_dot_wiz_plus__(self, input_dict={},
 
             if t is dict:
                 # noinspection PyArgumentList
-                value = DotWizPlus(value, check_lists)
-            elif check_lists and t is list:
+                value = DotWizPlus(value, _check_lists)
+            elif _check_lists and t is list:
                 value = [__resolve_value__(e, DotWizPlus) for e in value]
 
             __store_in_object__(__dict, __orig_dict, __orig_keys, key, value)
@@ -206,14 +206,14 @@ if __PY_39_OR_ABOVE__:  # Python >= 3.9, pragma: no cover
             __other_dict = getattr(other, '__dict__', None)
 
             if __other_dict is None:  # other is not a `DotWizPlus` instance
-                other = DotWizPlus(other, check_lists=check_lists)
+                other = DotWizPlus(other, _check_lists=check_lists)
                 __other_dict = other.__dict__
 
             __merged_dict = op(self.__dict__, __other_dict)
             __merged_orig_dict = op(self.__orig_dict__, other.__orig_dict__)
             __merged_orig_keys = op(self.__orig_keys__, other.__orig_keys__)
 
-            __merged = DotWizPlus(__skip_init=True)
+            __merged = DotWizPlus(_skip_init=True)
             __set__(__merged, '__dict__', __merged_dict)
             __set__(__merged, '__orig_dict__', __merged_orig_dict)
             __set__(__merged, '__orig_keys__', __merged_orig_keys)
@@ -234,14 +234,14 @@ else:  # Python < 3.9, pragma: no cover
         __other_dict = getattr(other, '__dict__', None)
 
         if __other_dict is None:  # other is not a `DotWizPlus` instance
-            other = DotWizPlus(other, check_lists=check_lists)
+            other = DotWizPlus(other, _check_lists=check_lists)
             __other_dict = other.__dict__
 
         __merged_dict = {**self.__dict__, **__other_dict}
         __merged_orig_dict = {**self.__orig_dict__, **other.__orig_dict__}
         __merged_orig_keys = {**self.__orig_keys__, **other.__orig_keys__}
 
-        __merged = DotWizPlus(__skip_init=True)
+        __merged = DotWizPlus(_skip_init=True)
         __set__(__merged, '__dict__', __merged_dict)
         __set__(__merged, '__orig_dict__', __merged_orig_dict)
         __set__(__merged, '__orig_keys__', __merged_orig_keys)
@@ -253,14 +253,14 @@ else:  # Python < 3.9, pragma: no cover
         __other_dict = getattr(other, '__dict__', None)
 
         if __other_dict is None:  # other is not a `DotWizPlus` instance
-            other = DotWizPlus(other, check_lists=check_lists)
+            other = DotWizPlus(other, _check_lists=check_lists)
             __other_dict = other.__dict__
 
         __merged_dict = {**__other_dict, **self.__dict__}
         __merged_orig_dict = {**other.__orig_dict__, **self.__orig_dict__}
         __merged_orig_keys = {**other.__orig_keys__, **self.__orig_keys__}
 
-        __merged = DotWizPlus(__skip_init=True)
+        __merged = DotWizPlus(_skip_init=True)
         __set__(__merged, '__dict__', __merged_dict)
         __set__(__merged, '__orig_dict__', __merged_orig_dict)
         __set__(__merged, '__orig_keys__', __merged_orig_keys)
@@ -420,7 +420,7 @@ class DotWizPlus(metaclass=__add_common_methods__,
 
         :return: DotWizPlus instance
         """
-        dw = DotWizPlus(__skip_init=True)
+        dw = DotWizPlus(_skip_init=True)
         __set__(dw, '__dict__', __copy(self.__dict__))
         __set__(dw, '__orig_dict__', __copy(self.__orig_dict__))
         __set__(dw, '__orig_keys__', __copy(self.__orig_keys__))
@@ -474,7 +474,7 @@ class DotWizPlus(metaclass=__add_common_methods__,
 
         return self.__orig_dict__.popitem()
 
-    def setdefault(self, k, default=None, check_lists=True, __get=dict.get, ):
+    def setdefault(self, k, default=None, check_lists=True, __get=dict.get):
         """
         Insert key with a value of default if key is not in the dictionary.
 
