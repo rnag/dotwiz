@@ -6,7 +6,7 @@ __title__ = 'dotwiz'
 __description__ = 'DotWiz is a blazing fast dict wrapper that enables ' \
                   'accessing (nested) keys in dot notation.'
 __url__ = 'https://github.com/rnag/dotwiz'
-__version__ = '0.3.1'
+__version__ = '0.4.0'
 __author__ = 'Ritvik Nag'
 __author_email__ = 'rv.kvetch@gmail.com'
 __license__ = 'MIT'

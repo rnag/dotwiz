@@ -4,13 +4,43 @@ Usage
 
 To use ``dotwiz`` in a project::
 
-    import dotwiz
+    from dotwiz import *
 
+Default for Missing Keys
+------------------------
+
+The default behavior for :class:`DotWiz` or :class:`DotWizPlus` is
+to |raise an AttributeError|_ if an attribute (key) doesn't exist::
+
+    >>> from dotwiz import DotWiz
+    >>> DotWiz(key='test').other_key
+    Traceback (most recent call last):
+      AttributeError: 'DotWiz' object has no attribute 'other_key'
+
+The helper function :func:`set_default_for_missing_keys <dotwiz.set_default_for_missing_keys>` can be used
+to return a *default* value for any missing attributes, as shown (or ``None`` if the argument is omitted).
+This essentially implements a custom :meth:`__getattr__` on the public, exported classes.
+
+.. code:: python3
+
+    from dotwiz import DotWiz, DotWizPlus, set_default_for_missing_keys
+
+    # if omitted, the default value is `None`
+    set_default_for_missing_keys('test')
+
+    dw = DotWiz(hello='world!')
+    assert dw.hello == 'world!'
+    assert dw.world == 'test'
+
+    assert DotWizPlus().missing_key == 'test'
+
+.. |raise an AttributeError| replace:: raise an :exc:`AttributeError`
+.. _raise an AttributeError: https://github.com/rnag/dotwiz/issues/14
 
 :class:`DotWizPlus`
 -------------------
 
-Simple usage with :class:`DotWizPlus` to illustrate how keys with invalid characters
+Simple usage with :class:`DotWizPlus <dotwiz.DotWizPlus>` to illustrate how keys with invalid characters
 are made safe for attribute access:
 
 .. code:: python3
@@ -57,7 +87,7 @@ are made safe for attribute access:
 Complete Example
 ~~~~~~~~~~~~~~~~
 
-Example with :func:`make_dot_wiz_plus` to illustrate how :class:`DotWizPlus`
+Example with :func:`make_dot_wiz_plus <dotwiz.make_dot_wiz_plus>` to illustrate how :class:`DotWizPlus`
 mutates keys with invalid characters to a safe, *snake-cased* format:
 
 .. code:: python3
