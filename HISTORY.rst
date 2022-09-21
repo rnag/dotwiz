@@ -2,6 +2,14 @@
 History
 =======
 
+0.4.0 (2022-09-21)
+------------------
+
+**Features and Improvements**
+
+* Add helper function :func:`set_default_for_missing_keys <dotwiz.set_default_for_missing_keys>`,
+  which can be used to set a *default* value to return when an attribute (key) is missing.
+
 0.3.1 (2022-06-17)
 ------------------
 
