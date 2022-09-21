@@ -18,6 +18,22 @@ def test_dot_wiz_with_basic_usage():
     assert dw['key-3'] == 3.21
 
 
+def test_make_dot_wiz():
+    """Confirm intended functionality of `make_dot_wiz`"""
+    dd = make_dot_wiz([(1, 'test'), ('two', [{'hello': 'world'}])],
+                      a=1, b='two', c={'d': [123]})
+
+    assert repr(dd) == "✫(a=1, b='two', c=✫(d=[123]), 1='test', two=[✫(hello='world')])"
+    assert dd.a == 1
+    assert dd.b == 'two'
+    assert dd[1] == 'test'
+    assert dd.two == [DotWiz(hello='world')]
+    assert dd.c.d[0] == 123
+
+    dd.b = [1, 2, 3]
+    assert dd.b == [1, 2, 3]
+
+
 class TestDefaultForMissingKeys(CleanupGetAttr):
 
     def test_usage(self):
@@ -47,22 +63,6 @@ class TestDefaultForMissingKeys(CleanupGetAttr):
 
         # confirm that error message correctly indicates the fix/resolution
         assert 'pass `overwrite=True`' in str(e.value)
-
-
-def test_make_dot_wiz():
-    """Confirm intended functionality of `make_dot_wiz`"""
-    dd = make_dot_wiz([(1, 'test'), ('two', [{'hello': 'world'}])],
-                      a=1, b='two', c={'d': [123]})
-
-    assert repr(dd) == "✫(a=1, b='two', c=✫(d=[123]), 1='test', two=[✫(hello='world')])"
-    assert dd.a == 1
-    assert dd.b == 'two'
-    assert dd[1] == 'test'
-    assert dd.two == [DotWiz(hello='world')]
-    assert dd.c.d[0] == 123
-
-    dd.b = [1, 2, 3]
-    assert dd.b == [1, 2, 3]
 
 
 def test_dotwiz_init():
