@@ -5,12 +5,12 @@ from typing import (
     Iterable, Iterator, Reversible,
     KeysView, ItemsView, ValuesView,
     Mapping, MutableMapping, AnyStr, Any,
-    overload,
+    overload, Generic,
 )
 
 _T = TypeVar('_T')
-_KT = TypeVar('_KT')
-_VT = TypeVar('_VT')
+_KT = TypeVar('_KT')  # Key type.
+_VT = TypeVar('_VT')  # Value type.
 
 # Valid collection types in JSON.
 _JSONList = list[Any]
@@ -66,9 +66,10 @@ def __store_in_object__(__self_dict: MutableMapping[_KT, _VT],
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz_plus__(self: DotWizPlus,
                                  input_dict: MutableMapping[_KT, _VT] = {},
-                                 *, check_lists=True,
-                                 check_types=True,
-                                 __skip_init=False,
+                                 *,
+                                 _check_lists=True,
+                                 _check_types=True,
+                                 _skip_init=False,
                                  **kwargs: _T) -> None: ...
 
 def __setattr_impl__(self: DotWizPlus,
@@ -101,7 +102,7 @@ def __ior_impl__(self: DotWizPlus,
                  __update: _Update = dict.update): ...
 
 
-class DotWizPlus:
+class DotWizPlus(Generic[_KT, _VT]):
 
     __dict__: dict[_KT, _VT]
     __orig_dict__: dict[_KT, _VT]
@@ -110,20 +111,21 @@ class DotWizPlus:
     # noinspection PyDefaultArgument
     def __init__(self,
                  input_dict: MutableMapping[_KT, _VT] = {},
-                 *, check_lists=True,
-                 check_types=True,
-                 __skip_init=False,
+                 *,
+                 _check_lists=True,
+                 _check_types=True,
+                 _skip_init=False,
                  **kwargs: _T) -> None:
         """Create a new :class:`DotWizPlus` instance.
 
         :param input_dict: Input `dict` object to process the key-value pairs of.
-        :param check_lists: False to not check for nested `list` values. Defaults
+        :param _check_lists: False to not check for nested `list` values. Defaults
           to True.
-        :param check_types: False to not check for nested `dict` and `list` values.
+        :param _check_types: False to not check for nested `dict` and `list` values.
           This is a minor performance improvement, if we know an input `dict` only
           contains simple values, and no nested `dict` or `list` values.
           Defaults to True.
-        :param __skip_init: True to simply return, and skip the initialization
+        :param _skip_init: True to simply return, and skip the initialization
           logic. This is useful to create an empty `DotWizPlus` instance.
           Defaults to False.
         :param kwargs: Additional keyword arguments to process, in addition to
@@ -261,15 +263,17 @@ class DotWizPlus:
     def popitem(self) -> tuple[_KT, _VT]: ...
 
     def setdefault(self, k: _KT, default=None,
-                   *, check_lists=True,
+                   *,
+                   check_lists=True,
                    __get=dict.get) -> _VT: ...
 
     # noinspection PyDefaultArgument
     def update(self,
                __m: MutableMapping[_KT, _VT] = {},
-               *, check_lists=True,
-               check_types=True,
-               __skip_init=False,
+               *,
+               _check_lists=True,
+               _check_types=True,
+               _skip_init=False,
                **kwargs: _T) -> None: ...
 
     def values(self) -> ValuesView: ...

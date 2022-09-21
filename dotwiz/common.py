@@ -27,6 +27,14 @@ def __add_common_methods__(name, bases, cls_dict, *,
     # add a `__repr__` magic method to the class.
     cls_dict['__repr__'] = __repr__
 
+    # __class_getitem__(): used to subscript the type of key-value pairs for
+    #   type hinting purposes. ex.: `DotWiz[str, int]`
+    def __class_getitem__(cls, _: 'type | tuple[type]'):
+        return cls
+
+    # add a `__class_getitem__` magic method to the class.
+    cls_dict['__class_getitem__'] = __class_getitem__
+
     # add utility or helper methods to the class, such as:
     #   - `from_json`     - de-serialize a JSON string into an instance.
     #   - `to_dict`       - convert an instance to a Python `dict` object.
@@ -102,7 +110,7 @@ or a list of :class:`{name}` instances.
     if has_attr_dict:
 
         def __object_hook__(d):
-            return __cls__(d, check_types=False)
+            return __cls__(d, _check_types=False)
 
         def __convert_to_dict_snake_cased__(o):
             """
@@ -212,7 +220,7 @@ Serialize the :class:`{name}` instance as a JSON string.
     else:
 
         def __object_hook__(d):
-            return __cls__(d, __set_dict=True)
+            return __cls__(d, _check_types=False)
 
         def to_json(o, filename=None, encoding='utf-8', errors='strict',
                     file_encoder=json.dump,

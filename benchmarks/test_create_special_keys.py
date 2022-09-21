@@ -20,7 +20,11 @@ from benchmarks.models import MyClassSpecialCased
 
 
 # Mark all benchmarks in this module, and assign them to the specified group.
+#   use with: `pytest benchmarks -m create_with_special_keys`
+#   use with: `pytest benchmarks -m create_sp`
 pytestmark = [pytest.mark.create_with_special_keys,
+              # alias, for easier typing
+              pytest.mark.create_sp,
               pytest.mark.benchmark(group='create_with_special_keys')]
 
 
@@ -79,7 +83,7 @@ def assert_eq2(result):
     assert result['Some  r@ndom#$(*#@ Key##$# here   !!!'] == 'T'
 
 
-def assert_eq3(result, nested_in_list=True):
+def assert_eq3(result, nested_in_dict=True, nested_in_list=True):
     assert result.camel_case == 1
     assert result.snake_case == 2
     assert result.pascal_case == 3
@@ -88,8 +92,10 @@ def assert_eq3(result, nested_in_list=True):
     assert result._3d == 6
     if nested_in_list:
         assert result.for_._1nfinity[0].and_.beyond == 8
-    else:
+    elif nested_in_dict:
         assert result.for_._1nfinity[0]['and']['Beyond!'] == 8
+    else:
+        assert result.for_['1nfinity'][0]['and']['Beyond!'] == 8
     assert result.some_r_ndom_key_here == 'T'
 
 
@@ -181,7 +187,14 @@ def test_dotwiz(benchmark, my_data):
 
 
 def test_dotwiz_without_check_lists(benchmark, my_data):
-    result = benchmark(dotwiz.DotWiz, my_data, check_lists=False)
+    result = benchmark(dotwiz.DotWiz, my_data, _check_lists=False)
+    # print(result)
+
+    assert_eq2(result)
+
+
+def test_dotwiz_without_check_types(benchmark, my_data):
+    result = benchmark(dotwiz.DotWiz, my_data, _check_types=False)
     # print(result)
 
     assert_eq2(result)
@@ -202,10 +215,17 @@ def test_dotwiz_plus(benchmark, my_data):
 
 
 def test_dotwiz_plus_without_check_lists(benchmark, my_data):
-    result = benchmark(dotwiz.DotWizPlus, my_data, check_lists=False)
+    result = benchmark(dotwiz.DotWizPlus, my_data, _check_lists=False)
     # print(result)
 
     assert_eq3(result, nested_in_list=False)
+
+
+def test_dotwiz_plus_without_check_types(benchmark, my_data):
+    result = benchmark(dotwiz.DotWizPlus, my_data, _check_types=False)
+    # print(result)
+
+    assert_eq3(result, nested_in_list=False, nested_in_dict=False)
 
 
 def test_make_dot_wiz_plus(benchmark, my_data):

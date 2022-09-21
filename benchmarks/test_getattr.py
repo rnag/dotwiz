@@ -20,6 +20,7 @@ from benchmarks.models import MyClass
 
 
 # Mark all benchmarks in this module, and assign them to the specified group.
+#   use with: `pytest benchmarks -m getattr`
 pytestmark = [pytest.mark.getattr,
               pytest.mark.benchmark(group='getattr')]
 
