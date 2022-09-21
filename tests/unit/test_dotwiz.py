@@ -2,7 +2,9 @@
 
 import pytest
 
-from dotwiz import DotWiz, make_dot_wiz
+from dotwiz import *
+
+from .conftest import CleanupGetAttr
 
 
 def test_dot_wiz_with_basic_usage():
@@ -14,6 +16,37 @@ def test_dot_wiz_with_basic_usage():
     assert dw.key_1[0].k == 'v'
     assert dw.keyTwo == '5'
     assert dw['key-3'] == 3.21
+
+
+class TestDefaultForMissingKeys(CleanupGetAttr):
+
+    def test_usage(self):
+        """Basic usage of :func:`set_default_for_missing_keys`."""
+        set_default_for_missing_keys()
+
+        dw = DotWiz(HelloWorld=True)
+        assert dw.HelloWorld
+        assert dw.world is None
+
+    def test_overwrite(self):
+        """
+        Error is not raised when classes define a __getattr__()
+        and ``overwrite=True`` is passed.
+        """
+        set_default_for_missing_keys('hello world')
+        set_default_for_missing_keys(123, overwrite=True)
+
+        assert DotWiz().missing_key == 123
+
+    def test_overwrite_raises_an_error_by_default(self):
+        """Error is raised when classes already define a __getattr__()."""
+        set_default_for_missing_keys('test')
+
+        with pytest.raises(ValueError) as e:
+            set_default_for_missing_keys(None)
+
+        # confirm that error message correctly indicates the fix/resolution
+        assert 'pass `overwrite=True`' in str(e.value)
 
 
 def test_make_dot_wiz():
