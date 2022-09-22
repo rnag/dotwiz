@@ -15,6 +15,7 @@ import scalpl
 from dataclass_wizard import fromdict
 
 import dotwiz
+from dotwiz.plus_slim import DotWizPlusSlim
 
 from benchmarks.models import MyClassSpecialCased
 
@@ -205,6 +206,13 @@ def test_make_dot_wiz(benchmark, my_data):
     # print(result)
 
     assert_eq2(result)
+
+
+def test_dotwiz_plus_slim(benchmark, my_data):
+    result = benchmark(DotWizPlusSlim, my_data)
+    # print(result)
+
+    assert_eq3(result)
 
 
 def test_dotwiz_plus(benchmark, my_data):

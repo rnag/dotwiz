@@ -1,6 +1,7 @@
 from typing import Any, Callable, ItemsView, TypeVar, Union
 
 from dotwiz import DotWiz, DotWizPlus
+from dotwiz.plus_slim import DotWizPlusSlim
 
 
 _T = TypeVar('_T')
@@ -9,7 +10,7 @@ _KT = TypeVar('_KT')
 _VT = TypeVar('_VT')
 
 _ItemsFn = Callable[[_D ], ItemsView[_KT, _VT]]
-_SetAttribute = Callable[[Union[DotWiz, DotWizPlus], str, Any], None]
+_SetAttribute = Callable[[Union[DotWiz, DotWizPlus, DotWizPlusSlim], str, Any], None]
 
 __set__: _SetAttribute
 
