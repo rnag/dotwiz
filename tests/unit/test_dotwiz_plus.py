@@ -1,4 +1,6 @@
 """Tests for the `DotWizPlus` class."""
+from collections import OrderedDict, defaultdict
+from copy import deepcopy
 from datetime import datetime
 
 import pytest
@@ -94,6 +96,22 @@ def test_init():
     assert dd.b == [1, 2, 3]
 
 
+def test_init_with_skip_init():
+    """Confirm intended functionality of `DotWizPlus.__init__` with `_skip_init`"""
+    # adding a constructor call with empty params, for comparison
+    dw = DotWizPlus()
+    assert dw.__dict__ == dw.__orig_dict__ == dw.__orig_keys__ == {}
+
+    # now call the constructor with `_skip_init=True`
+    dw = DotWizPlus(_skip_init=True)
+
+    assert dw.__dict__ == {}
+
+    # assert that attributes aren't present in the `DotWizPlus` object
+    assert not hasattr(dw, '__orig_dict__')
+    assert not hasattr(dw, '__orig_keys__')
+
+
 def test_class_get_item():
     """Using __class_get_item__() to subscript the types, i.e. DotWizPlus[K, V]"""
     dw = DotWizPlus[str, int](first_key=123, SecondKey=321)
@@ -110,7 +128,7 @@ def test_del_attr():
     dd = DotWizPlus(
         a=1,
         b={'one': [1],
-           'two': [{'first': 'one', 'second': 'two'}]},
+           'two': [{'first': 'one', 'secondKey': 'two'}]},
         three={'four': [{'five': '5'}]}
     )
 
@@ -124,9 +142,11 @@ def test_del_attr():
     assert 'a' not in dd
 
     assert isinstance(dd.b, DotWizPlus)
-    assert dd.b.two[0].second == 'two'
-    del dd.b.two[0].second
-    assert 'second' not in dd.b.two[0]
+    assert dd.b.two[0].second_key == 'two'
+
+    assert 'secondKey' in dd.b.two[0]
+    del dd.b.two[0].second_key
+    assert 'secondKey' not in dd.b.two[0]
 
     del dd.b
     assert 'b' not in dd
@@ -135,15 +155,15 @@ def test_del_attr():
 def test_get_attr():
     """Confirm intended functionality of `DotWizPlus.__getattr__`"""
     dd = DotWizPlus()
-    dd.a = [{'one': 1, 'two': {'key': 'value'}}]
+    dd.a = [{'one': 1, 'two': {'Inner-Key': 'value'}}]
 
     item = getattr(dd, 'a')[0]
     assert isinstance(item, DotWizPlus)
     assert getattr(item, 'one') == 1
 
-    assert getattr(getattr(item, 'two'), 'key') == 'value'
+    assert getattr(getattr(item, 'two'), 'inner_key') == 'value'
     # alternate way of writing the above
-    assert item.two.key == 'value'
+    assert item.two.inner_key == 'value'
 
 
 def test_get_item():
@@ -181,6 +201,240 @@ def test_set_item():
     assert item.key_two == 2
 
 
+@pytest.mark.parametrize("data,result", [({"a": 42}, True), ({}, False)])
+def test_bool(data, result):
+    dw = DotWizPlus(data)
+    assert bool(dw) is result
+
+
+def test_clear():
+    dw = DotWizPlus({"a": 42})
+    dw.clear()
+    assert len(dw) == 0
+
+
+def test_copy():
+    data = {"a": 42}
+    dw = DotWizPlus(data)
+    assert dw.copy() == data
+
+
+class TestEquals:
+
+    def test_against_another_dot_wiz_plus(self):
+        data = {"a": 42}
+        dw = DotWizPlus(data)
+        assert dw == DotWizPlus(data)
+
+    def test_against_another_dict(self):
+        data = {"a": 42}
+        dw = DotWizPlus(data)
+        assert dw == dict(data)
+
+    def test_against_another_ordered_dict(self):
+        data = {"a": 42}
+        dw = DotWizPlus(data)
+        assert dw == OrderedDict(data)
+
+    def test_against_another_default_dict(self):
+        data = {"a": 42}
+        dw = DotWizPlus(data)
+        assert dw == defaultdict(None, data)
+
+
+class TestNotEquals:
+
+    def test_against_another_dot_wiz_plus(self):
+        data = {"a": 42}
+        dw = DotWizPlus(a=41)
+        assert dw != DotWizPlus(data)
+
+    def test_against_another_dict(self):
+        data = {"a": 42}
+        dw = DotWizPlus(a=41)
+        assert dw != dict(data)
+
+    def test_against_another_ordered_dict(self):
+        data = {"a": 42}
+        dw = DotWizPlus(a=41)
+        assert dw != OrderedDict(data)
+
+    def test_against_another_default_dict(self):
+        data = {"a": 42}
+        dw = DotWizPlus(a=41)
+        assert dw != defaultdict(None, data)
+
+
+class TestFromKeys:
+    def test_fromkeys(self):
+        assert DotWizPlus.fromkeys(["Bulbasaur", "The-Charmander", "Squirtle"]) == DotWizPlus(
+            {"Bulbasaur": None, "The-Charmander": None, "Squirtle": None}
+        )
+
+    def test_fromkeys_with_default_value(self):
+        assert DotWizPlus.fromkeys(["Bulbasaur", "Charmander", "Squirtle"], "captured") == DotWizPlus(
+            {"Bulbasaur": "captured", "Charmander": "captured", "Squirtle": "captured"}
+        )
+
+        dw = DotWizPlus.fromkeys(['class', 'lambda', '123'], 'Value')
+        assert dw.class_ == dw.lambda_ == dw._123 == 'Value'
+
+
+def test_items():
+    dw = DotWizPlus({"a": 1, "secondKey": 2, "lambda": 3})
+    assert sorted(dw.items()) == [("a", 1), ("lambda", 3), ("secondKey", 2)]
+
+
+def test_iter():
+    dw = DotWizPlus({"a": 1, "secondKey": 2, "c": 3})
+    assert sorted([key for key in dw]) == ["a", "c", "secondKey"]
+
+
+def test_keys():
+    dw = DotWizPlus({"a": 1, "secondKey": 2, "c": 3})
+    assert sorted(dw.keys()) == ["a", "c", "secondKey"]
+
+
+def test_values():
+    dw = DotWizPlus({"a": 1, "b": 2, "c": 3})
+    assert sorted(dw.values()) == [1, 2, 3]
+
+
+def test_len():
+    dw = DotWizPlus({"a": 1, "b": 2, "c": 3})
+    assert len(dw) == 3
+
+
+def test_reversed():
+    dw = DotWizPlus({"a": 1, "secondKey": 2, "c": 3})
+    assert list(reversed(dw)) == ["c", "secondKey", "a"]
+
+
+@pytest.mark.parametrize(
+    "op1,op2,result",
+    [
+        (DotWizPlus(a=1, b=2), DotWizPlus(b=1.5, c=3), DotWizPlus({'a': 1, 'b': 1.5, 'c': 3})),
+        (DotWizPlus(a=1, b=2), dict(b=1.5, c=3), DotWizPlus({'a': 1, 'b': 1.5, 'c': 3})),
+    ],
+)
+def test_or(op1, op2, result):
+    actual = op1 | op2
+
+    assert type(actual) == type(result)
+    assert actual == result
+
+
+def test_ror():
+    op1 = {'a': 1, 'b': 2}
+    op2 = DotWizPlus(b=1.5, c=3)
+
+    assert op1 | op2 == DotWizPlus({'a': 1, 'b': 1.5, 'c': 3})
+
+
+# TODO: apparently __setitem__() or __or__() doesn't work with different cased
+#   keys are used for the update. Will have to look into how to best handle this.
+def test_ior():
+    op1 = DotWizPlus(a=1, secondKey=2)
+    op1 |= {'Second-Key': 1.5, 'c': 3}
+
+    assert op1 == DotWizPlus({'a': 1, 'secondKey': 2, 'Second-Key': 1.5, 'c': 3})
+    assert op1 != DotWizPlus({'a': 1, 'Second-Key': 1.5, 'c': 3})
+
+
+def test_popitem():
+    dw = DotWizPlus({"a": 1, "b": 2, "c": 3, "class": 4})
+
+    assert len(dw) == len(dw.__dict__) == len(dw.__orig_dict__) == 4
+    assert dw.__orig_keys__ == {'class_': 'class'}
+
+    # items are returned in a LIFO (last-in, first-out) order
+    (k, v) = dw.popitem()
+    assert (k, v) == ('class', 4)
+
+    assert len(dw) == len(dw.__dict__) == len(dw.__orig_dict__) == 3
+    assert dw.__orig_keys__ == {}
+
+
+@pytest.mark.parametrize(
+    "data,key,result",
+    [
+        ({"this-key": 42}, "this-key", 42),
+        ({"this-key": 42}, "this_key", None),
+        ({"a": 42}, "b", None),
+        # TODO: enable once we set up dot-style access
+        # ({"a": {"b": 42}}, "a.b", 42),
+        # ({"a": {"b": {"c": 42}}}, "a.b.c", 42),
+        # ({"a": [42]}, "a[0]", 42),
+        # ({"a": [{"b": 42}]}, "a[0].b", 42),
+        # ({"a": [42]}, "a[1]", None),
+        # ({"a": [{"b": 42}]}, "a[1].b", None),
+        # ({"a": {"b": 42}}, "a.c", None),
+        # ({"a": {"b": {"c": 42}}}, "a.b.d", None),
+    ],
+)
+def test_get(data, key, result):
+    dw = DotWizPlus(data)
+    assert dw.get(key) == result
+
+
+@pytest.mark.parametrize(
+    "data,key,default",
+    [
+        ({}, "b", None),
+        ({"a": 42}, "b", "default"),
+    ],
+)
+def test_with_default(data, key, default):
+    dw = DotWizPlus(data)
+    assert dw.get(key, default) == default
+
+
+class TestDelitem:
+    @pytest.mark.parametrize(
+        "data,key",
+        [
+            ({"a": 42}, "a"),
+            ({"a": 1, "b": 2}, "b"),
+        ],
+    )
+    def test_delitem(self, data, key):
+        dw = DotWizPlus(deepcopy(data))
+        del dw[key]
+        assert key not in dw
+
+    def test_key_error(self):
+        dw = DotWizPlus({"a": 1, "c": 3})
+        with pytest.raises(KeyError):
+            del dw["b"]
+
+    @pytest.mark.parametrize(
+        "data,key",
+        [
+            ({False: "a"}, False),
+            ({1: "a", 2: "b"}, 2),
+        ],
+    )
+    def test_type_error(self, data, key):
+        dw = DotWizPlus(deepcopy(data))
+        # raises `TypeError` internally, but delete is still successful
+        del dw[key]
+        assert key not in dw
+
+
+class TestContains:
+    @pytest.mark.parametrize(
+        "data,key,result",
+        [
+            ({"MyKey": 42}, "MyKey", True),
+            ({"MyKey": 42}, "my_key", False),
+            ({"a": 42}, "b", False),
+        ],
+    )
+    def test_contains(self, data, key, result):
+        dw = DotWizPlus(data)
+        assert (key in dw) is result
+
+
 def test_update():
     """Confirm intended functionality of `DotWizPlus.update`"""
     dd = DotWizPlus(a=1, b={'one': [1]})
@@ -206,13 +460,78 @@ def test_update():
 
 def test_update_with_no_args():
     """Add for full branch coverage."""
-    dd = DotWizPlus(a=1, b={'one': [1]})
+    dd = DotWizPlus(First_Key=1, b={'one': [1]})
 
     dd.update()
-    assert dd.a == 1
+    assert dd.first_key == 1
 
-    dd.update(a=2)
-    assert dd.a == 2
+    dd.update(firstKey=2)
+    assert dd.first_key == 2
+
+
+class TestPop:
+
+    @pytest.mark.parametrize(
+        "data,key,result",
+        [
+            ({"a": 42}, "a", 42),
+            ({"a": 1, "b": 2}, "b", 2),
+        ],
+    )
+    def test_pop(self, data, key, result):
+        dw = DotWizPlus(deepcopy(data))
+        assert dw.pop(key) == result
+        assert key not in dw
+
+    @pytest.mark.parametrize(
+        "data,key,default",
+        [
+            ({}, "b", None),
+            ({"a": 1}, "b", 42),
+        ],
+    )
+    def test_with_default(self, data, key, default):
+        dw = DotWizPlus(deepcopy(data))
+        assert dw.pop(key, default) == default
+
+
+class TestSetDefault:
+
+    @pytest.mark.parametrize(
+        "data,key,result",
+        [
+            ({"a": 42}, "a", 42),
+            ({"a": 1}, "b", None),
+            # ({"a": {"b": 42}}, "a.b", 42),
+            # ({"a": {"b": {"c": 42}}}, "a.b.c", 42),
+            # ({"a": [42]}, "a[0]", 42),
+            # ({"a": [{"b": 42}]}, "a[0].b", 42),
+            # ({"a": {"b": 1}}, "a.c", None),
+            # ({"a": {"b": {"c": 1}}}, "a.b.d", None),
+            # ({"a": [{"b": 1}]}, "a[0].c", None),
+            # ({"a": {"b": {"c": 42}}}, "a.d.e.f", None),
+        ],
+    )
+    def test_setdefault(self, data, key, result):
+        dw = DotWizPlus(deepcopy(data))
+        assert dw.setdefault(key) == result
+        assert dw[key] == result
+
+    @pytest.mark.parametrize(
+        "data,key,default",
+        [
+            ({}, "b", None),
+            ({"a": 1}, "b", "default"),
+            # ({"a": {"b": 1}}, "a.c", "default"),
+            # ({"a": {"b": {"c": 1}}}, "a.b.d", "default"),
+            # ({"a": [{"b": 1}]}, "a[0].c", "default"),
+            # ({"a": {"b": {"c": 42}}}, "a.d.e.f", "default"),
+        ],
+    )
+    def test_with_default(self, data, key, default):
+        dw = DotWizPlus(deepcopy(data))
+        assert dw.setdefault(key, default) == default
+        assert dw[key] == default
 
 
 def test_from_json():

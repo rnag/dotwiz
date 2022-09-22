@@ -239,7 +239,7 @@ class TestNotEquals:
         assert dw != defaultdict(None, data)
 
 
-class TestFromkeys:
+class TestFromKeys:
     def test_fromkeys(self):
         assert DotWiz.fromkeys(["Bulbasaur", "Charmander", "Squirtle"]) == DotWiz(
             {"Bulbasaur": None, "Charmander": None, "Squirtle": None}
@@ -311,7 +311,9 @@ def test_ior():
 
 def test_popitem():
     dw = DotWiz({"a": 1, "b": 2, "c": 3})
-    dw.popitem()
+    # items are returned in a LIFO (last-in, first-out) order
+    (k, v) = dw.popitem()
+    assert (k, v) == ('c', 3)
     assert len(dw) == 2
 
 
@@ -454,7 +456,7 @@ class TestPop:
         assert dw.pop(key, default) == default
 
 
-class TestSetdefault:
+class TestSetDefault:
 
     @pytest.mark.parametrize(
         "data,key,result",
