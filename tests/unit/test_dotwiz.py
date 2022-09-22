@@ -592,6 +592,38 @@ def test_to_json():
 }"""
 
 
+def test_to_json_with_filename(mock_file_open):
+    """Confirm intended functionality of `DotWiz.to_json` with `filename`"""
+    dw = DotWiz(hello=[{"Key": "value", "Another-KEY": {"a": "b"}}],
+                camelCased={r"th@#$%is.is.!@#$%^&*()a{}\:<?>/~`.T'e'\"st": True})
+
+    mock_filename = 'out_file-TEST.json'
+
+    # write out to dummy file
+    assert dw.to_json(filename=mock_filename, indent=4) is None
+
+    # assert open(...) is called with expected arguments
+    mock_file_open.assert_called_once_with(
+        mock_filename, 'w', encoding='utf-8', errors='strict',
+    )
+
+    # assert expected mock data is written out
+    assert mock_file_open.write_lines == r"""
+{
+    "hello": [
+        {
+            "Key": "value",
+            "Another-KEY": {
+                "a": "b"
+            }
+        }
+    ],
+    "camelCased": {
+        "th@#$%is.is.!@#$%^&*()a{}\\:<?>/~`.T'e'\\\"st": true
+    }
+}""".lstrip()
+
+
 def test_to_json_with_non_serializable_type():
     """
     Confirm intended functionality of `DotWiz.to_json` when an object

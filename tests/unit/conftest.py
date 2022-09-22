@@ -1,4 +1,5 @@
 """Reusable test utilities and fixtures."""
+from functools import cache
 from unittest.mock import MagicMock, mock_open
 
 import pytest
@@ -9,10 +10,14 @@ from dotwiz import DotWiz, DotWizPlus
 
 class FileMock(MagicMock):
 
-    def __init__(self, mocker: MagicMock):
-        super().__init__()
+    def __init__(self, mocker: MagicMock = None, **kwargs):
+        super().__init__(**kwargs)
 
-        self.__dict__ = mocker.__dict__
+        if mocker:
+            self.__dict__ = mocker.__dict__
+            # configure mock object to replace the use of open(...)
+            # note: this is useful in scenarios where data is written out
+            _ = mock_open(mock=self)
 
     @property
     def read_data(self):
@@ -22,6 +27,19 @@ class FileMock(MagicMock):
     def read_data(self, mock_data: str):
         """set mock data to be returned when `open(...).read()` is called."""
         self.side_effect = mock_open(read_data=mock_data)
+
+    @property
+    @cache
+    def write_calls(self):
+        """a list of calls made to `open().write(...)`"""
+        handle = self.return_value
+        write: MagicMock = handle.write
+        return write.call_args_list
+
+    @property
+    def write_lines(self) -> str:
+        """a list of written lines (as a string)"""
+        return ''.join([c[0][0] for c in self.write_calls])
 
 
 @pytest.fixture
