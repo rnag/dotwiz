@@ -1,4 +1,5 @@
 """Tests for the `DotWizPlus` class."""
+from datetime import datetime
 
 import pytest
 
@@ -7,7 +8,7 @@ from dotwiz import *
 from .conftest import CleanupGetAttr
 
 
-def test_dot_wiz_plus_with_basic_usage():
+def test_basic_usage():
     """Confirm intended functionality of `DotWizPlus`"""
     dw = DotWizPlus({'Key_1': [{'k': 'v'}],
                      'keyTwo': '5',
@@ -72,7 +73,7 @@ class TestDefaultForMissingKeys(CleanupGetAttr):
         assert 'pass `overwrite=True`' in str(e.value)
 
 
-def test_dotwiz_plus_init():
+def test_init():
     """Confirm intended functionality of `DotWizPlus.__init__`"""
     dd = DotWizPlus({
         1: 'test',
@@ -93,7 +94,19 @@ def test_dotwiz_plus_init():
     assert dd.b == [1, 2, 3]
 
 
-def test_dotwiz_plus_del_attr():
+def test_class_get_item():
+    """Using __class_get_item__() to subscript the types, i.e. DotWizPlus[K, V]"""
+    dw = DotWizPlus[str, int](first_key=123, SecondKey=321)
+
+    # type hinting and auto-completion for value (int) works for dict access
+    assert dw['first_key'].real == 123
+
+    # however, the same doesn't work for attribute access. i.e. `dw.second_key.`
+    # doesn't result in any method auto-completion or suggestions.
+    assert dw.second_key == 321
+
+
+def test_del_attr():
     dd = DotWizPlus(
         a=1,
         b={'one': [1],
@@ -119,7 +132,7 @@ def test_dotwiz_plus_del_attr():
     assert 'b' not in dd
 
 
-def test_dotwiz_plus_get_attr():
+def test_get_attr():
     """Confirm intended functionality of `DotWizPlus.__getattr__`"""
     dd = DotWizPlus()
     dd.a = [{'one': 1, 'two': {'key': 'value'}}]
@@ -133,51 +146,52 @@ def test_dotwiz_plus_get_attr():
     assert item.two.key == 'value'
 
 
-def test_dotwiz_plus_get_item():
+def test_get_item():
     """Confirm intended functionality of `DotWizPlus.__getitem__`"""
     dd = DotWizPlus()
-    dd.a = [{'one': 1, 'two': {'key': 'value'}}]
+    dd.a = [{'one': 1, 'two': {'any-key': 'value'}}]
 
     item = dd['a'][0]
     assert isinstance(item, DotWizPlus)
     assert item['one'] == 1
 
-    assert item['two']['key'] == 'value'
+    assert item.two.any_key == 'value'
+    assert item['two']['any-key'] == 'value'
 
 
-def test_dotwiz_plus_set_attr():
+def test_set_attr():
     """Confirm intended functionality of `DotWizPlus.__setattr__`"""
     dd = DotWizPlus()
-    dd.a = [{'one': 1, 'two': 2}]
+    dd.AnyOne = [{'one': 1, 'keyTwo': 2}]
 
-    item = dd.a[0]
+    item = dd.AnyOne[0]
     assert isinstance(item, DotWizPlus)
     assert item.one == 1
-    assert item.two == 2
+    assert item.key_two == 2
 
 
-def test_dotwiz_plus_set_item():
+def test_set_item():
     """Confirm intended functionality of `DotWizPlus.__setitem__`"""
     dd = DotWizPlus()
-    dd['a'] = [{'one': 1, 'two': 2}]
+    dd['AnyOne'] = [{'one': 1, 'keyTwo': 2}]
 
-    item = dd.a[0]
+    item = dd.any_one[0]
     assert isinstance(item, DotWizPlus)
     assert item.one == 1
-    assert item.two == 2
+    assert item.key_two == 2
 
 
-def test_dotwiz_plus_update():
+def test_update():
     """Confirm intended functionality of `DotWizPlus.update`"""
     dd = DotWizPlus(a=1, b={'one': [1]})
     assert isinstance(dd.b, DotWizPlus)
 
     dd.b.update({'two': [{'first': 'one', 'second': 'two'}]},
-                three={'four': [{'five': '5'}]})
+                threeFour={'five': [{'six': '6'}]})
 
     assert isinstance(dd.b, DotWizPlus)
     assert isinstance(dd.b.two[0], DotWizPlus)
-    assert isinstance(dd.b.three, DotWizPlus)
+    assert isinstance(dd.b.three_four, DotWizPlus)
     assert dd.b.one == [1]
 
     item = dd.b.two[0]
@@ -185,12 +199,12 @@ def test_dotwiz_plus_update():
     assert item.first == 'one'
     assert item.second == 'two'
 
-    item = dd.b.three.four[0]
+    item = dd.b.three_four.five[0]
     assert isinstance(item, DotWizPlus)
-    assert item.five == '5'
+    assert item.six == '6'
 
 
-def test_dotwiz_plus_update_with_no_args():
+def test_update_with_no_args():
     """Add for full branch coverage."""
     dd = DotWizPlus(a=1, b={'one': [1]})
 
@@ -269,7 +283,7 @@ def test_from_json_with_multiline(mock_file_open):
     assert dw_list[1].second_key[1].nested_key
 
 
-def test_dotwiz_plus_to_dict():
+def test_to_dict():
     """Confirm intended functionality of `DotWizPlus.to_dict`"""
     dw = DotWizPlus(hello=[{"Key": "value", "Another-KEY": {"a": "b"}}],
                     camelCased={r"th@#$%is.is.!@#$%^&*()a{}\:<?>/~`.T'e'\"st": True})
@@ -287,7 +301,29 @@ def test_dotwiz_plus_to_dict():
     }
 
 
-def test_dotwiz_to_json():
+def test_to_dict_with_snake_cased_keys():
+    """Confirm intended functionality of `DotWizPlus.to_dict` with `snake=True`"""
+    dw = DotWizPlus(hello=[{"items": "value", "Another-KEY": {"for": {"123": True}}}],
+                    camelCased={r"th@#$%is.is.!@#$%^&*()a{}\:<?>/~`.T'e'\"st": True})
+
+    assert dw.to_dict(snake=True) == {
+        'hello': [
+            {
+                'another_key': {
+                    'for': {
+                        '123': True
+                    }
+                },
+                'items': 'value',
+            }
+        ],
+        'camel_cased': {
+            'th_is_is_a_t_e_st': True
+        },
+    }
+
+
+def test_to_json():
     """Confirm intended functionality of `DotWizPlus.to_json`"""
     dw = DotWizPlus(hello=[{"Key": "value", "Another-KEY": {"a": "b"}}],
                     camelCased={r"th@#$%is.is.!@#$%^&*()a{}\:<?>/~`.T'e'\"st": True})
@@ -308,16 +344,66 @@ def test_dotwiz_to_json():
 }""".lstrip()
 
 
-def test_dotwiz_plus_to_attr_dict():
+def test_to_json_with_attribute_keys():
+    """Confirm intended functionality of `DotWizPlus.to_json` with `attr=True`"""
+    dw = DotWizPlus(hello=[{"items": "value", "Another-KEY": {"for": {"123": True}}}],
+                    camelCased={r"th@#$%is.is.!@#$%^&*()a{}\:<?>/~`.T'e'\"st": True})
+
+    assert dw.to_json(attr=True, indent=4) == r"""
+{
+    "hello": [
+        {
+            "items_": "value",
+            "another_key": {
+                "for_": {
+                    "_123": true
+                }
+            }
+        }
+    ],
+    "camel_cased": {
+        "th_is_is_a_t_e_st": true
+    }
+}""".lstrip()
+
+
+def test_to_json_with_snake_cased_keys():
+    """Confirm intended functionality of `DotWizPlus.to_json` with `snake=True`"""
+    dw = DotWizPlus(hello=[{"items": "value", "Another-KEY": {"for": {"123": True}}}],
+                    camelCased={r"th@#$%is.is.!@#$%^&*()a{}\:<?>/~`.T'e'\"st": True})
+
+    assert dw.to_json(snake=True, indent=4) == r"""
+{
+    "hello": [
+        {
+            "items": "value",
+            "another_key": {
+                "for": {
+                    "123": true
+                }
+            }
+        }
+    ],
+    "camel_cased": {
+        "th_is_is_a_t_e_st": true
+    }
+}""".lstrip()
+
+
+def test_to_attr_dict():
     """Confirm intended functionality of `DotWizPlus.to_dict`"""
-    dw = DotWizPlus(hello=[{"Key": "value", "Another-KEY": {"a": "b"}}],
+    dw = DotWizPlus(hello=[{"items": "value", "Another-KEY": {"for": {"123": True}}}],
                     camelCased={r"th@#$%is.is.!@#$%^&*()a{}\:<?>/~`.T'e'\"st": True})
 
     assert dw.to_attr_dict() == {
         'hello': [
             {
-                'another_key': {'a': 'b'},
-                'key': 'value',
+                'another_key': {
+                    'for_': {
+                        '_123': True
+                    }
+                },
+                'items_': 'value',
             }
         ],
         'camel_cased': {'th_is_is_a_t_e_st': True},
@@ -351,3 +437,18 @@ def test_dir():
 
     assert '1string' not in obj_dir
     assert 'lambda' not in obj_dir
+
+
+def test_to_json_with_non_serializable_type():
+    """
+    Confirm intended functionality of `DotWizPlus.to_json` when an object
+    doesn't define a `__dict__`, so the default `JSONEncoder.default`
+    implementation is called.
+    """
+
+    dw = DotWizPlus(string='val', dt=datetime.min)
+    # print(dw)
+
+    # TypeError: Object of type `datetime` is not JSON serializable
+    with pytest.raises(TypeError):
+        _ = dw.to_json()

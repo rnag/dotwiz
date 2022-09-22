@@ -89,6 +89,18 @@ def test_init():
     assert dd.b == [1, 2, 3]
 
 
+def test_class_get_item():
+    """Using __class_get_item__() to subscript the types, i.e. DotWiz[K, V]"""
+    dw = DotWiz[str, int](first_key=123, SecondKey=321)
+
+    # type hinting and auto-completion for value (int) works for dict access
+    assert dw['first_key'].real == 123
+
+    # however, the same doesn't work for attribute access. i.e. `dw.SecondKey.`
+    # doesn't result in any method auto-completion or suggestions.
+    assert dw.SecondKey == 321
+
+
 def test_del_attr():
     dd = DotWiz(
         a=1,
