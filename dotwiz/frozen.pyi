@@ -1,5 +1,5 @@
 from .main import DotWiz
-from dataclasses
+
 
 # Raised when an attempt is made to modify a frozen class.
 class FrozenDotWizError(AttributeError): ...
