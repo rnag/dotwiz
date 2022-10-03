@@ -3,6 +3,7 @@
 import pytest
 
 from dotwiz import *
+from dotwiz.frozen import FrozenDotWiz
 
 from .conftest import CleanupGetAttr
 
@@ -63,6 +64,27 @@ class TestDefaultForMissingKeys(CleanupGetAttr):
 
         # confirm that error message correctly indicates the fix/resolution
         assert 'pass `overwrite=True`' in str(e.value)
+
+    def test_nested_access(self):
+        """
+        Error is raised when both a ``default`` value and
+        ``nested_access=True`` is specified.
+        """
+        set_default_for_missing_keys(nested_access=True)
+
+        dw = DotWiz(HelloWorld=True)
+        assert dw.HelloWorld
+        assert type(dw.world) is FrozenDotWiz
+
+        assert not dw.this.is_.a.sample.nested.path
+
+    def test_nested_access_with_default_raises_an_error(self):
+        """
+        Error is raised when both a ``default`` value and
+        ``nested_access=True`` is specified.
+        """
+        with pytest.raises(ValueError):
+            set_default_for_missing_keys(123, nested_access=True)
 
 
 def test_dotwiz_init():

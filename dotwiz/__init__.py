@@ -36,7 +36,9 @@ from .main import DotWiz, make_dot_wiz
 from .plus import DotWizPlus, make_dot_wiz_plus
 
 
-def set_default_for_missing_keys(default=None, overwrite=False):
+def set_default_for_missing_keys(default=None,
+                                 nested_access=False,
+                                 overwrite=False):
     """
     Modifies :class:`DotWiz` and :class:`DotWizPlus` to add a custom
     :meth:`__getattr__`, so that accessing missing or non-existing attributes
@@ -53,13 +55,28 @@ def set_default_for_missing_keys(default=None, overwrite=False):
         >>> dw = DotWiz(hello='world!')
         >>> assert dw.hello == 'world!'
         >>> assert dw.world == 'test'
+        >>> set_default_for_missing_keys(nested_access=True, overwrite=True)
+        >>> assert not dw.this.is_.a.nested.path
 
     :param default: The default value to return for missing or non-existing
       attributes (keys).
+    :param nested_access: Enable nested dot access for missing keys in a
+      path (without raising errors), such as `dw.hello.there.world`.
     :param overwrite: True to overwrite a class's `__getattr__()` method,
       if one already exists; defaults to False.
 
     """
+    # enable nested dot access for missing keys in a path (if needed)
+    if nested_access:
+        from .frozen import FrozenDotWiz
+
+        if default is not None:
+            raise ValueError('cannot specify both default and nested_access')
+
+        # create a frozen, global dot-dict object; this object can't
+        # be modified or assigned to.
+        default = FrozenDotWiz()
+
     for cls in DotWiz, DotWizPlus:
         cls_dict = cls.__dict__
 

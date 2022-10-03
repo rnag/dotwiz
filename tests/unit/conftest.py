@@ -16,5 +16,8 @@ class CleanupGetAttr:
             * https://docs.pytest.org/en/latest/how-to/xunit_setup.html#method-and-function-level-setup-teardown
 
         """
-        del DotWiz.__getattr__
-        del DotWizPlus.__getattr__
+        try:
+            del DotWiz.__getattr__
+            del DotWizPlus.__getattr__
+        except AttributeError:
+            pass
