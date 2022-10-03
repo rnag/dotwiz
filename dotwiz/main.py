@@ -47,7 +47,11 @@ def __upsert_into_dot_wiz__(self, input_dict={},
 
     """
     if not _check_types:
-        __set__(self, '__dict__', input_dict)
+        __set__(self, '__dict__', kwargs)
+
+        if input_dict:
+            kwargs.update(input_dict)
+
         return None
 
     __dict = self.__dict__
