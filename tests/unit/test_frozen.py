@@ -1,14 +1,14 @@
 import pytest
 
-from dotwiz.frozen import FrozenDotWiz, FrozenDotWizError
+from dotwiz.frozen import NotDotWiz, FrozenDotWizError
 
 
-def test_frozen_dot_wiz_is_immutable():
+def test_not_dot_wiz_is_immutable():
     """
-    Test that :class:`FrozenDotWiz` is immutable, i.e. it cannot be
+    Test that :class:`NotDotWiz` is immutable, i.e. it cannot be
     modified (easily).
     """
-    dw = FrozenDotWiz(k1='value')
+    dw = NotDotWiz()
 
     with pytest.raises(FrozenDotWizError):
         dw.k2 = 'value'
@@ -22,4 +22,7 @@ def test_frozen_dot_wiz_is_immutable():
     with pytest.raises(FrozenDotWizError):
         dw.setdefault('k5', 'value')
 
-    assert dw.to_dict() == {'k1': 'value'}
+
+def test_not_dot_wiz_bool():
+    dw = NotDotWiz()
+    assert not dw

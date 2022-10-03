@@ -3,7 +3,7 @@
 import pytest
 
 from dotwiz import *
-from dotwiz.frozen import FrozenDotWiz
+from dotwiz.frozen import NotDotWiz
 
 from .conftest import CleanupGetAttr
 
@@ -74,7 +74,7 @@ class TestDefaultForMissingKeys(CleanupGetAttr):
 
         dw = DotWiz(HelloWorld=True)
         assert dw.HelloWorld
-        assert type(dw.world) is FrozenDotWiz
+        assert type(dw.world) is NotDotWiz
 
         assert not dw.this.is_.a.sample.nested.path
 

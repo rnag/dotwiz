@@ -68,14 +68,14 @@ def set_default_for_missing_keys(default=None,
     """
     # enable nested dot access for missing keys in a path (if needed)
     if nested_access:
-        from .frozen import FrozenDotWiz
+        from .frozen import NOT_DOT_WIZ
 
         if default is not None:
             raise ValueError('cannot specify both default and nested_access')
 
         # create a frozen, global dot-dict object; this object can't
         # be modified or assigned to.
-        default = FrozenDotWiz()
+        default = NOT_DOT_WIZ
 
     for cls in DotWiz, DotWizPlus:
         cls_dict = cls.__dict__
