@@ -21,3 +21,5 @@ def test_frozen_dot_wiz_is_immutable():
 
     with pytest.raises(FrozenDotWizError):
         dw.setdefault('k5', 'value')
+
+    assert dw.to_dict() == {'k1': 'value'}
