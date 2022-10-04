@@ -27,3 +27,4 @@ prodict==0.8.18
 python-box==6.0.2
 glom==22.1.0
 scalpl==0.4.2
+backports.cached_property; python_version <= "3.7"

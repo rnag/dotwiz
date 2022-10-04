@@ -1,5 +1,10 @@
 """Reusable test utilities and fixtures."""
-from functools import cache
+try:
+    from functools import cached_property
+except ImportError:  # Python <= 3.7
+    # noinspection PyUnresolvedReferences, PyPackageRequirements
+    from backports.cached_property import cached_property
+
 from unittest.mock import MagicMock, mock_open
 
 import pytest
@@ -28,8 +33,7 @@ class FileMock(MagicMock):
         """set mock data to be returned when `open(...).read()` is called."""
         self.side_effect = mock_open(read_data=mock_data)
 
-    @property
-    @cache
+    @cached_property
     def write_calls(self):
         """a list of calls made to `open().write(...)`"""
         handle = self.return_value
