@@ -1,6 +1,7 @@
 import dataclasses
 
 import addict
+import attrdict
 import box
 import dict2dot
 import dotmap
@@ -19,7 +20,11 @@ from benchmarks.models import MyClassSpecialCased
 
 
 # Mark all benchmarks in this module, and assign them to the specified group.
+#   use with: `pytest benchmarks -m create_with_special_keys`
+#   use with: `pytest benchmarks -m create_sp`
 pytestmark = [pytest.mark.create_with_special_keys,
+              # alias, for easier typing
+              pytest.mark.create_sp,
               pytest.mark.benchmark(group='create_with_special_keys')]
 
 
@@ -78,14 +83,19 @@ def assert_eq2(result):
     assert result['Some  r@ndom#$(*#@ Key##$# here   !!!'] == 'T'
 
 
-def assert_eq3(result):
+def assert_eq3(result, nested_in_dict=True, nested_in_list=True):
     assert result.camel_case == 1
     assert result.snake_case == 2
     assert result.pascal_case == 3
     assert result.spinal_case3 == 4
     assert result.hello_how_s_it_going == 5
     assert result._3d == 6
-    assert result.for_._1nfinity[0].and_.beyond == 8
+    if nested_in_list:
+        assert result.for_._1nfinity[0].and_.beyond == 8
+    elif nested_in_dict:
+        assert result.for_._1nfinity[0]['and']['Beyond!'] == 8
+    else:
+        assert result.for_['1nfinity'][0]['and']['Beyond!'] == 8
     assert result.some_r_ndom_key_here == 'T'
 
 
@@ -122,6 +132,21 @@ def assert_eq6(result: MyClassSpecialCased):
     assert result._3d == 6
     assert result.for_.infinity[0].and_.beyond == 8
     assert result.some_random_key_here == 'T'
+
+
+def assert_eq7(result, ns_to_dict):
+    """For testing with a `types.SimpleNamespace` object, primarily"""
+    assert result.camelCase == 1
+    assert result.Snake_Case == 2
+    assert result.PascalCase == 3
+
+    result_dict = ns_to_dict(result)
+
+    assert result_dict['spinal-case3'] == 4
+    assert result_dict['Hello, how\'s it going?'] == 5
+    assert result_dict['3D'] == 6
+    assert result_dict['for']['1nfinity'][0]['and']['Beyond!'] == 8
+    assert result_dict['Some  r@ndom#$(*#@ Key##$# here   !!!'] == 'T'
 
 
 @pytest.mark.xfail(reason='some key names are not valid identifiers')
@@ -161,6 +186,20 @@ def test_dotwiz(benchmark, my_data):
     assert_eq2(result)
 
 
+def test_dotwiz_without_check_lists(benchmark, my_data):
+    result = benchmark(dotwiz.DotWiz, my_data, _check_lists=False)
+    # print(result)
+
+    assert_eq2(result)
+
+
+def test_dotwiz_without_check_types(benchmark, my_data):
+    result = benchmark(dotwiz.DotWiz, my_data, _check_types=False)
+    # print(result)
+
+    assert_eq2(result)
+
+
 def test_make_dot_wiz(benchmark, my_data):
     result = benchmark(dotwiz.make_dot_wiz, my_data)
     # print(result)
@@ -173,6 +212,20 @@ def test_dotwiz_plus(benchmark, my_data):
     # print(result)
 
     assert_eq3(result)
+
+
+def test_dotwiz_plus_without_check_lists(benchmark, my_data):
+    result = benchmark(dotwiz.DotWizPlus, my_data, _check_lists=False)
+    # print(result)
+
+    assert_eq3(result, nested_in_list=False)
+
+
+def test_dotwiz_plus_without_check_types(benchmark, my_data):
+    result = benchmark(dotwiz.DotWizPlus, my_data, _check_types=False)
+    # print(result)
+
+    assert_eq3(result, nested_in_list=False, nested_in_dict=False)
 
 
 def test_make_dot_wiz_plus(benchmark, my_data):
@@ -234,6 +287,13 @@ def test_addict(benchmark, my_data):
     assert_eq2(result)
 
 
+def test_attrdict(benchmark, my_data):
+    result = benchmark(attrdict.AttrDict, my_data)
+    # print(result)
+
+    assert_eq2(result)
+
+
 def test_metadict(benchmark, my_data):
     result = benchmark(metadict.MetaDict, my_data)
     # print(result)
@@ -259,3 +319,10 @@ def test_scalpl(benchmark, my_data):
     # print(result)
 
     assert_eq5(result, subscript_list=True)
+
+
+def test_simple_namespace(benchmark, my_data, parse_to_ns, ns_to_dict):
+    result = benchmark(parse_to_ns, my_data)
+    # print(result)
+
+    assert_eq7(result, ns_to_dict)

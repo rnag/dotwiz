@@ -1,10 +1,11 @@
 """Main module."""
 
 from .common import (
-    __add_repr__,
-    __convert_to_dict__,
+    __add_common_methods__,
     __resolve_value__,
+    __set__,
 )
+from .constants import __PY_38_OR_ABOVE__, __PY_39_OR_ABOVE__
 
 
 def make_dot_wiz(*args, **kwargs):
@@ -26,13 +27,33 @@ def make_dot_wiz(*args, **kwargs):
 
 # noinspection PyDefaultArgument
 def __upsert_into_dot_wiz__(self, input_dict={},
-                            __set=dict.__setitem__,
+                            _check_lists=True,
+                            _check_types=True,
                             **kwargs):
     """
     Helper method to generate / update a :class:`DotWiz` (dot-access dict)
     from a Python ``dict`` object, and optional *keyword arguments*.
 
+    :param input_dict: Input `dict` object to process the key-value pairs of.
+    :param _check_lists: False to not check for nested `list` values. Defaults
+      to True.
+    :param _check_types: False to not check for nested `dict` and `list` values.
+      In this case, we use `input_dict` as is, and skip the bulk of
+      the initialization logic, such as iterating over the key-value pairs.
+      This is a huge performance improvement, if we know an input `dict`
+      only contains simple values, and no nested `dict` or `list` values.
+    :param kwargs: Additional keyword arguments to process, in addition to
+      `input_dict`.
+
     """
+    if not _check_types:
+        __set__(self, '__dict__', kwargs)
+
+        if input_dict:
+            kwargs.update(input_dict)
+
+        return None
+
     __dict = self.__dict__
 
     if kwargs:
@@ -52,26 +73,92 @@ def __upsert_into_dot_wiz__(self, input_dict={},
         t = type(value)
 
         if t is dict:
-            value = DotWiz(value)
-        elif t is list:
+            # noinspection PyArgumentList
+            value = DotWiz(value, _check_lists)
+        elif _check_lists and t is list:
             value = [__resolve_value__(e, DotWiz) for e in value]
 
         # note: this logic is the same as `DotWiz.__setitem__()`
-        __set(self, key, value)
         __dict[key] = value
 
 
-def __setitem_impl__(self, key, value, __set=dict.__setitem__):
+def __setitem_impl__(self, key, value, check_lists=True):
     """Implementation of `DotWiz.__setitem__` to preserve dot access"""
-    value = __resolve_value__(value, DotWiz)
+    value = __resolve_value__(value, DotWiz, check_lists)
 
-    __set(self, key, value)
     self.__dict__[key] = value
 
 
-class DotWiz(dict, metaclass=__add_repr__, print_char='✫'):
+if __PY_38_OR_ABOVE__:  # Python >= 3.8, pragma: no cover
+    def __reversed_impl__(self):
+        """Implementation of `__reversed__`, to reverse the keys in a `DotWiz` instance."""
+        return reversed(self.__dict__)
+else:  # Python < 3.8, pragma: no cover
+    # Note: in Python 3.7, `dict` objects are not reversible by default.
+
+    def __reversed_impl__(self):
+        """Implementation of `__reversed__`, to reverse the keys in a `DotWiz` instance."""
+        return reversed(list(self.__dict__))
+
+
+if __PY_39_OR_ABOVE__:  # Python >= 3.9, pragma: no cover
+    def __merge_impl_fn__(op, check_lists=True):
+        """Implementation of `__or__` and `__ror__`, to merge `DotWiz` and `dict` objects."""
+
+        def __merge_impl__(self, other):
+            __other_dict = getattr(other, '__dict__', None) or {
+                k: __resolve_value__(other[k], DotWiz, check_lists)
+                for k in other
+            }
+            __merged_dict = op(self.__dict__, __other_dict)
+
+            return DotWiz(__merged_dict, _check_types=False)
+
+        return __merge_impl__
+
+    __or_impl__ = __merge_impl_fn__(dict.__or__)
+    __ror_impl__ = __merge_impl_fn__(dict.__ror__)
+
+else:  # Python < 3.9, pragma: no cover
+    # Note: this is *before* Union operators were introduced to `dict`,
+    # in https://peps.python.org/pep-0584/
+
+    def __or_impl__(self, other, check_lists=True):
+        """Implementation of `__or__` to merge `DotWiz` and `dict` objects."""
+        __other_dict = getattr(other, '__dict__', None) or {
+            k: __resolve_value__(other[k], DotWiz, check_lists)
+            for k in other
+        }
+        __merged_dict = {**self.__dict__, **__other_dict}
+
+        return DotWiz(__merged_dict, _check_types=False)
+
+    def __ror_impl__(self, other, check_lists=True):
+        """Implementation of `__ror__` to merge `DotWiz` and `dict` objects."""
+        __other_dict = getattr(other, '__dict__', None) or {
+            k: __resolve_value__(other[k], DotWiz, check_lists)
+            for k in other
+        }
+        __merged_dict = {**__other_dict, **self.__dict__}
+
+        return DotWiz(__merged_dict, _check_types=False)
+
+
+def __ior_impl__(self, other, check_lists=True, __update=dict.update):
+    """Implementation of `__ior__` to incrementally update a `DotWiz` instance."""
+    __other_dict = getattr(other, '__dict__', None) or {
+        k: __resolve_value__(other[k], DotWiz, check_lists)
+        for k in other
+    }
+    __update(self.__dict__, __other_dict)
+
+    return self
+
+
+class DotWiz(metaclass=__add_common_methods__,
+             print_char='✫'):
     """
-    :class:`DotWiz` - a blazing *fast* ``dict`` subclass that also supports
+    :class:`DotWiz` - a blazing *fast* ``dict`` wrapper that also supports
     *dot access* notation.
 
     Usage::
@@ -81,18 +168,123 @@ class DotWiz(dict, metaclass=__add_repr__, print_char='✫'):
         >>> assert dw.key_1[0].k == 'v'
         >>> assert dw.keyTwo == '5'
         >>> assert dw['key-3'] == 3.21
+        >>> dw.to_json()
+        '{"key_1": [{"k": "v"}], "keyTwo": "5", "key-3": 3.21}'
 
     """
     __slots__ = ('__dict__', )
 
     __init__ = update = __upsert_into_dot_wiz__
 
-    __delattr__ = __delitem__ = dict.__delitem__
-    __setattr__ = __setitem__ = __setitem_impl__
+    def __bool__(self):
+        return True if self.__dict__ else False
+
+    def __contains__(self, item):
+        # assuming that item is usually a `str`, this is actually faster
+        # than simply: `item in self.__dict__`
+        try:
+            _ = getattr(self, item)
+            return True
+        except AttributeError:
+            return False
+        except TypeError:  # item is not a `str`
+            return item in self.__dict__
+
+    def __eq__(self, other):
+        return self.__dict__ == other
+
+    def __ne__(self, other):
+        return self.__dict__ != other
+
+    def __delitem__(self, key):
+        # in general, this is little faster than simply: `self.__dict__[key]`
+        try:
+            delattr(self, key)
+        except TypeError:  # key is not a `str`
+            del self.__dict__[key]
 
     def __getitem__(self, key):
-        return self.__dict__[key]
+        # in general, this is little faster than simply: `self.__dict__[key]`
+        try:
+            return getattr(self, key)
+        except TypeError:  # key is not a `str`
+            return self.__dict__[key]
 
-    to_dict = __convert_to_dict__
-    to_dict.__doc__ = 'Recursively convert the :class:`DotWiz` instance ' \
-                      'back to a ``dict``.'
+    __setattr__ = __setitem__ = __setitem_impl__
+
+    def __iter__(self):
+        return iter(self.__dict__)
+
+    def __len__(self):
+        return len(self.__dict__)
+
+    __or__ = __or_impl__
+    __ior__ = __ior_impl__
+    __ror__ = __ror_impl__
+
+    __reversed__ = __reversed_impl__
+
+    def clear(self):
+        return self.__dict__.clear()
+
+    def copy(self, __copy=dict.copy):
+        """
+        Returns a shallow copy of the `dict` wrapped in :class:`DotWiz`.
+
+        :return: DotWiz instance
+        """
+        return DotWiz(__copy(self.__dict__), _check_types=False)
+
+    # noinspection PyIncorrectDocstring
+    @classmethod
+    def fromkeys(cls, seq, value=None, __from_keys=dict.fromkeys):
+        """
+        Create a new dictionary with keys from `seq` and values set to `value`.
+
+        New created dictionary is wrapped in :class:`DotWiz`.
+
+        :param seq: Sequence of elements which is to be used as keys for
+          the new dictionary.
+        :param value: Value which is set to each element of the dictionary.
+
+        :return: DotWiz instance
+        """
+        return cls(__from_keys(seq, value))
+
+    def get(self, k, default=None, __get=dict.get):
+        """
+        Get value from :class:`DotWiz` instance, or default if the key
+        does not exist.
+        """
+        return __get(self.__dict__, k, default)
+
+    def keys(self):
+        return self.__dict__.keys()
+
+    def items(self):
+        return self.__dict__.items()
+
+    def pop(self, key, *args):
+        return self.__dict__.pop(key, *args)
+
+    def popitem(self):
+        return self.__dict__.popitem()
+
+    def setdefault(self, k, default=None, check_lists=True, __get=dict.get):
+        """
+        Insert key with a value of default if key is not in the dictionary.
+
+        Return the value for key if key is in the dictionary, else default.
+        """
+        __dict = self.__dict__
+        result = __get(__dict, k)
+
+        if result is not None:
+            return result
+
+        __dict[k] = default = __resolve_value__(default, DotWiz, check_lists)
+
+        return default
+
+    def values(self):
+        return self.__dict__.values()

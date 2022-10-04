@@ -19,7 +19,7 @@ Dot Wiz
         :alt: Updates
 
 
-A `blazing fast`_ ``dict`` subclass that enables *dot access* notation via Python
+A `blazing fast`_ ``dict`` wrapper that enables *dot access* notation via Python
 attribute style. Nested ``dict`` and ``list`` values are automatically
 transformed as well.
 
@@ -97,6 +97,9 @@ creating a ``DotWiz`` object:
     assert dw['easy: as~ pie?']
     assert dw.AnyKey == 'value'
 
+    print(dw.to_json())
+    #> {"AnyKey": "value", "hello, world!": 123, "easy: as~ pie?": true}
+
 ``DotWizPlus``
 ~~~~~~~~~~~~~~
 
@@ -112,7 +115,7 @@ on `Issues with Invalid Characters`_ below.
     dw = DotWizPlus(my_dict)
 
     print(dw)
-    #> ✪(this=✪(_1=✪(is_=[✪(for_=✪(all_of=✪(my_fans=True)))])))
+    # >  ✪(this=✪(_1=✪(is_=[✪(for_=✪(all_of=✪(my_fans=True)))])))
 
     # True
     assert dw.this._1.is_[0].for_.all_of.my_fans
@@ -121,10 +124,13 @@ on `Issues with Invalid Characters`_ below.
     assert dw['THIS']['1']['is'][0]['For']['AllOf']['My !@ Fans!']
 
     print(dw.to_dict())
-    # {'THIS': {'1': {'is': [{'For': {'AllOf': {'My !@ Fans!': True}}}]}}}
+    # >  {'THIS': {'1': {'is': [{'For': {'AllOf': {'My !@ Fans!': True}}}]}}}
 
     print(dw.to_attr_dict())
-    # {'this': {'_1': {'is_': [{'for_': {'all_of': {'my_fans': True}}}]}}}
+    # >  {'this': {'_1': {'is_': [{'for_': {'all_of': {'my_fans': True}}}]}}
+
+    print(dw.to_json(snake=True))
+    # >  {"this": {"1": {"is": [{"for": {"all_of": {"my_fans": true}}}]}}}
 
 Issues with Invalid Characters
 ******************************
@@ -165,6 +171,16 @@ It's also about *5x* faster to create a ``DotWiz`` from a ``dict`` object
 as compared to other libraries such as ``prodict`` -- or close to **15x** faster
 than creating a `Box`_ -- and up to *10x* faster in general to access keys
 by *dot* notation -- or almost **30x** faster than accessing keys from a `DotMap`_.
+
+Type Hints and Auto Completion
+------------------------------
+
+For better code quality and to keep IDEs happy, it is possible to achieve auto-completion of key or attribute names,
+as well as provide type hinting and auto-suggestion of ``str`` methods for example.
+
+Check out the `Usage`_ section in the docs for more details.
+
+.. _Usage: https://dotwiz.readthedocs.io/en/latest/usage.html#type-hints-and-auto-completion
 
 Contributing
 ------------

@@ -72,11 +72,17 @@ are made safe for attribute access:
     # the original keys can also be accessed like a normal `dict`, if needed
     assert dw['items']['To']['1NFINITY']['AND']['Beyond  !! ']
 
-    print(dw.to_dict())
+    print('to_dict() ->', dw.to_dict())
     # >  {'items': {'camelCase': 1, 'TitleCase': 2, ...}}
 
-    print(dw.to_attr_dict())
+    print('to_attr_dict() ->', dw.to_attr_dict())
     # >  {'items_': {'camel_case': 1, 'title_case': 2, ...}}
+
+    # get a JSON string representation with snake-cased keys, which strips out
+    # underscores from the ends, such as for `and_` or `_42`.
+
+    print('to_json(snake=True) ->', dw.to_json(snake=True))
+    # >  {"items": {"camel_case": 1, "title_case": 2, ...}}
 
 Complete Example
 ~~~~~~~~~~~~~~~~
@@ -124,3 +130,58 @@ mutates keys with invalid characters to a safe, *snake-cased* format:
     assert dw._99 == dw._1abc == dw.x_y == dw.this_i_s_a_test == dw.hello_w0rld == 3
     assert dw.title_case == dw.screaming_snake_case == \
            dw.camel_case == dw.pascal_case == dw.spinal_case == 4
+
+
+Type Hints and Auto Completion
+------------------------------
+
+For better code quality and to keep IDEs happy, it is possible to achieve auto-completion of key or attribute names,
+as well as provide type hinting and auto-suggestion of ``str`` methods for example.
+
+The simplest way to do it, is to extend from ``DotWiz`` or ``DotWiz+`` and use type annotations, as below.
+
+    Note that this approach does **not** perform auto type conversion, such as ``str`` to ``int``.
+
+.. code:: python3
+
+    from typing import TYPE_CHECKING
+
+    from dotwiz import DotWiz
+
+
+    # create a simple alias.
+    MyTypedWiz = DotWiz
+
+
+    if TYPE_CHECKING:  # this only runs for static type checkers.
+
+        class MyTypedWiz(DotWiz):
+            # add attribute names and annotations for better type hinting!
+            i: int
+            b: bool
+            nested: list['Nested']
+
+
+        class Nested:
+            s: str
+
+
+    dw = MyTypedWiz(i=42, b=False, f=3.21, nested=[{'s': 'Hello, world!!'}])
+    print(dw)
+    # >  ✫(i=42, b=False, f=3.21, nested=[✫(s='Hello world!!')])
+
+    # note that field (and method) auto-completion now works as expected!
+    assert dw.nested[0].s.lower().rstrip('!') == 'hello, world'
+
+    # we can still access non-declared fields, however auto-completion and type
+    # hinting won't work as desired.
+    assert dw.f == 3.21
+
+    print('\nPrettified JSON string:')
+    print(dw.to_json(indent=2))
+    # prints:
+    #   {
+    #     "i": 42,
+    #     "b": false,
+    #     ...
+    #   }

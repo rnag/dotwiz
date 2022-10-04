@@ -1,6 +1,7 @@
 import dataclasses
 
 import addict
+import attrdict
 import box
 import dict2dot
 import dotmap
@@ -18,6 +19,7 @@ from benchmarks.models import MyClass
 
 
 # Mark all benchmarks in this module, and assign them to the specified group.
+#   use with: `pytest benchmarks -m create`
 pytestmark = [pytest.mark.create,
               pytest.mark.benchmark(group='create')]
 
@@ -77,6 +79,28 @@ def test_dotwiz(benchmark, my_data):
     assert result.c.bb[0].x == 77
 
 
+def test_dotwiz_without_check_lists(benchmark, my_data):
+    result = benchmark(dotwiz.DotWiz, my_data, _check_lists=False)
+    # print(result)
+
+    # now similar to `dict2dot`, `dict`s nested within `lists` won't work
+    # assert result.c.bb[0].x == 77
+
+    # instead, dict access should work fine:
+    assert result.c.bb[0]['x'] == 77
+
+
+def test_dotwiz_without_check_types(benchmark, my_data):
+    result = benchmark(dotwiz.DotWiz, my_data, _check_types=False)
+    # print(result)
+
+    # now, `dict`s and `lists` nested within the input `dict` won't work
+    # assert result.c.bb[0].x == 77
+
+    # instead, dict access should work fine:
+    assert result.c['bb'][0]['x'] == 77
+
+
 def test_make_dot_wiz(benchmark, my_data):
     result = benchmark(dotwiz.make_dot_wiz, my_data)
     # print(result)
@@ -89,6 +113,17 @@ def test_dotwiz_plus(benchmark, my_data):
     # print(result)
 
     assert result.c.bb[0].x == 77
+
+
+def test_dotwiz_plus_without_check_lists(benchmark, my_data):
+    result = benchmark(dotwiz.DotWizPlus, my_data, _check_lists=False)
+    # print(result)
+
+    # now similar to `dict2dot`, `dict`s nested within `lists` won't work
+    # assert result.c.bb[0].x == 77
+
+    # instead, dict access should work fine:
+    assert result.c.bb[0]['x'] == 77
 
 
 def test_make_dot_wiz_plus(benchmark, my_data):
@@ -152,6 +187,13 @@ def test_addict(benchmark, my_data):
     assert result.c.bb[0].x == 77
 
 
+def test_attrdict(benchmark, my_data):
+    result = benchmark(attrdict.AttrDict, my_data)
+    # print(result)
+
+    assert result.c.bb[0].x == 77
+
+
 def test_metadict(benchmark, my_data):
     result = benchmark(metadict.MetaDict, my_data)
     # print(result)
@@ -183,3 +225,10 @@ def test_scalpl(benchmark, my_data):
     # print(result)
 
     assert result['c.bb[0].x'] == 77
+
+
+def test_simple_namespace(benchmark, my_data, parse_to_ns):
+    result = benchmark(parse_to_ns, my_data)
+    # print(result)
+
+    assert result.c.bb[0].x == 77
