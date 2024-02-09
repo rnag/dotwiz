@@ -206,3 +206,41 @@ def test_dotwiz_to_dict():
             }
         ]
     }
+
+
+def assert_raises(fn, typ):
+    try:
+        fn()
+    except typ:
+        return
+    except Exception as e:
+        assert False, f"expected {typ}, got {type(e)}"
+    assert False, f"expected {typ}, got no exception"
+
+
+def test_del():
+    # https://github.com/rnag/dotwiz/issues/24
+    d = DotWiz()
+    d.a1 = 1
+    d.a2 = 2
+    assert d.get("a1")==1
+    assert d.get("bad") is None
+    assert d.get("bad", 3) == 3
+    assert str(d)=="✫(a1=1, a2=2)"
+    assert repr(d)=="✫(a1=1, a2=2)"
+    assert repr(d.__dict__)=="{'a1': 1, 'a2': 2}"
+    del d.a1
+    assert repr(d)=="✫(a2=2)"
+    assert_raises(lambda: d.a1, AttributeError)
+    assert_raises(lambda: d['a1'], KeyError)
+    # print(dir(d))
+    assert d.__dict__ == {'a2': 2}
+    assert list(d.__dict__.keys()) == ['a2']
+    assert list(d.keys()) == ['a2']
+    assert list(d.values()) == [2]
+
+    assert [a for a in d] == ['a2']
+    assert [a for a in d.items()] == [('a2', 2)]
+
+    d.a3 = DotWiz()
+    d.a3.a4 = 4
