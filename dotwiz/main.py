@@ -87,11 +87,11 @@ class DotWiz(dict, metaclass=__add_repr__, print_char='✫'):
 
     __init__ = update = __upsert_into_dot_wiz__
 
-    __delattr__ = __delitem__ = dict.__delitem__
     __setattr__ = __setitem__ = __setitem_impl__
 
-    def __getitem__(self, key):
-        return self.__dict__[key]
+    def __delattr__(self, key):
+        super().pop(key)
+        super().__delattr__(key)
 
     to_dict = __convert_to_dict__
     to_dict.__doc__ = 'Recursively convert the :class:`DotWiz` instance ' \
