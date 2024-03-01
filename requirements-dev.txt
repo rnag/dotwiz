@@ -9,7 +9,7 @@ twine==5.0.0
 # Test / Benchmark requirements
 codecov==2.1.13
 coverage>=6.2
-pytest>=7.0.1,<8
+pytest==8.0.2
 pytest-benchmark[histogram]==3.4.1
 pytest-cov==3.0.0
 dataclass-wizard==0.22.1  # for loading dict to nested dataclass
