@@ -4,7 +4,7 @@ wheel==0.42.0
 watchdog[watchmedo]==4.0.0
 flake8>=3  # pyup: ignore
 tox==4.13.0
-Sphinx==5.1.1
+Sphinx==7.2.6
 twine==4.0.1
 # Test / Benchmark requirements
 codecov==2.1.12
