@@ -7,7 +7,7 @@ tox==4.24.1
 Sphinx==8.1.3
 twine==6.1.0
 # Test / Benchmark requirements
-codecov==2.1.12
+codecov==2.1.13
 coverage>=6.2
 pytest>=7.0.1,<8
 pytest-benchmark[histogram]==3.4.1
