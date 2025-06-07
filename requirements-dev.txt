@@ -23,5 +23,5 @@ addict==2.4.0
 metadict==0.1.2
 prodict==0.8.20
 python-box==7.3.2
-glom==22.1.0
+glom==24.11.0
 scalpl==0.4.2
