@@ -4,7 +4,7 @@ Models for test data
 from dataclasses import dataclass
 from typing import List, Union
 
-from dataclass_wizard import json_field
+from dataclass_wizard import Alias
 
 
 @dataclass
@@ -31,14 +31,14 @@ class MyClassSpecialCased:
     MyClassSpecialCased dataclass
 
     """
-    camel_case: int
-    snake_case: int
-    pascal_case: int
-    spinal_case3: int
-    hello: int = json_field('Hello, how\'s it going?')
-    _3d: int = json_field('3D')
-    for_: 'For' = json_field('for')
-    some_random_key_here: Union[bool, str] = json_field('Some  r@ndom#$(*#@ Key##$# here   !!!')
+    camel_case: int = Alias('camelCase')
+    snake_case: int = Alias('Snake_Case')
+    pascal_case: int = Alias('PascalCase')
+    spinal_case3: int = Alias('spinal-case3')
+    hello: int = Alias('Hello, how\'s it going?')
+    _3d: int = Alias('3D')
+    for_: 'For' = Alias('for')
+    some_random_key_here: Union[bool, str] = Alias('Some  r@ndom#$(*#@ Key##$# here   !!!')
 
 
 @dataclass
@@ -47,7 +47,7 @@ class For:
     For dataclass
 
     """
-    infinity: List['Infinity'] = json_field('1nfinity')
+    infinity: List['Infinity'] = Alias('1nfinity')
 
 
 @dataclass
@@ -56,7 +56,7 @@ class Infinity:
     Infinity dataclass
 
     """
-    and_: 'And' = json_field('and')
+    and_: 'And' = Alias('and')
 
 
 @dataclass
@@ -65,4 +65,4 @@ class And:
     And dataclass
 
     """
-    beyond: int = json_field('Beyond!')
+    beyond: int = Alias('Beyond!')
