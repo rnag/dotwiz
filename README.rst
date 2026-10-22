@@ -148,10 +148,39 @@ a *snake case* variant, ``my_key`` in this example.
 Finally, check out `this example`_ which brings home all
 that was discussed above.
 
+Setting Nested Keys
+*******************
+
+Both ``DotWiz`` and ``DotWizPlus`` accept a *dotted* key in ``__setitem__``
+and ``__setattr__``. Any *missing* level in between is created and chained
+automatically, so the nesting does not have to be built up by hand:
+
+.. code:: python3
+
+    from dotwiz import DotWiz
+
+    dw = DotWiz()
+    dw['a.b.c.d'] = 1
+
+    print(dw)
+    #> ✫(a=✫(b=✫(c=✫(d=1))))
+
+    assert dw.a.b.c.d == 1
+    assert dw.to_dict() == {'a': {'b': {'c': {'d': 1}}}}
+
+A level that already exists is merged into, rather than replaced. Note that
+a dotted key with an *empty* segment, such as ``'a..b'`` or ``'a.'``, raises
+a :exc:`ValueError`.
+
 Features
 --------
 
-* TODO
+* *Dot access* notation, with nested ``dict`` and ``list`` values transformed
+  automatically.
+* *Dotted* keys in ``__setitem__`` and ``__setattr__``, which create and chain
+  any *missing* levels in between.
+* Recursive conversion back to a plain ``dict``, via ``to_dict()``.
+* Special-cased keys turned into valid *snake_case* names, via ``DotWizPlus``.
 
 Benchmarks
 ----------

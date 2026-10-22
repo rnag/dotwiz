@@ -160,6 +160,81 @@ def test_dotwiz_set_item():
     assert item.two == 2
 
 
+def test_dotwiz_set_item_with_dotted_key():
+    """Confirm `DotWiz.__setitem__` creates and chains the missing levels"""
+    dd = DotWiz()
+    dd['a.b.c.d'] = 1
+
+    assert dd == {'a': {'b': {'c': {'d': 1}}}}
+    assert dd.a.b.c.d == 1
+    assert isinstance(dd.a, DotWiz)
+    assert isinstance(dd.a.b, DotWiz)
+    assert isinstance(dd.a.b.c, DotWiz)
+    assert dd.to_dict() == {'a': {'b': {'c': {'d': 1}}}}
+
+
+def test_dotwiz_set_item_with_dotted_key_merges_existing():
+    """Confirm a dotted key is merged into the levels that already exist"""
+    dd = DotWiz(a={'b': {'c': 1}})
+    dd['a.b.d'] = 2
+
+    assert dd == {'a': {'b': {'c': 1, 'd': 2}}}
+    assert dd.a.b.c == 1
+    assert dd.a.b.d == 2
+
+
+def test_dotwiz_set_item_with_dotted_key_and_plain_dict():
+    """Confirm a plain ``dict`` level is promoted, to preserve dot access"""
+    dd = DotWiz()
+    dict.__setitem__(dd, 'a', {'b': {'c': 1}})
+    dd['a.b.d'] = 2
+
+    assert isinstance(dd.a, DotWiz)
+    assert dd.a.b.c == 1
+    assert dd.a.b.d == 2
+
+
+def test_dotwiz_set_attr_with_dotted_key():
+    """Confirm `DotWiz.__setattr__` also chains the missing levels"""
+    dd = DotWiz()
+    setattr(dd, 'a.b.c', 1)
+
+    assert dd == {'a': {'b': {'c': 1}}}
+    assert dd.a.b.c == 1
+
+
+def test_dotwiz_set_item_with_dotted_key_and_non_str_key():
+    """Confirm that non-``str`` keys are left untouched"""
+    dd = DotWiz()
+    dd[1] = 'one'
+    dd[(1, 2)] = 'tuple'
+
+    assert dd[1] == 'one'
+    assert dd[(1, 2)] == 'tuple'
+    assert dd.to_dict() == {1: 'one', (1, 2): 'tuple'}
+
+
+def test_dotwiz_set_item_with_dotted_key_and_empty_segment():
+    """Confirm a `ValueError` for a dotted key with an empty segment"""
+    dd = DotWiz()
+
+    for key in ('.', '.a', 'a.', 'a..b'):
+        with pytest.raises(ValueError):
+            dd[key] = 1
+
+    assert not dd
+
+
+def test_dotwiz_set_item_with_dotted_key_and_non_dict_level():
+    """Confirm a `TypeError` when an existing level is not a ``dict``"""
+    dd = DotWiz(a=1)
+
+    with pytest.raises(TypeError):
+        dd['a.b.c'] = 2
+
+    assert dd == {'a': 1}
+
+
 def test_dotwiz_update():
     """Confirm intended functionality of `DotWiz.update`"""
     dd = DotWiz(a=1, b={'one': [1]})

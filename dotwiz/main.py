@@ -4,6 +4,7 @@ from .common import (
     __add_repr__,
     __convert_to_dict__,
     __resolve_value__,
+    __set_nested_dot_key__,
 )
 
 
@@ -61,9 +62,20 @@ def __upsert_into_dot_wiz__(self, input_dict={},
         __dict[key] = value
 
 
+def __store_in_dot_wiz__(self, key, value, __set=dict.__setitem__):
+    """Store `key` and `value` in a `DotWiz` instance, to preserve dot access"""
+    __set(self, key, value)
+    self.__dict__[key] = value
+
+
 def __setitem_impl__(self, key, value, __set=dict.__setitem__):
     """Implementation of `DotWiz.__setitem__` to preserve dot access"""
     value = __resolve_value__(value, DotWiz)
+
+    if key.__class__ is str and '.' in key:
+        # a dotted key such as `a.b.c`: create and chain the missing levels.
+        __set_nested_dot_key__(self, key, value, DotWiz, __store_in_dot_wiz__)
+        return
 
     __set(self, key, value)
     self.__dict__[key] = value
@@ -81,6 +93,17 @@ class DotWiz(dict, metaclass=__add_repr__, print_char='✫'):
         >>> assert dw.key_1[0].k == 'v'
         >>> assert dw.keyTwo == '5'
         >>> assert dw['key-3'] == 3.21
+
+    A *dotted* key passed to ``__setitem__`` (or ``__setattr__``) creates and
+    chains any *missing* levels in between::
+
+        >>> dw = DotWiz()
+        >>> dw['a.b.c.d'] = 1
+        >>> assert dw == {'a': {'b': {'c': {'d': 1}}}}
+        >>> assert dw.a.b.c.d == 1
+
+    Note that a dotted key with an *empty* segment, such as ``'a..b'`` or
+    ``'a.'``, raises a :exc:`ValueError`.
 
     """
     __slots__ = ('__dict__', )

@@ -9,6 +9,7 @@ _KT = TypeVar('_KT')
 _VT = TypeVar('_VT')
 
 _ItemsFn = Callable[[_D ], ItemsView[_KT, _VT]]
+_Store = Callable[[dict, _KT, _VT], None]
 
 
 def __add_repr__(name: str,
@@ -23,3 +24,9 @@ def __convert_to_dict__(o: dict | DotWiz | DotWizPlus | list | _T,
                         *, __items_fn: _ItemsFn = dict.items) -> dict[_KT, _VT] : ...
 
 def __resolve_value__(value: _T, dict_type: type[_D]) -> _T | _D | list[_D]: ...
+
+def __set_nested_dot_key__(self: dict,
+                           key: str,
+                           value: _VT,
+                           dict_type: type[_D],
+                           __store: _Store) -> None: ...

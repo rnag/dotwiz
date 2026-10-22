@@ -27,6 +27,11 @@ def __setitem_impl__(self: DotWiz,
                      value: _VT,
                      *, __set: _SetItem = dict.__setitem__) -> None: ...
 
+def __store_in_dot_wiz__(self: DotWiz,
+                         key: _KT,
+                         value: _VT,
+                         *, __set: _SetItem = dict.__setitem__) -> None: ...
+
 
 class DotWiz(dict):
 
