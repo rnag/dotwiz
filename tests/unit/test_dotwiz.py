@@ -223,14 +223,14 @@ def test_del():
     d = DotWiz()
     d.a1 = 1
     d.a2 = 2
-    assert d.get("a1")==1
+    assert d.get("a1") == 1
     assert d.get("bad") is None
     assert d.get("bad", 3) == 3
-    assert str(d)=="✫(a1=1, a2=2)"
-    assert repr(d)=="✫(a1=1, a2=2)"
-    assert repr(d.__dict__)=="{'a1': 1, 'a2': 2}"
+    assert str(d) == "✫(a1=1, a2=2)"
+    assert repr(d) == "✫(a1=1, a2=2)"
+    assert repr(d.__dict__) == "{'a1': 1, 'a2': 2}"
     del d.a1
-    assert repr(d)=="✫(a2=2)"
+    assert repr(d) == "✫(a2=2)"
     assert_raises(lambda: d.a1, AttributeError)
     assert_raises(lambda: d['a1'], KeyError)
     # print(dir(d))

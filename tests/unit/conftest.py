@@ -1,6 +1,4 @@
 """Reusable test utilities and fixtures."""
-import pytest
-
 from dotwiz import DotWiz, DotWizPlus
 
 
