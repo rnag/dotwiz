@@ -36,6 +36,10 @@ def __setitem_impl__(self: DotWizPlus,
                      key: _KT,
                      value: _VT) -> None: ...
 
+def __store_in_dot_wiz_plus__(self: DotWizPlus,
+                              key: _KT,
+                              value: _VT) -> None: ...
+
 
 class DotWizPlus(dict):
 

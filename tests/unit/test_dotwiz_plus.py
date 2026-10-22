@@ -167,6 +167,60 @@ def test_dotwiz_plus_set_item():
     assert item.two == 2
 
 
+def test_dotwiz_plus_set_item_with_dotted_key():
+    """Confirm `DotWizPlus.__setitem__` creates and chains the missing levels"""
+    dd = DotWizPlus()
+    dd['a.b.c.d'] = 1
+
+    assert dd == {'a': {'b': {'c': {'d': 1}}}}
+    assert dd.a.b.c.d == 1
+    assert isinstance(dd.a, DotWizPlus)
+    assert dd.to_dict() == {'a': {'b': {'c': {'d': 1}}}}
+    assert dd.to_attr_dict() == {'a': {'b': {'c': {'d': 1}}}}
+
+
+def test_dotwiz_plus_set_item_with_dotted_key_and_special_keys():
+    """Confirm each segment of a dotted key is snake-cased as well"""
+    dd = DotWizPlus()
+    dd['myKey.subKey'] = 1
+
+    assert dd.my_key.sub_key == 1
+    assert dd['myKey']['subKey'] == 1
+    assert dd.to_dict() == {'myKey': {'subKey': 1}}
+    assert dd.to_attr_dict() == {'my_key': {'sub_key': 1}}
+
+
+def test_dotwiz_plus_set_item_with_dotted_key_merges_existing():
+    """Confirm a dotted key is merged into the levels that already exist"""
+    dd = DotWizPlus(a={'b': {'c': 1}})
+    dd['a.b.d'] = 2
+
+    assert dd == {'a': {'b': {'c': 1, 'd': 2}}}
+    assert dd.a.b.c == 1
+    assert dd.a.b.d == 2
+
+
+def test_dotwiz_plus_set_item_with_dotted_key_and_empty_segment():
+    """Confirm a `ValueError` for a dotted key with an empty segment"""
+    dd = DotWizPlus()
+
+    for key in ('.', '.a', 'a.', 'a..b'):
+        with pytest.raises(ValueError):
+            dd[key] = 1
+
+    assert not dd
+
+
+def test_dotwiz_plus_set_item_with_dotted_key_and_non_dict_level():
+    """Confirm a `TypeError` when an existing level is not a ``dict``"""
+    dd = DotWizPlus(a=1)
+
+    with pytest.raises(TypeError):
+        dd['a.b.c'] = 2
+
+    assert dd == {'a': 1}
+
+
 def test_dotwiz_plus_update():
     """Confirm intended functionality of `DotWizPlus.update`"""
     dd = DotWizPlus(a=1, b={'one': [1]})

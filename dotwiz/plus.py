@@ -9,6 +9,7 @@ from .common import (
     __convert_to_attr_dict__,
     __convert_to_dict__,
     __resolve_value__,
+    __set_nested_dot_key__,
 )
 
 
@@ -127,9 +128,20 @@ def __upsert_into_dot_wiz_plus__(self, input_dict={}, **kwargs):
         __store_in_object__(self, __dict, key, value)
 
 
+def __store_in_dot_wiz_plus__(self, key, value):
+    """Store `key` and `value` in a `DotWizPlus` instance, to preserve dot access"""
+    __store_in_object__(self, self.__dict__, key, value)
+
+
 def __setitem_impl__(self, key, value):
     """Implementation of `DotWizPlus.__setitem__` to preserve dot access"""
     value = __resolve_value__(value, DotWizPlus)
+
+    if key.__class__ is str and '.' in key:
+        # a dotted key such as `a.b.c`: create and chain the missing levels.
+        __set_nested_dot_key__(self, key, value, DotWizPlus, __store_in_dot_wiz_plus__)
+        return
+
     __store_in_object__(self, self.__dict__, key, value)
 
 
@@ -154,6 +166,15 @@ class DotWizPlus(dict, metaclass=__add_repr__,
         {'Key 1': [{'3D': {'with': 2}}], 'keyTwo': '5', 'r-2!@d.2?': 3.21}
         >>> dw.to_attr_dict()
         {'key_1': [{'_3d': {'with_': 2}}], 'key_two': '5', 'r_2_d_2': 3.21}
+
+    A *dotted* key passed to ``__setitem__`` (or ``__setattr__``) creates and
+    chains any *missing* levels in between. Each segment is snake-cased, just
+    like any other key::
+
+        >>> dw = DotWizPlus()
+        >>> dw['myKey.subKey'] = 1
+        >>> assert dw.my_key.sub_key == 1
+        >>> assert dw['myKey']['subKey'] == 1
 
     **Issues with Invalid Characters**
 

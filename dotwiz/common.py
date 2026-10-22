@@ -68,3 +68,63 @@ def __resolve_value__(value, dict_type):
         value = [__resolve_value__(e, dict_type) for e in value]
 
     return value
+
+
+def __set_nested_dot_key__(self, key, value, dict_type, __store):
+    """
+    Helper method to set a *dotted* ``key`` (such as ``'a.b.c'``) on ``self``,
+    by creating and chaining any *missing* intermediate levels along the way.
+
+    :param self: a ``DotWiz`` or ``DotWizPlus`` instance to modify.
+    :param key: a dotted ``str`` key, i.e. one that contains a ``.``
+    :param value: the value to set at the end of the dotted key.
+    :param dict_type: ``DotWiz`` or ``DotWizPlus`` - the type used to
+        instantiate any missing intermediate levels.
+    :param __store: a callable that stores a key-value pair in an instance
+        of ``dict_type``.
+
+    """
+    keys = key.split('.')
+
+    if '' in keys:
+        raise ValueError(
+            f'Invalid key {key!r}: a dotted key cannot contain an empty '
+            f'segment, such as a leading, trailing, or repeated dot.')
+
+    # first, walk the existing path to validate it. Doing this up front means
+    # that an invalid key does not leave `self` in a partially-modified state.
+    container = self
+
+    for k in keys[:-1]:
+        if k not in container:
+            break
+
+        child = container[k]
+
+        if not isinstance(child, dict):
+            raise TypeError(
+                f'Cannot set {key!r} because {k!r} is not a dict, but an '
+                f'instance of {type(child).__name__!r}.')
+
+        container = child
+
+    # then, create and chain the missing intermediate levels.
+    container = self
+
+    for k in keys[:-1]:
+        if k in container:
+            child = container[k]
+
+            if not isinstance(child, dict_type):
+                # replace a plain `dict` level with a `dict_type` instance,
+                # so that dot access keeps working for the new keys as well.
+                child = dict_type(child)
+                __store(container, k, child)
+
+        else:
+            child = dict_type()
+            __store(container, k, child)
+
+        container = child
+
+    __store(container, keys[-1], value)
