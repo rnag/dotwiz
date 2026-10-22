@@ -1,0 +1,8 @@
+[flake8]
+max-line-length = 120
+extend-ignore = F403,F405
+exclude =
+    .git,
+    .tox,
+    build,
+    dist

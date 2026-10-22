@@ -48,6 +48,9 @@ dev = [
     "build",
     "twine",
 ]
+docs = [
+    "Sphinx==9.1.0",
+]
 
 [tool.setuptools]
 include-package-data = true
