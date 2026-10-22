@@ -2,6 +2,27 @@
 History
 =======
 
+0.5.0 (2026-10-22)
+------------------
+
+**Features and Improvements**
+
+* Add official support for Python 3.11 through 3.15.
+* Migrate package configuration from ``setup.py`` to ``pyproject.toml``.
+* Modernize GitHub Actions workflows and test configuration.
+
+**Bug Fixes**
+
+* Fix attribute deletion to remove keys from both the underlying dictionary
+  and instance attributes.
+* Fix dictionary key deletion to keep instance attributes synchronized.
+
+**Other Changes**
+
+* Remove redundant ``__getitem__`` override in favor of the built-in
+  dictionary implementation.
+* Drop official support for Python 3.10 and earlier.
+
 0.4.0 (2022-09-21)
 ------------------
 
