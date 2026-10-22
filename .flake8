@@ -5,4 +5,6 @@ exclude =
     .git,
     .tox,
     build,
-    dist
+    dist,
+    docs
+
