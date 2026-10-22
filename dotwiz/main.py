@@ -89,9 +89,17 @@ class DotWiz(dict, metaclass=__add_repr__, print_char='✫'):
 
     __setattr__ = __setitem__ = __setitem_impl__
 
+    def __delitem__(self, key):
+        dict.__delitem__(self, key)
+        self.__dict__.pop(key, None)
+
     def __delattr__(self, key):
-        super().pop(key)
-        super().__delattr__(key)
+        try:
+            dict.__delitem__(self, key)
+        except KeyError:
+            # Attribute deletion must raise AttributeError, not KeyError
+            raise AttributeError(key) from None
+        self.__dict__.pop(key, None)
 
     to_dict = __convert_to_dict__
     to_dict.__doc__ = 'Recursively convert the :class:`DotWiz` instance ' \

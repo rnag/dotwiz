@@ -244,3 +244,31 @@ def test_del():
 
     d.a3 = DotWiz()
     d.a3.a4 = 4
+
+
+def test_delitem():
+    d = DotWiz(a1=1, a2=2)
+
+    del d["a1"]
+
+    assert d == {"a2": 2}
+    assert d.__dict__ == {"a2": 2}
+
+    with pytest.raises(KeyError):
+        _ = d["a1"]
+
+    with pytest.raises(AttributeError):
+        _ = d.a1
+
+
+def test_del_missing():
+    d = DotWiz(a1=1)
+
+    with pytest.raises(KeyError):
+        del d["missing"]
+
+    with pytest.raises(AttributeError):
+        del d.missing
+
+    assert d == {"a1": 1}
+    assert d.__dict__ == {"a1": 1}
