@@ -1,0 +1,67 @@
+
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dotwiz"
+dynamic = ["version"]
+description = "Dictionary wrapper providing dot notation access"
+readme = { file = "README.rst", content-type = "text/x-rst" }
+requires-python = ">=3.11"
+license = "MIT"
+keywords = [
+    "dot", "dict", "dotted", "dotdict",
+    "map", "access", "dynamic",
+    "attribute", "attr", "dotwiz",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+]
+dependencies = [
+    "pyheck==0.1.5",
+]
+
+[project.urls]
+Homepage = "https://github.com/rnag/dotwiz"
+Documentation = "https://dotwiz.readthedocs.io"
+Source = "https://github.com/rnag/dotwiz"
+Issues = "https://github.com/rnag/dotwiz/issues"
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8",
+    "pytest-benchmark>=5",
+    "pytest-cov>=6",
+]
+dev = [
+    "dotwiz[test]",
+    "flake8>=7",
+    "build",
+    "twine",
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["dotwiz", "dotwiz.*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "dotwiz.__version__.__version__" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = [
+    "--ignore=benchmarks",
+    "--ignore-glob=*integration*",
+]

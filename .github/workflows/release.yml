@@ -1,82 +1,40 @@
-# Publish package on main branch if it's tagged with 'v*'
-# Ref: https://github.community/t/run-workflow-on-push-tag-on-specific-branch/17519
 
-name: build & release
+name: Build and release
 
-# Controls when the action will run.
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
     tags:
-      - 'v*'
-
-  # Allows you to run this workflow manually from the Actions tab
+      - "v*"
   workflow_dispatch:
 
-# After you create the GitHub repo, head over to `pypi.org` and create
-# an API Token, or use the link below:
-#   <https://pypi.org/manage/account/token>
-#
-# Once you have an API token, add it as a Repository Secret (PYPI_API_TOKEN)
-# under the GitHub repo, so that it can be used by GitHub Actions to deploy
-# to `pypi.org` whenever a new tag is pushed to GitHub:
-#   <https://github.com/rnag/dotwiz/settings/secrets/actions/new>
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   release:
-    name: Create Release
+    name: Publish to PyPI
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        python-versions: [3.8]
+    permissions:
+      contents: read
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      # Temporarily disable this - I want it to trigger on merge, but it doesn't
-      # work (at least not on a tagged commit too)
-#      - name: Exit if not on main branch
-#        if: endsWith(github.ref, 'main') == false
-#        run: exit -1
-
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-versions }}
+          python-version: "3.14"
 
-      - name: Install dependencies
+      - name: Install build tools
         run: |
           python -m pip install --upgrade pip
-          pip install tox-gh-actions wheel
+          python -m pip install build twine
 
-      - name: Build wheels and source tarball
-        run: >-
-          make dist
+      - name: Build distributions
+        run: python -m build
+
+      - name: Validate distributions
+        run: python -m twine check dist/*
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-          skip_existing: true
-
-      - name: Generate coverage report
-        run: |
-          pip install pytest pytest-cov
-          pip install -r requirements.txt
-          make codecov
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          directory: ./coverage/reports/
-          env_vars: OS,PYTHON
-          fail_ci_if_error: true
-          files: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-          verbose: true
