@@ -3,7 +3,7 @@ bump2version==1.0.1
 wheel==0.48.0
 watchdog[watchmedo]==7.0.0
 flake8>=3  # pyup: ignore
-tox==4.64.6
+tox==4.67.5
 Sphinx==9.1.0
 twine==7.0.0
 # Test / Benchmark requirements
